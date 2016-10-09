@@ -80,7 +80,7 @@ public class NBuilder {
     }
 
     public NBuilder setPath(String path) {
-        if (path != null && !path.isEmpty() && !requestModel.getUrl().isEmpty() && requestModel.getUrl().endsWith("/"))
+        if (path != null && !path.isEmpty() && requestModel.getUrl() != null && !requestModel.getUrl().isEmpty() && requestModel.getUrl().endsWith("/"))
             requestModel.setUrl(requestModel.getUrl() + path);
         return this;
     }
@@ -169,4 +169,8 @@ public class NBuilder {
         return valid;
     }
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

@@ -45,20 +45,10 @@
 
     </android.support.design.widget.AppBarLayout>
 
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <TextView
-            android:id="@+id/content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:textColor="#454545"
-            android:textSize="13sp"
-            android:textStyle="normal" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -67,6 +57,11 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:visibility="gone" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

@@ -19,7 +19,7 @@ public class NConfig {
     private static NConfig config;
 
     private NConfig() {
-        nBuilder = NBuilder.newInstance();
+        //nBuilder = NBuilder.newInstance();
         //nMultipartBuilder = NMultipartBuilder;
     }
 
@@ -44,7 +44,7 @@ public class NConfig {
 
     public NBuilder getDefaultNBuilder() {
         if (defaultNBuilderListener != null) {
-            this.nBuilder = defaultNBuilderListener.defaultConfig(nBuilder);
+            this.nBuilder = defaultNBuilderListener.defaultConfig(NBuilder.newInstance());
         }
         return this.nBuilder;
     }

@@ -19,24 +19,23 @@ public class NBuilder {
     public static final String PUT = "PUT";
     public static final String DELETE = "DELETE";
 
-    public static final String PORT_HTTP = "http://";
-    public static final String PORT_HTTPS = "https://";
-    public static final String DEFAULT_PORT = PORT_HTTP;
-
-    public static final String REQUEST_TYPE_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded;charset=UTF-8";
+    private static final String PORT_HTTP = "http://";
+    private static final String PORT_HTTPS = "https://";
+    private static final String DEFAULT_PORT = PORT_HTTP;
 
     private NRequestModel requestModel;
-    private NTask.NTaskListener taskListener;
+    protected String contentType;
+    protected NTask.NTaskListener taskListener;
 
-    private NBuilder() {
+    protected NBuilder() {
         requestModel = new NRequestModel();
-        requestModel.setRequestType(REQUEST_TYPE_X_WWW_FORM_URLENCODED);
         requestModel.setMethod(GET);
         requestModel.setWriteLogs(true);
         requestModel.setNeedParse(true);
         requestModel.setEnableDefaultListeners(true);
         requestModel.setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT);
         requestModel.setReadTimeout(NTask.DEFAULT_TIMEOUT_READ);
+        setContentType(NConst.MIME_X_WWW_FORM_URLENCODED);
     }
 
     static NBuilder newInstance() {
@@ -90,6 +89,10 @@ public class NBuilder {
             requestModel.setMethod(method);
         else requestModel.setMethod(GET);
         return this;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public NBuilder setConnectTimeout(long mills) {
@@ -146,12 +149,13 @@ public class NBuilder {
 
     public void start() {
         if (validateRequest()) {
+            addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_X_WWW_FORM_URLENCODED : contentType);
             NTask task = new NTask(taskListener, requestModel);
             task.execute();
         }
     }
 
-    private boolean validateRequest() {
+    protected boolean validateRequest() {
         boolean valid = true;
 
         if (requestModel == null) {
@@ -167,10 +171,5 @@ public class NBuilder {
             valid = false;
         }
         return valid;
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 }

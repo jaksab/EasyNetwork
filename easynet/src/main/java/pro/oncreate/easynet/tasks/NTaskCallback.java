@@ -1,5 +1,10 @@
 package pro.oncreate.easynet.tasks;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.models.NBaseModel;
 import pro.oncreate.easynet.models.NRequestModel;
@@ -11,11 +16,13 @@ import pro.oncreate.easynet.models.NResponseModel;
 
 public class NTaskCallback<T extends NBaseModel> implements NTask.NTaskListener {
 
-    private NRequestModel requestModel;
-    private T model;
+    protected NRequestModel requestModel;
+    protected T model;
+    protected ArrayList<T> models;
+    protected Class<T> tClass;
 
-    public NTaskCallback(T model) {
-        this.model = model;
+    public NTaskCallback(Class<T> tClass) {
+        this.tClass = tClass;
     }
 
     @Override
@@ -27,13 +34,17 @@ public class NTaskCallback<T extends NBaseModel> implements NTask.NTaskListener 
     @Override
     public void finishUI(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
-            if (model != null) {
-                if (requestModel.isEnableDefaultListeners())
+            if (requestModel.isEnableDefaultListeners()) {
+                if (model != null)
                     preSuccess(model, responseModel);
-                else onSuccess(model, responseModel);
+                else if (models != null)
+                    preSuccess(models, responseModel);
+                else preFailed(requestModel, Errors.PARSE_ERROR);
             } else {
-                if (requestModel.isEnableDefaultListeners())
-                    preFailed(requestModel, Errors.PARSE_ERROR);
+                if (model != null)
+                    onSuccess(model, responseModel);
+                else if (models != null)
+                    onSuccess(models, responseModel);
                 else onFailed(requestModel, Errors.PARSE_ERROR);
             }
         } else if (responseModel.statusType() == NResponseModel.STATUS_TYPE_ERROR) {
@@ -47,7 +58,20 @@ public class NTaskCallback<T extends NBaseModel> implements NTask.NTaskListener 
     public void finish(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
             if (requestModel.isNeedParse()) {
-                model.create(responseModel);
+                if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
+                    try {
+                        model = tClass.cast(tClass.newInstance().parse(responseModel, new JSONObject(responseModel.getBody())));
+                    } catch (Exception e) {
+                    }
+                else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
+                    try {
+                        JSONArray jsonArray = new JSONArray(responseModel.getBody());
+                        models = new ArrayList<T>();
+                        for (int i = 0; i < jsonArray.length(); i++)
+                            models.add(tClass.cast(tClass.newInstance().parse(responseModel, jsonArray.getJSONObject(i))));
+                    } catch (Exception e) {
+                    }
+                }
             }
         } else {
             // TODO: parse error model
@@ -56,19 +80,25 @@ public class NTaskCallback<T extends NBaseModel> implements NTask.NTaskListener 
     }
 
     public void onStart(NRequestModel requestModel) {
-
     }
 
-    private void preSuccess(T model, NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() != null && NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(model, responseModel))
-                || (NConfig.getInstance().getOnSuccessDefaultListener() == null))
+    protected void preSuccess(T model, NResponseModel responseModel) {
+        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null) || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(model, responseModel);
+    }
+
+    protected void preSuccess(ArrayList<T> models, NResponseModel responseModel) {
+        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null) || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+            onSuccess(models, responseModel);
     }
 
     public void onSuccess(T model, NResponseModel responseModel) {
     }
 
-    private void preError(NResponseModel responseModel) {
+    public void onSuccess(ArrayList<T> models, NResponseModel responseModel) {
+    }
+
+    protected void preError(NResponseModel responseModel) {
         if (NConfig.getInstance().getOnErrorDefaultListener() != null) {
             NConfig.getInstance().getOnErrorDefaultListener().onError(responseModel);
         } else {

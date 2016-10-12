@@ -36,10 +36,10 @@ public class NTaskMultipart extends AsyncTask<String, Void, NResponseModel> {
     private OutputStream outputStream;
     private PrintWriter writer;
 
-    private NTaskListener listener;
+    private NTask.NTaskListener listener;
     private NRequestMultipartModel requestModel;
 
-    public NTaskMultipart(NTaskListener listener, NRequestMultipartModel requestModel) {
+    public NTaskMultipart(NTask.NTaskListener listener, NRequestMultipartModel requestModel) {
         this.listener = listener;
         this.requestModel = requestModel;
     }
@@ -207,14 +207,12 @@ public class NTaskMultipart extends AsyncTask<String, Void, NResponseModel> {
         writer.flush();
     }
 
-    // Callback
-    public interface NTaskListener {
-        void start(NRequestMultipartModel requestMModel);
-
-        void finishUI(NResponseModel responseModel);
-
-        void finish(NResponseModel responseModel);
-    }
-
-
+//    // Callback
+//    public interface NTaskListener {
+//        void start(NRequestMultipartModel requestMModel);
+//
+//        void finishUI(NResponseModel responseModel);
+//
+//        void finish(NResponseModel responseModel);
+//    }
 }

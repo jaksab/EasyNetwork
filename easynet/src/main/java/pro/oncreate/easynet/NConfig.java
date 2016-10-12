@@ -2,7 +2,6 @@ package pro.oncreate.easynet;
 
 import java.util.ArrayList;
 
-import pro.oncreate.easynet.models.NBaseModel;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.tasks.NTaskCallback;
@@ -80,7 +79,7 @@ public class NConfig {
     }
 
     public interface OnSuccessDefaultListener {
-        boolean onSuccess(NBaseModel model, NResponseModel responseModel);
+        boolean onSuccess(NResponseModel responseModel);
     }
 
     // Failed

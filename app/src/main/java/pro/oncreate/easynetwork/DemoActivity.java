@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +17,13 @@ import java.util.Locale;
 import java.util.Map;
 
 import pro.oncreate.easynet.NBuilder;
+import pro.oncreate.easynet.NMultipartBuilder;
 import pro.oncreate.easynet.models.NKeyValueModel;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.tasks.NTaskCallback;
 import pro.oncreate.easynetwork.adapters.ExpandableListAdapter;
-import pro.oncreate.easynetwork.models.ExampleModel;
+import pro.oncreate.easynetwork.models.CountryModel;
 
 public class DemoActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -53,11 +55,11 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         NBuilder.create()
-                .addHeader("x", "x")
-                .setPath("geocode/json")
-                .addParam("address", "USA")
-                .setListener(new NTaskCallback<ExampleModel>(new ExampleModel()) {
-
+                //.setPath("geocode/json")
+                //.addParam("address", "USA")
+                .setPath("countries")
+                .setNeedParse(true) // default
+                .setListener(new NTaskCallback<CountryModel>(CountryModel.class) {
                     @Override
                     public void onStart(NRequestModel requestModel) {
                         edtToolbar.setText(requestModel.getMethod() + " " + requestModel.getUrl());
@@ -74,7 +76,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                     @Override
-                    public void onSuccess(ExampleModel model, NResponseModel responseModel) {
+                    public void onSuccess(CountryModel model, NResponseModel responseModel) {
                         bar1.setVisibility(View.GONE);
                         Snackbar.make(getCurrentFocus(), String.format(Locale.getDefault(), "%s [status code: %d] [response time: %d ms]", "Success", responseModel.getStatusCode(), responseModel.getResponseTime()), Snackbar.LENGTH_LONG).show();
 
@@ -84,8 +86,21 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, "Body"));
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.CHILD, responseModel.getBody()));
+                    }
 
+                    @Override
+                    public void onSuccess(ArrayList<CountryModel> models, NResponseModel responseModel) {
+                        bar1.setVisibility(View.GONE);
+                        Snackbar.make(getCurrentFocus(), String.format(Locale.getDefault(), "%s [status code: %d] [response time: %d ms]", "Success", responseModel.getStatusCode(), responseModel.getResponseTime()), Snackbar.LENGTH_SHORT).show();
 
+                        adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, String.format(Locale.getDefault(), "Headers (%d)", responseModel.getHeaders().size())));
+                        for (Map.Entry<String, List<String>> entry : responseModel.getHeaders().entrySet())
+                            adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.CHILD, entry.getKey() + ": " + entry.getValue().toString()));
+
+                        adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, "Body"));
+                        adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.CHILD, responseModel.getBody()));
+
+                        Toast.makeText(DemoActivity.this, "" + models.size(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -109,5 +124,9 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                 }).start();
     }
 
-
+    public void multipart(){
+        NMultipartBuilder.create()
+                .setUrl("")
+                .addFilePart();
+    }
 }

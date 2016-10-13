@@ -18,8 +18,6 @@ public class NConfig {
     private static NConfig config;
 
     private NConfig() {
-        //nBuilder = NBuilder.newInstance();
-        //nMultipartBuilder = NMultipartBuilder;
     }
 
     public static NConfig getInstance() {
@@ -28,14 +26,26 @@ public class NConfig {
         return config;
     }
 
+    // Data
+    //
+
+    private boolean writeLogs = true;
+
+    public boolean isWriteLogs() {
+        return writeLogs;
+    }
+
+    public void setWriteLogs(boolean writeLogs) {
+        this.writeLogs = writeLogs;
+    }
+
+
     // Default builders
     //
 
     private NBuilder nBuilder;
-    private NMultipartBuilder nMultipartBuilder;
 
     private NBuilderDefaultListener defaultNBuilderListener;
-    private NMultipartBuilderDefaultListener defaultNMultipartBuilderListener;
 
     public void setDefaultNBuilderListener(NBuilderDefaultListener defaultNBuilderListener) {
         this.defaultNBuilderListener = defaultNBuilderListener;
@@ -48,19 +58,8 @@ public class NConfig {
         return this.nBuilder;
     }
 
-    public NMultipartBuilder getDefaultNMultipartBuilder() {
-        if (defaultNMultipartBuilderListener != null) {
-            this.nMultipartBuilder = defaultNMultipartBuilderListener.defaultConfig(nMultipartBuilder);
-        }
-        return this.nMultipartBuilder;
-    }
-
     public interface NBuilderDefaultListener {
         NBuilder defaultConfig(NBuilder nBuilder);
-    }
-
-    public interface NMultipartBuilderDefaultListener {
-        NMultipartBuilder defaultConfig(NMultipartBuilder nBuilder);
     }
 
     // Default behaviour

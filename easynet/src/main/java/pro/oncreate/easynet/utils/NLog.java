@@ -21,6 +21,7 @@ public class NLog {
     public static final String DEBUG_HEADERS = "[Headers]: ";
     public static final String DEBUG_NO_BODY_PARAMS = "[No-body params]: ";
     public static final String DEBUG_BODY_PARAMS = "[Body params]: ";
+    public static final String DEBUG_RAW_BODY = "[Request body]: ";
 
     public static final String DEBUG_RESPONSE_CODE = "[Response code]: ";
     public static final String DEBUG_RESPONSE_BODY = "[Body]: ";

@@ -26,7 +26,7 @@ public class NConst {
     //
 
     // MIME TYPES
-    public static final String MIME_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded;charset=UTF-8";
+    public static final String MIME_TYPE_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded;charset=UTF-8";
     public static final String MIME_TYPE_JSON = "application/json";
     public static final String MIME_TYPE_GZIP = "application/gzip";
     public static final String MIME_TYPE_ZIP = "application/zip";

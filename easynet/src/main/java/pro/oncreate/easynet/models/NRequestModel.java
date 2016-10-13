@@ -12,14 +12,16 @@ public class NRequestModel {
     private String requestType;
     private ArrayList<NKeyValueModel> headers = new ArrayList<>();
     private ArrayList<NKeyValueModel> params = new ArrayList<>();
+    private ArrayList<NKeyValueModel> queryParams = new ArrayList<>();
+    private ArrayList<NKeyValueFileModel> paramsFile = new ArrayList<>();
+    private ArrayList<NKeyValueModel> paramsText = new ArrayList<>();
+    private String body;
     private long connectTimeout;
     private long readTimeout;
+    private long startTime;
 
-    private boolean writeLogs;
     private boolean needParse;
     private boolean enableDefaultListeners;
-
-    private long startTime;
 
     public NRequestModel() {
     }
@@ -64,14 +66,6 @@ public class NRequestModel {
         this.params = params;
     }
 
-    public boolean isWriteLogs() {
-        return writeLogs;
-    }
-
-    public void setWriteLogs(boolean writeLogs) {
-        this.writeLogs = writeLogs;
-    }
-
     public boolean isNeedParse() {
         return needParse;
     }
@@ -110,5 +104,37 @@ public class NRequestModel {
 
     public void setReadTimeout(long readTimeout) {
         this.readTimeout = readTimeout;
+    }
+
+    public ArrayList<NKeyValueFileModel> getParamsFile() {
+        return paramsFile;
+    }
+
+    public void setParamsFile(ArrayList<NKeyValueFileModel> paramsFile) {
+        this.paramsFile = paramsFile;
+    }
+
+    public ArrayList<NKeyValueModel> getParamsText() {
+        return paramsText;
+    }
+
+    public void setParamsText(ArrayList<NKeyValueModel> paramsText) {
+        this.paramsText = paramsText;
+    }
+
+    public ArrayList<NKeyValueModel> getQueryParams() {
+        return queryParams;
+    }
+
+    public void setQueryParams(ArrayList<NKeyValueModel> queryParams) {
+        this.queryParams = queryParams;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

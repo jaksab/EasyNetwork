@@ -19,6 +19,8 @@ public class App extends Application {
         super.onCreate();
 
         NConfig netConfig = NConfig.getInstance();
+
+        netConfig.setWriteLogs(true); // Default
         netConfig.setDefaultNBuilderListener(new NConfig.NBuilderDefaultListener() {
             @Override
             public NBuilder defaultConfig(NBuilder nBuilder) {
@@ -26,7 +28,6 @@ public class App extends Application {
                 nBuilder.setHost("https://api.infitting.com/v1.1");
                 nBuilder.addHeader("Accept-Language", Locale.getDefault().toString().replace("_", "-"));
                 nBuilder.enableDefaultListeners(true);
-                nBuilder.writeLogs(true); // Default
                 return nBuilder;
             }
         });

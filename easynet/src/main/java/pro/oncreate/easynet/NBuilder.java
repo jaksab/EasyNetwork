@@ -2,8 +2,10 @@ package pro.oncreate.easynet;
 
 import android.util.Patterns;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
+import pro.oncreate.easynet.models.NKeyValueFileModel;
 import pro.oncreate.easynet.models.NKeyValueModel;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.tasks.NTask;
@@ -24,18 +26,17 @@ public class NBuilder {
     private static final String DEFAULT_PORT = PORT_HTTP;
 
     private NRequestModel requestModel;
-    protected String contentType;
-    protected NTask.NTaskListener taskListener;
+    private String contentType;
+    private NTask.NTaskListener taskListener;
 
-    protected NBuilder() {
+    private NBuilder() {
         requestModel = new NRequestModel();
         requestModel.setMethod(GET);
-        requestModel.setWriteLogs(true);
         requestModel.setNeedParse(true);
         requestModel.setEnableDefaultListeners(true);
         requestModel.setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT);
         requestModel.setReadTimeout(NTask.DEFAULT_TIMEOUT_READ);
-        setContentType(NConst.MIME_X_WWW_FORM_URLENCODED);
+        setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
     }
 
     static NBuilder newInstance() {
@@ -91,8 +92,10 @@ public class NBuilder {
         return this;
     }
 
-    public void setContentType(String contentType) {
+    public NBuilder setContentType(String contentType) {
         this.contentType = contentType;
+        this.requestModel.setRequestType(contentType);
+        return this;
     }
 
     public NBuilder setConnectTimeout(long mills) {
@@ -107,6 +110,11 @@ public class NBuilder {
         return this;
     }
 
+    public NBuilder setBody(String body) {
+        requestModel.setBody(body);
+        return this;
+    }
+
     public NBuilder addHeader(String key, String value) {
         requestModel.getHeaders().add(new NKeyValueModel(key, value));
         return this;
@@ -114,6 +122,16 @@ public class NBuilder {
 
     public NBuilder addParam(String key, String value) {
         requestModel.getParams().add(new NKeyValueModel(key, value));
+        return this;
+    }
+
+    public NBuilder addTextParam(String key, String value) {
+        requestModel.getParamsText().add(new NKeyValueModel(key, value));
+        return this;
+    }
+
+    public NBuilder addFileParam(String key, File file) {
+        requestModel.getParamsFile().add(new NKeyValueFileModel(key, file));
         return this;
     }
 
@@ -132,11 +150,6 @@ public class NBuilder {
         return this;
     }
 
-    public NBuilder writeLogs(boolean isWrite) {
-        requestModel.setWriteLogs(isWrite);
-        return this;
-    }
-
     public NBuilder setNeedParse(boolean isNeed) {
         requestModel.setNeedParse(isNeed);
         return this;
@@ -149,13 +162,32 @@ public class NBuilder {
 
     public void start() {
         if (validateRequest()) {
-            addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_X_WWW_FORM_URLENCODED : contentType);
-            NTask task = new NTask(taskListener, requestModel);
-            task.execute();
+            addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
+
+            if (contentType == null) {
+                this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+            }
+
+            switch (contentType) {
+                case NConst.MIME_TYPE_X_WWW_FORM_URLENCODED: {
+                    NTask task = new NTask(taskListener, requestModel);
+                    task.execute();
+                    break;
+                }
+                case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
+                    requestModel.setMethod(POST);
+                    NTask task = new NTask(taskListener, requestModel);
+                    task.execute();
+                    break;
+                }
+                default:
+                    // TODO: make request with raw body
+                    break;
+            }
         }
     }
 
-    protected boolean validateRequest() {
+    private boolean validateRequest() {
         boolean valid = true;
 
         if (requestModel == null) {

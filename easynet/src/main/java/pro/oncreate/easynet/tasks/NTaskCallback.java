@@ -35,12 +35,20 @@ public class NTaskCallback<T extends NBaseModel> implements NTask.NTaskListener 
     public void finishUI(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
             if (requestModel.isEnableDefaultListeners()) {
+                if (!requestModel.isNeedParse()) {
+                    preSuccess(responseModel);
+                    return;
+                }
                 if (model != null)
                     preSuccess(model, responseModel);
                 else if (models != null)
                     preSuccess(models, responseModel);
                 else preFailed(requestModel, Errors.PARSE_ERROR);
             } else {
+                if (!requestModel.isNeedParse()) {
+                    onSuccess(responseModel);
+                    return;
+                }
                 if (model != null)
                     onSuccess(model, responseModel);
                 else if (models != null)
@@ -92,7 +100,15 @@ public class NTaskCallback<T extends NBaseModel> implements NTask.NTaskListener 
             onSuccess(models, responseModel);
     }
 
+    protected void preSuccess(NResponseModel responseModel) {
+        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null) || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+            onSuccess(responseModel);
+    }
+
     public void onSuccess(T model, NResponseModel responseModel) {
+    }
+
+    public void onSuccess(NResponseModel responseModel) {
     }
 
     public void onSuccess(ArrayList<T> models, NResponseModel responseModel) {

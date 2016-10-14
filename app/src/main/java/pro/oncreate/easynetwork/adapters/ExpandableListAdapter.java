@@ -13,9 +13,7 @@ import java.util.List;
 
 import pro.oncreate.easynetwork.R;
 
-/**
- * Created by anandbose on 09/06/15.
- */
+
 public class ExpandableListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int HEADER = 0;
     public static final int CHILD = 1;
@@ -28,7 +26,7 @@ public class ExpandableListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int type) {
-        View view = null;
+        View view;
         Context context = parent.getContext();
         float dp = context.getResources().getDisplayMetrics().density;
         int subItemPaddingLeft = (int) (18 * dp);
@@ -70,7 +68,7 @@ public class ExpandableListAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                     @Override
                     public void onClick(View v) {
                         if (item.invisibleChildren == null) {
-                            item.invisibleChildren = new ArrayList<Item>();
+                            item.invisibleChildren = new ArrayList<>();
                             int count = 0;
                             int pos = data.indexOf(itemController.refferalItem);
                             while (data.size() > pos + 1 && data.get(pos + 1).type == CHILD) {

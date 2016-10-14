@@ -3,7 +3,7 @@ package pro.oncreate.easynet.models;
 import org.json.JSONObject;
 
 /**
- * Created by andrej on 05.10.16.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
 public abstract class NBaseModel {

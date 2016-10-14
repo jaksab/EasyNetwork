@@ -2,12 +2,12 @@ package pro.oncreate.easynet;
 
 import java.util.ArrayList;
 
+import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
-import pro.oncreate.easynet.tasks.NTaskCallback;
 
 /**
- * Created by andrej on 04.10.16.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
 public class NConfig {
@@ -15,12 +15,12 @@ public class NConfig {
     // Init
     //
 
-    private static NConfig config;
+    volatile private static NConfig config;
 
     private NConfig() {
     }
 
-    public static NConfig getInstance() {
+    synchronized public static NConfig getInstance() {
         if (config == null)
             config = new NConfig();
         return config;
@@ -94,7 +94,7 @@ public class NConfig {
     }
 
     public interface OnFailedDefaultListener {
-        boolean onFailed(NRequestModel nRequestModel, NTaskCallback.Errors error);
+        boolean onFailed(NRequestModel nRequestModel, NErrors error);
     }
 
     // Errors

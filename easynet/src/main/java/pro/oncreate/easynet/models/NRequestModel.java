@@ -3,7 +3,7 @@ package pro.oncreate.easynet.models;
 import java.util.ArrayList;
 
 /**
- * Created by andrej on 15.11.15.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 public class NRequestModel {
 

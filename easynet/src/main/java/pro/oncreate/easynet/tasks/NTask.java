@@ -21,7 +21,8 @@ import java.util.Map;
 
 import pro.oncreate.easynet.NBuilder;
 import pro.oncreate.easynet.NConfig;
-import pro.oncreate.easynet.NConst;
+import pro.oncreate.easynet.data.NConst;
+import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NKeyValueFileModel;
 import pro.oncreate.easynet.models.NKeyValueModel;
 import pro.oncreate.easynet.models.NRequestModel;
@@ -31,7 +32,7 @@ import pro.oncreate.easynet.utils.NLog;
 
 
 /**
- * Created by andrej on 15.11.15.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 public class NTask extends AsyncTask<String, Void, NResponseModel> {
 
@@ -133,10 +134,10 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
             if (responseModel != null)
                 listener.finishUI(responseModel);
             else {
-                if (requestModel.isEnableDefaultListeners())
-                    ((NTaskCallback) listener).preFailed(requestModel, NTaskCallback.Errors.CONNECTION_ERROR);
+                if (requestModel.isEnableDefaultListeners() && listener instanceof NBaseCallback)
+                    ((NBaseCallback) listener).preFailed(requestModel, NErrors.CONNECTION_ERROR);
                 else
-                    ((NTaskCallback) listener).onFailed(requestModel, NTaskCallback.Errors.CONNECTION_ERROR);
+                    ((NBaseCallback) listener).onFailed(requestModel, NErrors.CONNECTION_ERROR);
             }
         }
     }
@@ -144,15 +145,25 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     // Base
     //
 
-    protected HttpURLConnection openConnection() throws Exception {
+    private HttpURLConnection openConnection() throws Exception {
         URL url = new URL(requestModel.getUrl());
         return (HttpURLConnection) url.openConnection();
     }
 
-    protected void addUrlParams() throws UnsupportedEncodingException {
+    private void addUrlParams() throws UnsupportedEncodingException {
         String urlParams;
-        if (requestModel.getMethod().equals(NBuilder.GET) || requestModel.getMethod().equals(NBuilder.DELETE)) {
-            urlParams = NDataBuilder.getQuery(requestModel.getParams());
+
+        if ((requestModel.getMethod().equals(NBuilder.GET) || requestModel.getMethod().equals(NBuilder.DELETE))
+                && requestModel.getRequestType().equals(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED)
+                && requestModel.getQueryParams().isEmpty() && !requestModel.getParams().isEmpty()) {
+            urlParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
+            if (!urlParams.isEmpty()) {
+                requestModel.setUrl(requestModel.getUrl() + "?" + urlParams);
+                if (NConfig.getInstance().isWriteLogs())
+                    NLog.logD(NLog.DEBUG_NO_BODY_PARAMS + urlParams.replace("&", "; "));
+            }
+        } else if (!requestModel.getQueryParams().isEmpty()) {
+            urlParams = NDataBuilder.getQuery(requestModel.getQueryParams(), charset);
             if (!urlParams.isEmpty()) {
                 requestModel.setUrl(requestModel.getUrl() + "?" + urlParams);
                 if (NConfig.getInstance().isWriteLogs())
@@ -161,7 +172,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         }
     }
 
-    protected void addHeaders(HttpURLConnection connection) throws UnsupportedEncodingException {
+    private void addHeaders(HttpURLConnection connection) throws UnsupportedEncodingException {
         String logHeaders = "";
         for (NKeyValueModel header : requestModel.getHeaders()) {
             logHeaders += String.format("%s=%s; ", header.getKey(), header.getValue());
@@ -173,7 +184,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
             NLog.logD(NLog.DEBUG_HEADERS + logHeaders);
     }
 
-    protected Map<String, List<String>> getResponseHeaders(HttpURLConnection connection, String body) {
+    private Map<String, List<String>> getResponseHeaders(HttpURLConnection connection, String body) {
         Map<String, List<String>> headers = connection.getHeaderFields();
         if (NConfig.getInstance().isWriteLogs()) {
             if (headers != null) {
@@ -190,7 +201,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         return headers;
     }
 
-    protected InputStream getInputStreamFromConnection(HttpURLConnection connection) throws IOException {
+    private InputStream getInputStreamFromConnection(HttpURLConnection connection) throws IOException {
         // For only 2xx codes
         if (connection.getResponseCode() / 100 == 2)
             return connection.getInputStream();
@@ -198,7 +209,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     }
 
     @Deprecated
-    protected String readData(InputStream inputStream) throws IOException {
+    private String readData(InputStream inputStream) throws IOException {
         String body = "", line;
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         while ((line = reader.readLine()) != null) {
@@ -208,10 +219,10 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         return body;
     }
 
-    protected String readData(InputStream inputStream, int bufferSize) throws IOException {
+    private String readData(InputStream inputStream, int bufferSize) throws IOException {
         byte[] buf = new byte[bufferSize];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        int bytesRead = 0;
+        int bytesRead;
         int bytesBuffered = 0;
         while ((bytesRead = inputStream.read(buf)) > -1) {
             outputStream.write(buf, 0, bytesRead);
@@ -230,10 +241,10 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     // URL Encode
     //
 
-    protected void addEntityParams(HttpURLConnection connection) throws IOException {
+    private void addEntityParams(HttpURLConnection connection) throws IOException {
         if (requestModel.getMethod().equals(NBuilder.POST) || requestModel.getMethod().equals(NBuilder.PUT)) {
             connection.setDoOutput(true);
-            String bodyParams = NDataBuilder.getQuery(requestModel.getParams());
+            String bodyParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
             OutputStream os = connection.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(os, charset));
@@ -246,7 +257,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         }
     }
 
-    protected HttpURLConnection setUpConnection() throws Exception {
+    private HttpURLConnection setUpConnection() throws Exception {
         HttpURLConnection connection = openConnection();
         connection.setRequestMethod(requestModel.getMethod());
         connection.setReadTimeout(DEFAULT_TIMEOUT_READ);
@@ -260,7 +271,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     // Multipart
     //
 
-    public void addMultipartParams(HttpURLConnection connection) throws IOException {
+    private void addMultipartParams(HttpURLConnection connection) throws IOException {
         outputStream = connection.getOutputStream();
         writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
                 true);
@@ -290,7 +301,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         writer.close();
     }
 
-    protected HttpURLConnection setUpMultipartConnection() throws Exception {
+    private HttpURLConnection setUpMultipartConnection() throws Exception {
         HttpURLConnection connection = openConnection();
         connection.setRequestProperty(NConst.CONNECTION, "Keep-Alive");
         connection.setRequestProperty(NConst.CACHE_CONTROL, "no-cache");
@@ -300,7 +311,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         return connection;
     }
 
-    public void addFormField(NKeyValueModel model) {
+    private void addFormField(NKeyValueModel model) {
         writer.append("--" + boundary).append(LINE_FEED);
         writer.append("Content-Disposition: form-data; name=\"" + model.getKey() + "\"")
                 .append(LINE_FEED);
@@ -311,7 +322,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         writer.flush();
     }
 
-    public void addFilePart(NKeyValueFileModel model)
+    private void addFilePart(NKeyValueFileModel model)
             throws IOException {
         String fileName = model.getValue().getName();
         writer.append("--" + boundary).append(LINE_FEED);
@@ -329,7 +340,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
 
         FileInputStream inputStream = new FileInputStream(model.getValue());
         byte[] buffer = new byte[4096];
-        int bytesRead = -1;
+        int bytesRead;
         while ((bytesRead = inputStream.read(buffer)) != -1) {
             outputStream.write(buffer, 0, bytesRead);
         }
@@ -343,7 +354,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     // Raw
     //
 
-    protected void setRawBody(HttpURLConnection connection) throws IOException {
+    private void setRawBody(HttpURLConnection connection) throws IOException {
         if (requestModel.getMethod().equals(NBuilder.POST) || requestModel.getMethod().equals(NBuilder.PUT)) {
             connection.setDoOutput(true);
             OutputStream os = connection.getOutputStream();

@@ -3,7 +3,7 @@ package pro.oncreate.easynet.utils;
 import android.util.Log;
 
 /**
- * Created by andrej on 16.11.15.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 public class NLog {
 
@@ -13,6 +13,7 @@ public class NLog {
     public static final String ERROR_EXCEPTION = "[Error]: ";
     public static final String ERROR_URL_EMPTY = "Url is empty";
     public static final String ERROR_URL_INVALID = "Url incorrect";
+    public static final String ERROR_LISTENER_NULL = "Task listener can not be null";
 
     public static final String DEBUG_START_CONNECTION = "======== START REQUEST ========";
     public static final String DEBUG_OPEN_CONNECTION = "[URL]: ";

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by andrej on 15.11.15.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 public class NResponseModel {
 

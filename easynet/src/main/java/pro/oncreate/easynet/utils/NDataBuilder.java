@@ -6,13 +6,12 @@ import java.util.List;
 
 import pro.oncreate.easynet.models.NKeyValueModel;
 
-
 /**
- * Created by andrej on 15.11.15.
+ * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 public class NDataBuilder {
 
-    public static String getQuery(List<NKeyValueModel> params) throws UnsupportedEncodingException {
+    public static String getQuery(List<NKeyValueModel> params, String charset) throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
         boolean first = true;
 
@@ -22,9 +21,9 @@ public class NDataBuilder {
             else
                 result.append("&");
 
-            result.append(URLEncoder.encode(pair.getKey(), "UTF-8"));
+            result.append(URLEncoder.encode(pair.getKey(), charset));
             result.append("=");
-            result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
+            result.append(URLEncoder.encode(pair.getValue(), charset));
         }
 
         return result.toString();

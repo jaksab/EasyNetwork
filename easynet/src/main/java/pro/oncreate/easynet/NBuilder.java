@@ -18,6 +18,8 @@ import static pro.oncreate.easynet.utils.NLog.ERROR_LISTENER_NULL;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
+ * <p>
+ * This class provides methods to create and customize http request
  */
 public class NBuilder {
 
@@ -53,7 +55,7 @@ public class NBuilder {
     }
 
     /**
-     * Example: <b>http://example.com/path</b> or <b>example.com/path</b>
+     * Example: http://example.com/path or example.com/path
      *
      * @param url correct url address
      */
@@ -65,10 +67,10 @@ public class NBuilder {
     }
 
     /**
-     * Make URL from two part <b>[http://example.com]/[path]</b>
+     * Make URL from two part [http://example.com]/[path]
      *
-     * @param host example: </b>http://example.com</b>
-     * @param path example: </b>path</b>
+     * @param host example: http://example.com
+     * @param path example: path
      */
     public NBuilder setUrl(String host, String path) {
         if (host.contains("://"))
@@ -78,11 +80,11 @@ public class NBuilder {
     }
 
     /**
-     * Make URL from thee part <b>[http]://[example.com]/[path]</b>
+     * Make URL from thee part [http]://[example.com]/[path]
      *
-     * @param port example: <b>http</b>
-     * @param host example: <b>example.com</b>
-     * @param path example: <b>path</b>
+     * @param port example: http
+     * @param host example: example.com
+     * @param path example: path
      */
     public NBuilder setUrl(String port, String host, String path) {
         if (port != null && !port.isEmpty())
@@ -94,7 +96,7 @@ public class NBuilder {
     /**
      * Set the host of request URL.
      *
-     * @param host example: <b>http://example.com</b> or <b>example.com</b>
+     * @param host example: http://example.com or example.com
      */
     public NBuilder setHost(String host) {
         if (host == null || host.isEmpty())
@@ -111,7 +113,7 @@ public class NBuilder {
     /**
      * Set the path of request URL. You must call {@link NBuilder#setHost(String)} before use this method.
      *
-     * @param path example: <b>path</b>
+     * @param path example: path
      */
     public NBuilder setPath(String path) {
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
@@ -125,8 +127,8 @@ public class NBuilder {
     }
 
     /**
-     * Use only next constants: <b>NBuilder.GET</b>, <b>NBuilder.POST</b>, <b>NBuilder.PUT</b>, <b>NBuilder.DELETE</b>
-     * For multipart request default method - <b>POST</b>
+     * Use only next constants: NBuilder.GET, NBuilder.POST, NBuilder.PUT, NBuilder.DELETE
+     * For multipart request default method - POST
      *
      * @param method the method of the request
      */

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 24
@@ -26,6 +27,17 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
     }
+}
+
+publish {
+    userOrg = 'oncreate'
+    groupId = 'com.github.jaksab'
+    artifactId = 'easynet'
+    repoName = 'EasyNet'
+    publishVersion = '1.0.3'
+    desc = 'Powerful and easy-to-use http client for Android.'
+    licences = ['MIT']
+    website = 'https://github.com/jaksab/EasyNetwork'
 }
 
 dependencies {

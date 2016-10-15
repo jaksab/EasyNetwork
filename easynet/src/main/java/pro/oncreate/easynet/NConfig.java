@@ -35,6 +35,11 @@ public class NConfig {
         return writeLogs;
     }
 
+    /**
+     * Set true, if you will want to show logs when library is working
+     *
+     * @param writeLogs
+     */
     public void setWriteLogs(boolean writeLogs) {
         this.writeLogs = writeLogs;
     }

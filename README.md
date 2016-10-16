@@ -2,6 +2,8 @@
 
 EasyNetwork - is powerful and easy-to-use http library for Android.
 
+Library is performing a work with http requests using HttpURLConnection. But also she support old httpCore for only early projects. Use new solutions for better performance and ease of use.
+
 # Download
   
 ```groovy

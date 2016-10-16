@@ -100,7 +100,7 @@ You don't have to override all the methods of callback lifecycle.
 ```
 MIT License
 
-Copyright (c) 2016 Andrew Konovalenko
+Copyright (c) 2016 Andrii Konovalenko
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

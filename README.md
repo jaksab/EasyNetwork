@@ -91,6 +91,7 @@ public class App extends Application {
     }
 }
 ```
+You don't have to override all the methods of callback lifecycle.
 
 # Linecse
 

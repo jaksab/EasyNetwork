@@ -49,7 +49,7 @@ NBuilder.create()
     }
 ```
 
-You can define the default litheners and setup base NBuilder istance with `NConfig`. We recomended do this in Application class:
+You can define the default listeners and set up basic `NBuilder` instance with `NConfig`. We recommended do this in Application class:
 
 ```java
 public class App extends Application {

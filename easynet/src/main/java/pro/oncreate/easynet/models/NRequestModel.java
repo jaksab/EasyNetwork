@@ -1,5 +1,9 @@
 package pro.oncreate.easynet.models;
 
+import android.app.ProgressDialog;
+import android.view.View;
+import android.widget.ProgressBar;
+
 import java.util.ArrayList;
 
 /**
@@ -7,21 +11,34 @@ import java.util.ArrayList;
  */
 public class NRequestModel {
 
+    // Request general
     private String url;
     private String method;
     private String requestType;
-    private ArrayList<NKeyValueModel> headers = new ArrayList<>();
-    private ArrayList<NKeyValueModel> params = new ArrayList<>();
-    private ArrayList<NKeyValueModel> queryParams = new ArrayList<>();
-    private ArrayList<NKeyValueFileModel> paramsFile = new ArrayList<>();
-    private ArrayList<NKeyValueModel> paramsText = new ArrayList<>();
+
+    // Request data
+    private ArrayList<NKeyValueModel> headers;
+    private ArrayList<NKeyValueModel> params;
+    private ArrayList<NKeyValueModel> queryParams;
+    private ArrayList<NKeyValueFileModel> paramsFile;
+    private ArrayList<NKeyValueModel> paramsText;
     private String body;
+
+    // States
     private long connectTimeout;
     private long readTimeout;
     private long startTime;
 
+    // Parse
     private boolean needParse;
+
+    // Listeners
     private boolean enableDefaultListeners;
+
+    // Progress
+    private ProgressDialog progressDialog;
+    private ProgressBar progressBar;
+    private View progressView;
 
     public NRequestModel() {
     }
@@ -51,6 +68,8 @@ public class NRequestModel {
     }
 
     public ArrayList<NKeyValueModel> getHeaders() {
+        if (headers == null)
+            headers = new ArrayList<>();
         return headers;
     }
 
@@ -59,6 +78,8 @@ public class NRequestModel {
     }
 
     public ArrayList<NKeyValueModel> getParams() {
+        if (params == null)
+            params = new ArrayList<>();
         return params;
     }
 
@@ -107,6 +128,8 @@ public class NRequestModel {
     }
 
     public ArrayList<NKeyValueFileModel> getParamsFile() {
+        if (paramsFile == null)
+            paramsFile = new ArrayList<>();
         return paramsFile;
     }
 
@@ -115,6 +138,8 @@ public class NRequestModel {
     }
 
     public ArrayList<NKeyValueModel> getParamsText() {
+        if (paramsText == null)
+            paramsText = new ArrayList<>();
         return paramsText;
     }
 
@@ -123,6 +148,8 @@ public class NRequestModel {
     }
 
     public ArrayList<NKeyValueModel> getQueryParams() {
+        if (queryParams == null)
+            queryParams = new ArrayList<>();
         return queryParams;
     }
 
@@ -136,5 +163,29 @@ public class NRequestModel {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public ProgressDialog getProgressDialog() {
+        return progressDialog;
+    }
+
+    public void setProgressDialog(ProgressDialog progressDialog) {
+        this.progressDialog = progressDialog;
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    public void setProgressBar(ProgressBar progressBar) {
+        this.progressBar = progressBar;
+    }
+
+    public View getProgressView() {
+        return progressView;
+    }
+
+    public void setProgressView(View progressView) {
+        this.progressView = progressView;
     }
 }

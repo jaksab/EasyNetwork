@@ -56,6 +56,8 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
         NBuilder.create()
                 .setPath("countries/100")
                 .addParam("expand", "name")
+                .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
+                .bindProgress(progressBar)
                 .setMethod(NBuilder.GET) // default
                 .enableDefaultListeners(true) // default
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
@@ -65,7 +67,6 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onStart(NRequestModel requestModel) {
                         edtToolbar.setText(requestModel.getMethod() + " " + requestModel.getUrl());
-                        progressBar.setVisibility(View.VISIBLE);
 
                         adapter.clear();
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, String.format(Locale.getDefault(), "Headers (%d)", requestModel.getHeaders().size())));
@@ -79,7 +80,6 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
                     @Override
                     public void onSuccess(CountryModel model, NResponseModel responseModel) {
-                        progressBar.setVisibility(View.GONE);
                         Snackbar.make(getCurrentFocus(), String.format(Locale.getDefault(), "%s [status code: %d] [response time: %d ms]", "Success", responseModel.getStatusCode(), responseModel.getResponseTime()), Snackbar.LENGTH_LONG).show();
 
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, String.format(Locale.getDefault(), "Headers (%d)", responseModel.getHeaders().size())));
@@ -97,7 +97,6 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
                     @Override
                     public void onError(NResponseModel responseModel) {
-                        progressBar.setVisibility(View.GONE);
                         Snackbar.make(getCurrentFocus(), String.format(Locale.US, "%s [status code: %d] [response time: %d ms]", "Error", responseModel.getStatusCode(), responseModel.getResponseTime()), Snackbar.LENGTH_LONG).show();
 
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, "Headers"));

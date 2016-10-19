@@ -1,6 +1,9 @@
 package pro.oncreate.easynet;
 
+import android.app.ProgressDialog;
 import android.util.Patterns;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import java.io.File;
 import java.util.regex.Pattern;
@@ -51,7 +54,14 @@ public class NBuilder {
     }
 
     public static NBuilder create() {
-        return NConfig.getInstance().getDefaultNBuilder();
+        return NConfig.getInstance()
+                .getDefaultNBuilder();
+    }
+
+    public static NBuilder create(String method) {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(method);
     }
 
     /**
@@ -264,6 +274,36 @@ public class NBuilder {
      */
     public NBuilder enableDefaultListeners(boolean enabled) {
         requestModel.setEnableDefaultListeners(enabled);
+        return this;
+    }
+
+    /**
+     * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle
+     *
+     * @param progressDialog - progressDialog request indicator
+     */
+    public NBuilder bindProgress(ProgressDialog progressDialog) {
+        requestModel.setProgressDialog(progressDialog);
+        return this;
+    }
+
+    /**
+     * Set the progressBar instance, which will be automatically show\hide in request lifecycle
+     *
+     * @param progressBar - progressBar request indicator
+     */
+    public NBuilder bindProgress(ProgressBar progressBar) {
+        requestModel.setProgressBar(progressBar);
+        return this;
+    }
+
+    /**
+     * Set the other progress view instance, which will be automatically show\hide in request lifecycle
+     *
+     * @param progressView - progress view request indicator
+     */
+    public NBuilder bindProgress(View progressView) {
+        requestModel.setProgressView(progressView);
         return this;
     }
 

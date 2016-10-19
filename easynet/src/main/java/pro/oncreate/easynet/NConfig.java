@@ -1,10 +1,13 @@
 package pro.oncreate.easynet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.tasks.NTask;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
@@ -21,9 +24,19 @@ public class NConfig {
     }
 
     synchronized public static NConfig getInstance() {
-        if (config == null)
-            config = new NConfig();
-        return config;
+//        if (config == null)
+//            config = new NConfig();
+//        return config;
+        NConfig localInstance = config;
+        if (localInstance == null) {
+            synchronized (NConfig.class) {
+                localInstance = config;
+                if (localInstance == null) {
+                    config = localInstance = new NConfig();
+                }
+            }
+        }
+        return localInstance;
     }
 
     // Data
@@ -144,5 +157,26 @@ public class NConfig {
 
         public abstract void onError(NResponseModel responseModel);
     }
+
+    // Tasks queue
+
+    private Map<String, NTask> taskQueue;
+
+    public void addTask(String tag, NTask task) {
+        if (taskQueue == null)
+            taskQueue = new HashMap<>();
+        taskQueue.put(tag, task);
+    }
+
+    public void removeTask(String tag) {
+        taskQueue.remove(tag);
+    }
+
+    public void cancelAllTasks() {
+        for (NTask task : taskQueue.values()) {
+            task.cancel(false);
+        }
+    }
+
 }
 

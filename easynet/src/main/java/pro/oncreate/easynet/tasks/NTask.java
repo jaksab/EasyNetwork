@@ -44,6 +44,8 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     private final String boundary = "===" + System.currentTimeMillis() + "===";
     private static final String charset = "UTF-8";
 
+    private String tag;
+
     private OutputStream outputStream;
     private PrintWriter writer;
 
@@ -55,18 +57,28 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         this.requestModel = requestModel;
     }
 
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
         if (listener != null)
             listener.start(requestModel);
+        requestModel.setStartTime(System.currentTimeMillis());
+        setTag("task#" + requestModel.getStartTime());
+        NConfig.getInstance().addTask(this.tag, this);
     }
 
     @Override
     protected NResponseModel doInBackground(String... params) {
         NResponseModel responseModel;
         HttpURLConnection connection = null;
-        requestModel.setStartTime(System.currentTimeMillis());
 
         try {
             // Request
@@ -123,6 +135,7 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
             if (connection != null) {
                 connection.disconnect();
             }
+            NConfig.getInstance().removeTask(getTag());
         }
         return responseModel;
     }
@@ -219,12 +232,16 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         return body;
     }
 
-    private String readData(InputStream inputStream, int bufferSize) throws IOException {
+    private String readData(InputStream inputStream, int bufferSize) throws Exception {
         byte[] buf = new byte[bufferSize];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         int bytesRead;
         int bytesBuffered = 0;
         while ((bytesRead = inputStream.read(buf)) > -1) {
+
+            if (isCancelled())
+                throw new Exception("Task was cancelled");
+
             outputStream.write(buf, 0, bytesRead);
             bytesBuffered += bytesRead;
             if (bytesBuffered > 1024 * 1024) {

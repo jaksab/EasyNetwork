@@ -9,8 +9,4 @@ import org.json.JSONObject;
 public abstract class NBaseModel {
 
     public abstract NBaseModel parse(NResponseModel responseModel, JSONObject jsonObject);
-
-    public JSONObject toJSONObject() {
-        return new JSONObject();
-    }
 }

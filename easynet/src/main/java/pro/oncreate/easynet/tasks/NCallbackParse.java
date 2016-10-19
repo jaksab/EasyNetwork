@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NBaseModel;
-import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.utils.NLog;
 
@@ -18,7 +17,7 @@ import pro.oncreate.easynet.utils.NLog;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
-public class NCallbackParse<T extends NBaseModel> extends NBaseCallback implements NTask.NTaskListener {
+public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
 
     private T model;
     protected ArrayList<T> models;
@@ -29,13 +28,8 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback implemen
     }
 
     @Override
-    public void start(NRequestModel requestModel) {
-        this.requestModel = requestModel;
-        onStart(requestModel);
-    }
-
-    @Override
     public void finishUI(NResponseModel responseModel) {
+        super.finishUI(responseModel);
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
             if (requestModel.isEnableDefaultListeners()) {
                 if (model != null)

@@ -28,4 +28,22 @@ public class NDataBuilder {
 
         return result.toString();
     }
+
+    public static String getQuery(List<NKeyValueModel> params) throws UnsupportedEncodingException {
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+
+        for (NKeyValueModel pair : params) {
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(pair.getKey());
+            result.append("=");
+            result.append(pair.getValue());
+        }
+
+        return result.toString();
+    }
 }

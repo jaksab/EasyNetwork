@@ -34,7 +34,7 @@ import pro.oncreate.easynet.utils.NLog;
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
-public class NTask extends AsyncTask<String, Void, NResponseModel> {
+public class NTask extends AsyncTask<String, Integer, NResponseModel> {
 
     public final static int DEFAULT_TIMEOUT_READ = 10000;
     public final static int DEFAULT_TIMEOUT_CONNECT = 7500;
@@ -141,6 +141,10 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
     }
 
     @Override
+    protected void onProgressUpdate(Integer... errorCode) {
+    }
+
+    @Override
     protected void onPostExecute(NResponseModel responseModel) {
         super.onPostExecute(responseModel);
         if (listener != null) {
@@ -238,10 +242,9 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         int bytesRead;
         int bytesBuffered = 0;
         while ((bytesRead = inputStream.read(buf)) > -1) {
-
-            if (isCancelled())
+            if (isCancelled()) {
                 throw new Exception("Task was cancelled");
-
+            }
             outputStream.write(buf, 0, bytesRead);
             bytesBuffered += bytesRead;
             if (bytesBuffered > 1024 * 1024) {
@@ -253,6 +256,12 @@ public class NTask extends AsyncTask<String, Void, NResponseModel> {
         outputStream.flush();
         outputStream.close();
         return outputStream.toString();
+    }
+
+    @Override
+    protected void onCancelled() {
+        if (listener != null && listener instanceof NBaseCallback)
+            ((NBaseCallback) listener).preTaskCancelled(requestModel, tag);
     }
 
     // URL Encode

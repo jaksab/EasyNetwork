@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.0.6"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -34,7 +34,7 @@ publish {
     groupId = 'com.github.jaksab'
     artifactId = 'easynet'
     repoName = 'EasyNet'
-    publishVersion = '1.0.4'
+    publishVersion = '1.0.6'
     desc = 'Powerful and easy-to-use http client for Android.'
     licences = ['MIT']
     website = 'https://github.com/jaksab/EasyNetwork'

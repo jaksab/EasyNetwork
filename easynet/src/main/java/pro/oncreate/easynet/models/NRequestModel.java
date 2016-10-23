@@ -1,6 +1,6 @@
 package pro.oncreate.easynet.models;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -36,9 +36,10 @@ public class NRequestModel {
     private boolean enableDefaultListeners;
 
     // Progress
-    private ProgressDialog progressDialog;
+    private Dialog progressDialog;
     private ProgressBar progressBar;
     private View progressView;
+    private View hideView;
 
     public NRequestModel() {
     }
@@ -165,11 +166,11 @@ public class NRequestModel {
         this.body = body;
     }
 
-    public ProgressDialog getProgressDialog() {
+    public Dialog getProgressDialog() {
         return progressDialog;
     }
 
-    public void setProgressDialog(ProgressDialog progressDialog) {
+    public void setProgressDialog(Dialog progressDialog) {
         this.progressDialog = progressDialog;
     }
 
@@ -187,5 +188,13 @@ public class NRequestModel {
 
     public void setProgressView(View progressView) {
         this.progressView = progressView;
+    }
+
+    public View getHideView() {
+        return hideView;
+    }
+
+    public void setHideView(View hideView) {
+        this.hideView = hideView;
     }
 }

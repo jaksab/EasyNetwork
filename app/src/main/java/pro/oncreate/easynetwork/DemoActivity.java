@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import pro.oncreate.easynet.NBuilder;
+import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NKeyValueModel;
@@ -30,6 +32,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
     private ProgressBar progressBar;
     private EditText edtToolbar;
+    private RecyclerView recyclerview;
 
     private ExpandableListAdapter adapter;
 
@@ -41,7 +44,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
         edtToolbar = (EditText) findViewById(R.id.toolbar_edittext);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         ImageButton ibtnGo = (ImageButton) findViewById(R.id.toolbar_go);
-        RecyclerView recyclerview = (RecyclerView) findViewById(R.id.recyclerview);
+        recyclerview = (RecyclerView) findViewById(R.id.recyclerview);
 
         recyclerview.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         adapter = new ExpandableListAdapter(new ArrayList<ExpandableListAdapter.Item>());
@@ -54,10 +57,11 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         NBuilder.create()
-                .setPath("countries/100")
+                //.create(NBuilder.GET) analog setMethod(NBuilder.GET)
+                .setPath("countries", 100)
                 .addParam("expand", "name")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
-                .bindProgress(progressBar)
+                .bindProgress(progressBar, recyclerview)
                 .setMethod(NBuilder.GET) // default
                 .enableDefaultListeners(true) // default
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
@@ -112,6 +116,18 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                         progressBar.setVisibility(View.GONE);
                         Snackbar.make(getCurrentFocus(), String.format(Locale.getDefault(), "Failed %s ", error.name()), Snackbar.LENGTH_LONG).show();
                     }
+
+                    @Override
+                    public void onTaskCancelled(NRequestModel requestModel, String tag) {
+                        Toast.makeText(DemoActivity.this, "Cancelled " + tag, Toast.LENGTH_LONG).show();
+                    }
                 });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (NConfig.getInstance().isCurrentTasks())
+            NConfig.getInstance().cancelAllTasks();
+        else super.onBackPressed();
     }
 }

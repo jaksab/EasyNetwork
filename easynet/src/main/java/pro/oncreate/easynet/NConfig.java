@@ -24,9 +24,6 @@ public class NConfig {
     }
 
     synchronized public static NConfig getInstance() {
-//        if (config == null)
-//            config = new NConfig();
-//        return config;
         NConfig localInstance = config;
         if (localInstance == null) {
             synchronized (NConfig.class) {
@@ -65,6 +62,11 @@ public class NConfig {
 
     private NBuilderDefaultListener defaultNBuilderListener;
 
+    /**
+     * Use this callback to set the basic properties for all queries.
+     *
+     * @param defaultNBuilderListener callback default NBuilder
+     */
     public void setDefaultNBuilderListener(NBuilderDefaultListener defaultNBuilderListener) {
         this.defaultNBuilderListener = defaultNBuilderListener;
     }
@@ -77,6 +79,9 @@ public class NConfig {
     }
 
     public interface NBuilderDefaultListener {
+        /**
+         * Receives a empty NBuilder instance that must a result return
+         */
         NBuilder defaultConfig(NBuilder nBuilder);
     }
 
@@ -87,6 +92,11 @@ public class NConfig {
 
     private OnSuccessDefaultListener onSuccessDefaultListener;
 
+    /**
+     * Define the basic logic of successful requests.
+     *
+     * @param onSuccessDefaultListener OnSuccessDefaultListener instance
+     */
     public void setDefaultOnSuccessListener(OnSuccessDefaultListener onSuccessDefaultListener) {
         this.onSuccessDefaultListener = onSuccessDefaultListener;
     }
@@ -103,6 +113,11 @@ public class NConfig {
 
     private OnFailedDefaultListener onFailedDefaultListener;
 
+    /**
+     * Define the basic logic of failed requests.
+     *
+     * @param onFailedDefaultListener OnFailedDefaultListener instance
+     */
     public void setDefaultOnFailedListener(OnFailedDefaultListener onFailedDefaultListener) {
         this.onFailedDefaultListener = onFailedDefaultListener;
     }
@@ -124,6 +139,11 @@ public class NConfig {
         return onErrorDefaultListenersCollection;
     }
 
+    /**
+     * Define the basic logic of error for status code.
+     *
+     * @param onErrorDefaultListener OnErrorDefaultListenerWithCode instance
+     */
     public void addOnErrorDefaultListener(OnErrorDefaultListenerWithCode onErrorDefaultListener) {
         onErrorDefaultListenersCollection.add(onErrorDefaultListener);
     }
@@ -132,6 +152,11 @@ public class NConfig {
         return onErrorDefaultListener;
     }
 
+    /**
+     * Define the basic logic of all errors.
+     *
+     * @param onErrorDefaultListener OnErrorDefaultListener instance
+     */
     public void setOnErrorDefaultListener(OnErrorDefaultListener onErrorDefaultListener) {
         this.onErrorDefaultListener = onErrorDefaultListener;
     }
@@ -162,16 +187,39 @@ public class NConfig {
 
     private Map<String, NTask> taskQueue;
 
+    /**
+     * Resister a new task in queue.
+     *
+     * @param tag  unique name
+     * @param task NTask instance
+     */
     public void addTask(String tag, NTask task) {
         if (taskQueue == null)
             taskQueue = new HashMap<>();
         taskQueue.put(tag, task);
     }
 
+    /**
+     * Is there any current tasks in execution.
+     *
+     * @return true - if task queue not empty
+     */
+    public boolean isCurrentTasks() {
+        return taskQueue != null && taskQueue.size() > 0;
+    }
+
+    /**
+     * Cancel current request execution for tag.
+     *
+     * @param tag - name of task
+     */
     public void removeTask(String tag) {
         taskQueue.remove(tag);
     }
 
+    /**
+     * Cancel all current request execution.
+     */
     public void cancelAllTasks() {
         for (NTask task : taskQueue.values()) {
             task.cancel(false);

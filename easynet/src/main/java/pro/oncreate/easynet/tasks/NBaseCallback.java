@@ -32,6 +32,8 @@ abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getProgressBar().setVisibility(View.VISIBLE);
             if (requestModel.getProgressView() != null)
                 requestModel.getProgressView().setVisibility(View.VISIBLE);
+            if (requestModel.getHideView() != null)
+                requestModel.getHideView().setVisibility(View.INVISIBLE);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -45,6 +47,8 @@ abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getProgressBar().setVisibility(View.GONE);
             if (requestModel.getProgressView() != null)
                 requestModel.getProgressView().setVisibility(View.GONE);
+            if (requestModel.getHideView() != null)
+                requestModel.getHideView().setVisibility(View.VISIBLE);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -82,5 +86,13 @@ abstract class NBaseCallback implements NTask.NTaskListener {
     }
 
     public void onFailed(NRequestModel nRequestModel, NErrors error) {
+    }
+
+    void preTaskCancelled(NRequestModel requestModel, String tag) {
+        stopProgressDialog();
+        onTaskCancelled(requestModel, tag);
+    }
+
+    public void onTaskCancelled(NRequestModel requestModel, String tag) {
     }
 }

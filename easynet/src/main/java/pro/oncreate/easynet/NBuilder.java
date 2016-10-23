@@ -1,6 +1,6 @@
 package pro.oncreate.easynet;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -133,6 +133,24 @@ public class NBuilder {
 
         if (requestModel.getUrl().endsWith("/"))
             requestModel.setUrl(requestModel.getUrl() + path);
+        return this;
+    }
+
+    /**
+     * Set the path of request URL with id. You must call {@link NBuilder#setHost(String)} before use this method.
+     * Example: path/{id}
+     *
+     * @param path url path
+     * @param id   essence id
+     */
+    public NBuilder setPath(String path, int id) {
+        if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
+            throw new NullPointerException("Host is empty");
+        if (path == null || path.isEmpty())
+            throw new NullPointerException("Path can not be empty");
+
+        if (requestModel.getUrl().endsWith("/"))
+            requestModel.setUrl(requestModel.getUrl() + path + "/" + id);
         return this;
     }
 
@@ -278,17 +296,17 @@ public class NBuilder {
     }
 
     /**
-     * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle
+     * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle.
      *
      * @param progressDialog - progressDialog request indicator
      */
-    public NBuilder bindProgress(ProgressDialog progressDialog) {
+    public NBuilder bindProgress(Dialog progressDialog) {
         requestModel.setProgressDialog(progressDialog);
         return this;
     }
 
     /**
-     * Set the progressBar instance, which will be automatically show\hide in request lifecycle
+     * Set the progressBar instance, which will be automatically show\hide in request lifecycle.
      *
      * @param progressBar - progressBar request indicator
      */
@@ -298,12 +316,48 @@ public class NBuilder {
     }
 
     /**
-     * Set the other progress view instance, which will be automatically show\hide in request lifecycle
+     * Set the other progress view instance, which will be automatically show\hide in request lifecycle.
      *
      * @param progressView - progress view request indicator
      */
     public NBuilder bindProgress(View progressView) {
         requestModel.setProgressView(progressView);
+        return this;
+    }
+
+    /**
+     * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle with content view.
+     *
+     * @param progressDialog - progressDialog request indicator
+     * @param hideView       - content which must be hidden during the request
+     */
+    public NBuilder bindProgress(Dialog progressDialog, View hideView) {
+        bindProgress(progressDialog);
+        requestModel.setHideView(hideView);
+        return this;
+    }
+
+    /**
+     * Set the progressBar instance, which will be automatically show\hide in request lifecycle  with content view.
+     *
+     * @param progressBar - progressBar request indicator
+     * @param hideView    - content which must be hidden during the request
+     */
+    public NBuilder bindProgress(ProgressBar progressBar, View hideView) {
+        bindProgress(progressBar);
+        requestModel.setHideView(hideView);
+        return this;
+    }
+
+    /**
+     * Set the other progress view instance, which will be automatically show\hide in request lifecycle with content view.
+     *
+     * @param progressView - progress view request indicator
+     * @param hideView     - content which must be hidden during the request
+     */
+    public NBuilder bindProgress(View progressView, View hideView) {
+        bindProgress(progressView);
+        requestModel.setHideView(hideView);
         return this;
     }
 

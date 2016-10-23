@@ -8,7 +8,7 @@ Library is performing a work with http requests using HttpURLConnection. But als
   
 ```groovy
 dependencies {
-    compile 'com.github.jaksab:easynet:1.0.4'
+    compile 'com.github.jaksab:easynet:1.0.5'
 }
 ```
 
@@ -22,6 +22,7 @@ NBuilder.create()
                 .setUrl("http://example.com/api/path")
                 .addParam("id", "10")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
+                .bindProgress(progressBar) // You can bind progressDailog, progressView or other View, that will be show\hide automatically in request lifecycle
                 .setMethod(NBuilder.GET) // default
                 .enableDefaultListeners(true) // default
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
@@ -80,7 +81,7 @@ public class App extends Application {
         netConfig.setDefaultOnFailedListener(new NConfig.OnFailedDefaultListener() {
             @Override
             public boolean onFailed(NRequestModel nRequestModel, NErrors error) {
-                // 
+                // Fatal errors callback
                 return true; // Return true, if you want to call the final handler
             }
         });
@@ -93,7 +94,11 @@ public class App extends Application {
     }
 }
 ```
-You don't have to override all the methods of callback lifecycle.
+Notes:
+
+- You don't have to override all the methods of callback lifecycle.
+
+- Use `NConfig.getInstance().cancelAllTasks();` to cancel current tasks.
 
 # Linecse
 

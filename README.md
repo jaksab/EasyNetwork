@@ -8,7 +8,7 @@ Library is performing a work with http requests using HttpURLConnection. But als
   
 ```groovy
 dependencies {
-    compile 'com.github.jaksab:easynet:1.0.5'
+    compile 'com.github.jaksab:easynet:1.0.6'
 }
 ```
 
@@ -19,11 +19,11 @@ Make request by means of `NBuilder` and start execution:
 
 ```java
 NBuilder.create()
+                // Use .setMethod(NBuilder.GET) or .create(NBuilder.GET), GET by default
                 .setUrl("http://example.com/api/path")
                 .addParam("id", "10")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
                 .bindProgress(progressBar) // You can bind progressDailog, progressView or other View, that will be show\hide automatically in request lifecycle
-                .setMethod(NBuilder.GET) // default
                 .enableDefaultListeners(true) // default
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
                 .setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT) // default
@@ -47,6 +47,11 @@ NBuilder.create()
                     @Override
                     public void onFailed(NRequestModel nRequestModel, NErrors error) {
                       // Processing a fatal error
+                    }
+                    
+                    @Override
+                    public void onTaskCancelled(NRequestModel requestModel, String tag) {
+                      // Will be called, if task was manually cancelled 
                     }
                 });
     }
@@ -99,6 +104,8 @@ Notes:
 - You don't have to override all the methods of callback lifecycle.
 
 - Use `NConfig.getInstance().cancelAllTasks();` to cancel current tasks.
+
+- `NConfig.getInstance().isCurrentTasks();` return true, if task queue not empty
 
 # Linecse
 

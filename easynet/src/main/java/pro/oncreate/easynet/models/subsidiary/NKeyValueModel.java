@@ -1,4 +1,4 @@
-package pro.oncreate.easynet.models;
+package pro.oncreate.easynet.models.subsidiary;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]

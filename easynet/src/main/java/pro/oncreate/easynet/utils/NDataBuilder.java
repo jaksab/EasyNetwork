@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 
-import pro.oncreate.easynet.models.NKeyValueModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]

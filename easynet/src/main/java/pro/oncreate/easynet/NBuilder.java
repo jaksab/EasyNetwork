@@ -1,6 +1,7 @@
 package pro.oncreate.easynet;
 
 import android.app.Dialog;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -9,9 +10,10 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import pro.oncreate.easynet.data.NConst;
-import pro.oncreate.easynet.models.NKeyValueFileModel;
-import pro.oncreate.easynet.models.NKeyValueModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.models.NRequestModel;
+import pro.oncreate.easynet.tasks.NBaseCallback;
 import pro.oncreate.easynet.tasks.NCallback;
 import pro.oncreate.easynet.tasks.NCallbackParse;
 import pro.oncreate.easynet.tasks.NTask;
@@ -33,6 +35,10 @@ public class NBuilder {
 
     public static final String PORT_HTTP = "http://";
     public static final String PORT_HTTPS = "https://";
+    public static final String PORT_FTP = "ftp://";
+    public static final String PORT_FTP_SSL = "ftps://";
+    public static final String PORT_FILE = "file://";
+    public static final String PORT_DARA = "data:";
     private static final String DEFAULT_PORT = PORT_HTTP;
 
     private NRequestModel requestModel;
@@ -318,7 +324,7 @@ public class NBuilder {
     /**
      * Set the other progress view instance, which will be automatically show\hide in request lifecycle.
      *
-     * @param progressView - progress view request indicator
+     * @param progressView progress view request indicator
      */
     public NBuilder bindProgress(View progressView) {
         requestModel.setProgressView(progressView);
@@ -326,10 +332,32 @@ public class NBuilder {
     }
 
     /**
+     * Set the SwipeRefreshLayout instance, which will be automatically show\hide in request lifecycle.
+     *
+     * @param swipeRefreshLayout SwipeRefreshLayout request indicator
+     */
+    public NBuilder bindProgress(SwipeRefreshLayout swipeRefreshLayout) {
+        requestModel.setRefreshLayout(swipeRefreshLayout);
+        return this;
+    }
+
+    /**
+     * Set the SwipeRefreshLayout instance, which will be automatically start\dismiss in request lifecycle with content view.
+     *
+     * @param swipeRefreshLayout SwipeRefreshLayout request indicator
+     * @param hideView           content which must be hidden during the request
+     */
+    public NBuilder bindProgress(SwipeRefreshLayout swipeRefreshLayout, View hideView) {
+        bindProgress(swipeRefreshLayout);
+        requestModel.setHideView(hideView);
+        return this;
+    }
+
+    /**
      * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle with content view.
      *
-     * @param progressDialog - progressDialog request indicator
-     * @param hideView       - content which must be hidden during the request
+     * @param progressDialog progressDialog request indicator
+     * @param hideView       content which must be hidden during the request
      */
     public NBuilder bindProgress(Dialog progressDialog, View hideView) {
         bindProgress(progressDialog);
@@ -352,12 +380,82 @@ public class NBuilder {
     /**
      * Set the other progress view instance, which will be automatically show\hide in request lifecycle with content view.
      *
-     * @param progressView - progress view request indicator
-     * @param hideView     - content which must be hidden during the request
+     * @param progressView progress view request indicator
+     * @param hideView     content which must be hidden during the request
      */
     public NBuilder bindProgress(View progressView, View hideView) {
         bindProgress(progressView);
         requestModel.setHideView(hideView);
+        return this;
+    }
+
+    /**
+     * Enable pagination with custom API keys. You must call this method before using other pagination methods.
+     *
+     * @param pageNumberKey page number API key
+     * @param itemsCountKey page count API key
+     */
+    public NBuilder enablePagination(String pageNumberKey, String itemsCountKey) {
+        requestModel.setPaginationModel(new NPaginationModel(pageNumberKey, itemsCountKey));
+        return this;
+    }
+
+    /**
+     * Set items count on one page.
+     *
+     * @param count items count
+     */
+    public NBuilder setPaginationCount(int count) {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call enablePagination before");
+        requestModel.getPaginationModel().itemsCount = count;
+        return this;
+    }
+
+    /**
+     * Set page number for current request.
+     *
+     * @param pageNumber page number
+     */
+    public NBuilder setPaginationPage(int pageNumber) {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call enablePagination before");
+        requestModel.getPaginationModel().pageNumber = pageNumber;
+        return this;
+    }
+
+    /**
+     * Setting the next page with automatic calculation based on the current items number
+     *
+     * @param itemsCountNow current items count
+     */
+    public NBuilder setPaginationNextPage(int itemsCountNow) {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call enablePagination before");
+        requestModel.getPaginationModel().pageNumber = NPaginationModel.calculateNextPage(itemsCountNow,
+                requestModel.getPaginationModel().itemsCount);
+        return this;
+    }
+
+    /**
+     * Add pagination data to request params.
+     */
+    private void setUpPagination() {
+        if (requestModel.getPaginationModel() != null) {
+            addParam(requestModel.getPaginationModel().pageNumberKey,
+                    String.valueOf(requestModel.getPaginationModel().pageNumber));
+            addParam(requestModel.getPaginationModel().countItemsKey,
+                    String.valueOf(requestModel.getPaginationModel().itemsCount));
+        }
+    }
+
+    /**
+     * Use this method for intercepting header values. The callback will be called if the header is present.
+     *
+     * @param waitHeaderCallback header callback
+     */
+    public NBuilder waitHeader(NBaseCallback.WaitHeaderCallback waitHeaderCallback) {
+        requestModel.addWaitHeaderCallbacks(waitHeaderCallback);
         return this;
     }
 
@@ -406,6 +504,8 @@ public class NBuilder {
             addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
             if (contentType == null)
                 this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+
+            setUpPagination();
             switch (contentType) {
                 case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
                     requestModel.setMethod(POST);

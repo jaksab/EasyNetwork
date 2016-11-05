@@ -3,6 +3,8 @@ package pro.oncreate.easynet.tasks;
 import android.util.Log;
 import android.view.View;
 
+import java.util.List;
+
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
@@ -13,7 +15,7 @@ import pro.oncreate.easynet.utils.NLog;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
-abstract class NBaseCallback implements NTask.NTaskListener {
+public abstract class NBaseCallback implements NTask.NTaskListener {
 
     protected NRequestModel requestModel;
 
@@ -34,6 +36,8 @@ abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getProgressView().setVisibility(View.VISIBLE);
             if (requestModel.getHideView() != null)
                 requestModel.getHideView().setVisibility(View.INVISIBLE);
+            if (requestModel.getRefreshLayout() != null && !requestModel.getRefreshLayout().isRefreshing())
+                requestModel.getRefreshLayout().setRefreshing(true);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -49,6 +53,8 @@ abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getProgressView().setVisibility(View.GONE);
             if (requestModel.getHideView() != null)
                 requestModel.getHideView().setVisibility(View.VISIBLE);
+            if (requestModel.getRefreshLayout() != null && requestModel.getRefreshLayout().isRefreshing())
+                requestModel.getRefreshLayout().setRefreshing(false);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -60,6 +66,7 @@ abstract class NBaseCallback implements NTask.NTaskListener {
     @Override
     public void finishUI(NResponseModel responseModel) {
         stopProgressDialog();
+        callWaitHeadersCallbacks(responseModel);
     }
 
     protected void preError(NResponseModel responseModel) {
@@ -73,6 +80,17 @@ abstract class NBaseCallback implements NTask.NTaskListener {
                 }
             }
             onError(responseModel);
+        }
+    }
+
+    private void callWaitHeadersCallbacks(NResponseModel responseModel) {
+        if (requestModel.getWaitHeaderCallbacks() != null && responseModel != null && responseModel.getHeaders() != null) {
+            for (WaitHeaderCallback callback : requestModel.getWaitHeaderCallbacks()) {
+                List<String> headerValues = responseModel.getHeaders().get(callback.getHeader());
+                if (headerValues != null && !headerValues.isEmpty()) {
+                    callback.takeHeader(headerValues);
+                }
+            }
         }
     }
 
@@ -94,5 +112,24 @@ abstract class NBaseCallback implements NTask.NTaskListener {
     }
 
     public void onTaskCancelled(NRequestModel requestModel, String tag) {
+    }
+
+    public static abstract class WaitHeaderCallback {
+
+        private String header;
+
+        public WaitHeaderCallback(String header) {
+            this.header = header;
+        }
+
+        public String getHeader() {
+            return header;
+        }
+
+        public void setHeader(String header) {
+            this.header = header;
+        }
+
+        abstract public void takeHeader(List<String> values);
     }
 }

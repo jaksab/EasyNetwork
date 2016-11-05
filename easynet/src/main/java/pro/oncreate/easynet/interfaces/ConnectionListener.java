@@ -2,7 +2,7 @@ package pro.oncreate.easynet.interfaces;
 
 import org.apache.http.HttpResponse;
 
-import pro.oncreate.easynet.models.ConnectInfo;
+import pro.oncreate.easynet.models.subsidiary.ConnectInfo;
 
 
 @Deprecated

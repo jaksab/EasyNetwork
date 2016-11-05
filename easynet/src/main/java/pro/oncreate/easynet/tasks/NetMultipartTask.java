@@ -13,7 +13,7 @@ import org.apache.http.util.EntityUtils;
 import pro.oncreate.easynet.http.Net;
 import pro.oncreate.easynet.http.NetSettings;
 import pro.oncreate.easynet.interfaces.ConnectionListener;
-import pro.oncreate.easynet.models.ConnectInfo;
+import pro.oncreate.easynet.models.subsidiary.ConnectInfo;
 import pro.oncreate.easynet.models.ResponseModel;
 import pro.oncreate.easynet.utils.RequestStringBuilders;
 

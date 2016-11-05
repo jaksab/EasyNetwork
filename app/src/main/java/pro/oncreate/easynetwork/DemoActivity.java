@@ -5,6 +5,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -20,9 +21,10 @@ import pro.oncreate.easynet.NBuilder;
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
-import pro.oncreate.easynet.models.NKeyValueModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.tasks.NBaseCallback;
 import pro.oncreate.easynet.tasks.NCallbackParse;
 import pro.oncreate.easynet.tasks.NTask;
 import pro.oncreate.easynetwork.adapters.ExpandableListAdapter;
@@ -67,6 +69,18 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
                 .setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT) // default
                 .setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED) // default
+                .waitHeader(new NBaseCallback.WaitHeaderCallback("Date") {
+                    @Override
+                    public void takeHeader(List<String> values) {
+                        Log.d("EasyNetDemo", values.toString());
+                    }
+                })
+                .waitHeader(new NBaseCallback.WaitHeaderCallback("Server") {
+                    @Override
+                    public void takeHeader(List<String> values) {
+                        Log.d("EasyNetDemo", values.toString());
+                    }
+                })
                 .startWithParse(new NCallbackParse<CountryModel>(CountryModel.class) {
                     @Override
                     public void onStart(NRequestModel requestModel) {

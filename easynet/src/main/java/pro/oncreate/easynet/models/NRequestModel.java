@@ -1,10 +1,16 @@
 package pro.oncreate.easynet.models;
 
 import android.app.Dialog;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ProgressBar;
 
 import java.util.ArrayList;
+
+import pro.oncreate.easynet.NPaginationModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
+import pro.oncreate.easynet.tasks.NBaseCallback;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
@@ -23,6 +29,7 @@ public class NRequestModel {
     private ArrayList<NKeyValueFileModel> paramsFile;
     private ArrayList<NKeyValueModel> paramsText;
     private String body;
+    private NPaginationModel paginationModel;
 
     // States
     private long connectTimeout;
@@ -34,12 +41,14 @@ public class NRequestModel {
 
     // Listeners
     private boolean enableDefaultListeners;
+    private ArrayList<NBaseCallback.WaitHeaderCallback> waitHeaderCallbacks;
 
     // Progress
     private Dialog progressDialog;
     private ProgressBar progressBar;
     private View progressView;
     private View hideView;
+    private SwipeRefreshLayout refreshLayout;
 
     public NRequestModel() {
     }
@@ -196,5 +205,31 @@ public class NRequestModel {
 
     public void setHideView(View hideView) {
         this.hideView = hideView;
+    }
+
+    public SwipeRefreshLayout getRefreshLayout() {
+        return refreshLayout;
+    }
+
+    public void setRefreshLayout(SwipeRefreshLayout refreshLayout) {
+        this.refreshLayout = refreshLayout;
+    }
+
+    public NPaginationModel getPaginationModel() {
+        return paginationModel;
+    }
+
+    public void setPaginationModel(NPaginationModel paginationModel) {
+        this.paginationModel = paginationModel;
+    }
+
+    public ArrayList<NBaseCallback.WaitHeaderCallback> getWaitHeaderCallbacks() {
+        return waitHeaderCallbacks;
+    }
+
+    public void addWaitHeaderCallbacks(NBaseCallback.WaitHeaderCallback waitHeaderCallback) {
+        if (this.waitHeaderCallbacks == null)
+            this.waitHeaderCallbacks = new ArrayList<>();
+        this.waitHeaderCallbacks.add(waitHeaderCallback);
     }
 }

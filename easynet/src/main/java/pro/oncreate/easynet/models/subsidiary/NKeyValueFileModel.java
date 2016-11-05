@@ -1,4 +1,4 @@
-package pro.oncreate.easynet.models;
+package pro.oncreate.easynet.models.subsidiary;
 
 import java.io.File;
 

@@ -150,8 +150,9 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         if (listener != null) {
             if (responseModel != null)
                 listener.finishUI(responseModel);
-            else {
-                if (requestModel.isEnableDefaultListeners() && listener instanceof NBaseCallback)
+            else if (listener instanceof NBaseCallback) {
+                ((NBaseCallback) listener).finishUIFailed();
+                if (requestModel.isEnableDefaultListeners())
                     ((NBaseCallback) listener).preFailed(requestModel, NErrors.CONNECTION_ERROR);
                 else
                     ((NBaseCallback) listener).onFailed(requestModel, NErrors.CONNECTION_ERROR);

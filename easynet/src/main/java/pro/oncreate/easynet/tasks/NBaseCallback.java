@@ -69,6 +69,10 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
         callWaitHeadersCallbacks(responseModel);
     }
 
+    void finishUIFailed() {
+        stopProgressDialog();
+    }
+
     protected void preError(NResponseModel responseModel) {
         if (NConfig.getInstance().getOnErrorDefaultListener() != null) {
             NConfig.getInstance().getOnErrorDefaultListener().onError(responseModel);

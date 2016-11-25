@@ -107,7 +107,7 @@ Notes:
 
 - `NConfig.getInstance().isCurrentTasks();` return true, if task queue not empty
 
-# Linecse
+# License
 
 ```
 MIT License

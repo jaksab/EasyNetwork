@@ -58,8 +58,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        NBuilder.create()
-                //.create(NBuilder.GET) analog setMethod(NBuilder.GET)
+        NBuilder.get()
                 .setPath("countries", 100)
                 .addParam("expand", "name")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)

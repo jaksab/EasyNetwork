@@ -70,6 +70,36 @@ public class NBuilder {
                 .setMethod(method);
     }
 
+    public static NBuilder get() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(GET);
+    }
+
+    public static NBuilder post() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(POST);
+    }
+
+    public static NBuilder put() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(PUT);
+    }
+
+    public static NBuilder delete() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(DELETE);
+    }
+
+    public static NBuilder multipart() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setContentType(NConst.MIME_TYPE_MULTIPART_FORM_DATA);
+    }
+
     /**
      * Example: http://example.com/path or example.com/path
      *
@@ -157,6 +187,25 @@ public class NBuilder {
 
         if (requestModel.getUrl().endsWith("/"))
             requestModel.setUrl(requestModel.getUrl() + path + "/" + id);
+        return this;
+    }
+
+    /**
+     * Set the path of request URL with id. You must call {@link NBuilder#setHost(String)} before use this method.
+     * Example: path/{id}
+     *
+     * @param path  url path
+     * @param id    essence id
+     * @param param essence param
+     */
+    public NBuilder setPath(String path, int id, String param) {
+        if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
+            throw new NullPointerException("Host is empty");
+        if (path == null || path.isEmpty())
+            throw new NullPointerException("Path can not be empty");
+
+        if (requestModel.getUrl().endsWith("/"))
+            requestModel.setUrl(requestModel.getUrl() + path + "/" + id + "/" + param);
         return this;
     }
 

@@ -1,5 +1,7 @@
 package pro.oncreate.easynet.tasks;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
@@ -17,14 +19,24 @@ import pro.oncreate.easynet.utils.NLog;
 
 public abstract class NBaseCallback implements NTask.NTaskListener {
 
+    private static final int MESSAGE_SHOW_PROGRESS = 100;
+    private static final int DEFAULT_DELAY = 555;
+
     protected NRequestModel requestModel;
 
     @Override
     public void start(NRequestModel requestModel) {
         this.requestModel = requestModel;
-        startProgressDialog();
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MESSAGE_SHOW_PROGRESS, 1), DEFAULT_DELAY);
         onStart(requestModel);
     }
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            startProgressDialog();
+        }
+    };
 
     protected void startProgressDialog() {
         try {
@@ -45,13 +57,13 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
 
     protected void stopProgressDialog() {
         try {
-            if (requestModel.getProgressDialog() != null)
+            if (requestModel.getProgressDialog() != null && requestModel.getProgressDialog().isShowing())
                 requestModel.getProgressDialog().dismiss();
-            if (requestModel.getProgressBar() != null)
+            if (requestModel.getProgressBar() != null && requestModel.getProgressBar().getVisibility() == View.VISIBLE)
                 requestModel.getProgressBar().setVisibility(View.GONE);
-            if (requestModel.getProgressView() != null)
+            if (requestModel.getProgressView() != null && requestModel.getProgressView().getVisibility() == View.VISIBLE)
                 requestModel.getProgressView().setVisibility(View.GONE);
-            if (requestModel.getHideView() != null)
+            if (requestModel.getHideView() != null && requestModel.getHideView().getVisibility() != View.VISIBLE)
                 requestModel.getHideView().setVisibility(View.VISIBLE);
             if (requestModel.getRefreshLayout() != null && requestModel.getRefreshLayout().isRefreshing())
                 requestModel.getRefreshLayout().setRefreshing(false);
@@ -65,11 +77,13 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
 
     @Override
     public void finishUI(NResponseModel responseModel) {
+        mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
         stopProgressDialog();
         callWaitHeadersCallbacks(responseModel);
     }
 
     void finishUIFailed() {
+        mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
         stopProgressDialog();
     }
 

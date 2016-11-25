@@ -8,7 +8,7 @@ Library is performing a work with http requests using HttpURLConnection. But als
   
 ```groovy
 dependencies {
-    compile 'com.github.jaksab:easynet:1.0.6'
+    compile 'com.github.jaksab:easynet:1.0.7'
 }
 ```
 

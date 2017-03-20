@@ -4,7 +4,7 @@ EasyNetwork - is powerful and easy-to-use http library for Android.
 
 Library is performing a work with http requests using HttpURLConnection. But also she support old httpCore for only early projects. Use new solutions for better performance and ease of use.
 
-# Download
+# Download (temporarily unavailable)
   
 ```groovy
 dependencies {
@@ -18,8 +18,8 @@ Make request by means of `NBuilder` and start execution:
 
 
 ```java
-NBuilder.create()
-                // Use .setMethod(NBuilder.GET) or .create(NBuilder.GET), GET by default
+NBuilder.get()
+                // can also be used: post() etc, multipart(), create(NBuilder.GET) or setMethod(NBuilder.GET)
                 .setUrl("http://example.com/api/path")
                 .addParam("id", "10")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
@@ -107,7 +107,7 @@ Notes:
 
 - `NConfig.getInstance().isCurrentTasks();` return true, if task queue not empty
 
-# Linecse
+# License
 
 ```
 MIT License

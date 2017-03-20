@@ -4,11 +4,11 @@ EasyNetwork - is powerful and easy-to-use http library for Android.
 
 Library is performing a work with http requests using HttpURLConnection. But also she support old httpCore for only early projects. Use new solutions for better performance and ease of use.
 
-# Download (temporarily unavailable)
+# Download
   
 ```groovy
 dependencies {
-    compile 'com.github.jaksab:easynet:1.0.7'
+    compile 'pro.oncreate.easynet:easynet:1.1.0'
 }
 ```
 

@@ -4,9 +4,23 @@ package pro.oncreate.easynet.data;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
+@SuppressWarnings("unused,WeakerAccess")
 public class NConst {
 
-    // Default headers
+    //
+    //
+    //
+
+    public static final String POST = "POST";
+    public static final String GET = "GET";
+    public static final String PUT = "PUT";
+    public static final String DELETE = "DELETE";
+    public static final String OPTIONS = "OPTIONS";
+    public static final String HEAD = "HEAD";
+
+
+    //
+    // Headers
     //
 
     public static final String CONTENT_TYPE = "Content-Type";

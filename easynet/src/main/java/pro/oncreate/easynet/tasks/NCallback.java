@@ -7,6 +7,7 @@ import pro.oncreate.easynet.models.NResponseModel;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
+@SuppressWarnings("unused,WeakerAccess")
 public class NCallback extends NBaseCallback {
 
     @Override
@@ -29,7 +30,8 @@ public class NCallback extends NBaseCallback {
     }
 
     private void preSuccess(NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null) || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null)
+                || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(responseModel);
     }
 

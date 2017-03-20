@@ -5,9 +5,13 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import pro.oncreate.easynet.NPaginationModel;
+import pro.oncreate.easynet.methods.Method;
+import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.tasks.NBaseCallback;
@@ -15,11 +19,13 @@ import pro.oncreate.easynet.tasks.NBaseCallback;
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
+
+@SuppressWarnings("unused")
 public class NRequestModel {
 
     // Request general
     private String url;
-    private String method;
+    private Method method;
     private String requestType;
 
     // Request data
@@ -27,8 +33,8 @@ public class NRequestModel {
     private ArrayList<NKeyValueModel> params;
     private ArrayList<NKeyValueModel> queryParams;
     private ArrayList<NKeyValueFileModel> paramsFile;
-    private ArrayList<NKeyValueModel> paramsText;
     private String body;
+    private File chunk;
     private NPaginationModel paginationModel;
 
     // States
@@ -38,20 +44,24 @@ public class NRequestModel {
 
     // Parse
     private boolean needParse;
+    private boolean enablePagination;
 
     // Listeners
     private boolean enableDefaultListeners;
     private ArrayList<NBaseCallback.WaitHeaderCallback> waitHeaderCallbacks;
 
     // Progress
+    private List<BindView> bindViews;
+
     private Dialog progressDialog;
     private ProgressBar progressBar;
     private View progressView;
-    private View hideView;
+    private View enabledView;
     private SwipeRefreshLayout refreshLayout;
+    private View hideView;
+    private int hideViewState = View.INVISIBLE;
 
-    public NRequestModel() {
-    }
+    // Getters and setters
 
     public String getUrl() {
         return url;
@@ -61,11 +71,11 @@ public class NRequestModel {
         this.url = url;
     }
 
-    public String getMethod() {
+    public Method getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
+    public void setMethod(Method method) {
         this.method = method;
     }
 
@@ -147,16 +157,6 @@ public class NRequestModel {
         this.paramsFile = paramsFile;
     }
 
-    public ArrayList<NKeyValueModel> getParamsText() {
-        if (paramsText == null)
-            paramsText = new ArrayList<>();
-        return paramsText;
-    }
-
-    public void setParamsText(ArrayList<NKeyValueModel> paramsText) {
-        this.paramsText = paramsText;
-    }
-
     public ArrayList<NKeyValueModel> getQueryParams() {
         if (queryParams == null)
             queryParams = new ArrayList<>();
@@ -174,6 +174,60 @@ public class NRequestModel {
     public void setBody(String body) {
         this.body = body;
     }
+
+    public NPaginationModel getPaginationModel() {
+        return paginationModel;
+    }
+
+    public void setPaginationModel(NPaginationModel paginationModel) {
+        this.paginationModel = paginationModel;
+    }
+
+    public boolean isEnablePagination() {
+        return enablePagination;
+    }
+
+    public void setEnablePagination(boolean enablePagination) {
+        this.enablePagination = enablePagination;
+    }
+
+    public File getChunk() {
+        return chunk;
+    }
+
+    public void setChunk(File chunk) {
+        this.chunk = chunk;
+    }
+
+    public ArrayList<NBaseCallback.WaitHeaderCallback> getWaitHeaderCallbacks() {
+        return waitHeaderCallbacks;
+    }
+
+    public void addWaitHeaderCallbacks(NBaseCallback.WaitHeaderCallback waitHeaderCallback) {
+        if (this.waitHeaderCallbacks == null)
+            this.waitHeaderCallbacks = new ArrayList<>();
+        this.waitHeaderCallbacks.add(waitHeaderCallback);
+    }
+
+    //
+    //
+    //
+
+
+    public List<BindView> getBindViews() {
+        return bindViews;
+    }
+
+    public void setBindViews(List<BindView> bindViews) {
+        this.bindViews = bindViews;
+    }
+
+    public void addBindView(BindView bindView) {
+        if (this.bindViews == null)
+            this.bindViews = new ArrayList<>();
+        bindViews.add(bindView);
+    }
+
 
     public Dialog getProgressDialog() {
         return progressDialog;
@@ -199,6 +253,14 @@ public class NRequestModel {
         this.progressView = progressView;
     }
 
+    public int getHideViewState() {
+        return hideViewState;
+    }
+
+    public void setHideViewState(int hideViewState) {
+        this.hideViewState = hideViewState;
+    }
+
     public View getHideView() {
         return hideView;
     }
@@ -215,21 +277,12 @@ public class NRequestModel {
         this.refreshLayout = refreshLayout;
     }
 
-    public NPaginationModel getPaginationModel() {
-        return paginationModel;
+    public View getEnabledView() {
+        return enabledView;
     }
 
-    public void setPaginationModel(NPaginationModel paginationModel) {
-        this.paginationModel = paginationModel;
+    public void setEnabledView(View enabledView) {
+        this.enabledView = enabledView;
     }
 
-    public ArrayList<NBaseCallback.WaitHeaderCallback> getWaitHeaderCallbacks() {
-        return waitHeaderCallbacks;
-    }
-
-    public void addWaitHeaderCallbacks(NBaseCallback.WaitHeaderCallback waitHeaderCallback) {
-        if (this.waitHeaderCallbacks == null)
-            this.waitHeaderCallbacks = new ArrayList<>();
-        this.waitHeaderCallbacks.add(waitHeaderCallback);
-    }
 }

@@ -11,22 +11,25 @@ import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.utils.NLog;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
+@SuppressWarnings("unused,WeakerAccess")
 public abstract class NBaseCallback implements NTask.NTaskListener {
 
     private static final int MESSAGE_SHOW_PROGRESS = 100;
-    private static final int DEFAULT_DELAY = 555;
+    private static final int DEFAULT_DELAY = 399;
 
-    protected NRequestModel requestModel;
+    NRequestModel requestModel;
 
     @Override
     public void start(NRequestModel requestModel) {
         this.requestModel = requestModel;
+        hideContent();
         mHandler.sendMessageDelayed(mHandler.obtainMessage(MESSAGE_SHOW_PROGRESS, 1), DEFAULT_DELAY);
         onStart(requestModel);
     }
@@ -34,11 +37,11 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            startProgressDialog();
+            startProgress();
         }
     };
 
-    protected void startProgressDialog() {
+    private void startProgress() {
         try {
             if (requestModel.getProgressDialog() != null)
                 requestModel.getProgressDialog().show();
@@ -46,8 +49,6 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getProgressBar().setVisibility(View.VISIBLE);
             if (requestModel.getProgressView() != null)
                 requestModel.getProgressView().setVisibility(View.VISIBLE);
-            if (requestModel.getHideView() != null)
-                requestModel.getHideView().setVisibility(View.INVISIBLE);
             if (requestModel.getRefreshLayout() != null && !requestModel.getRefreshLayout().isRefreshing())
                 requestModel.getRefreshLayout().setRefreshing(true);
         } catch (Exception e) {
@@ -55,8 +56,34 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
         }
     }
 
-    protected void stopProgressDialog() {
+    @SuppressWarnings("WrongConstant")
+    private void hideContent() {
         try {
+            if (requestModel.getBindViews() != null) {
+                for (BindView bindView : requestModel.getBindViews()) {
+                    bindView.onStart();
+                }
+            }
+
+            if (requestModel.getHideView() != null)
+                requestModel.getHideView().setVisibility(requestModel.getHideViewState());
+            if (requestModel.getEnabledView() != null)
+                requestModel.getEnabledView().setEnabled(false);
+        } catch (Exception e) {
+            Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
+        }
+    }
+
+    private void stopProgress(boolean isSuccess) {
+        try {
+            if (requestModel.getBindViews() != null) {
+                for (int i = 0; i < requestModel.getBindViews().size(); i++) {
+                    if (isSuccess)
+                        requestModel.getBindViews().get(i).onSuccess();
+                    else requestModel.getBindViews().get(i).onError();
+                }
+            }
+
             if (requestModel.getProgressDialog() != null && requestModel.getProgressDialog().isShowing())
                 requestModel.getProgressDialog().dismiss();
             if (requestModel.getProgressBar() != null && requestModel.getProgressBar().getVisibility() == View.VISIBLE)
@@ -67,6 +94,8 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getHideView().setVisibility(View.VISIBLE);
             if (requestModel.getRefreshLayout() != null && requestModel.getRefreshLayout().isRefreshing())
                 requestModel.getRefreshLayout().setRefreshing(false);
+            if (requestModel.getEnabledView() != null)
+                requestModel.getEnabledView().setEnabled(true);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -78,13 +107,13 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     @Override
     public void finishUI(NResponseModel responseModel) {
         mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
-        stopProgressDialog();
+        stopProgress(true);
         callWaitHeadersCallbacks(responseModel);
     }
 
     void finishUIFailed() {
         mHandler.removeMessages(MESSAGE_SHOW_PROGRESS);
-        stopProgressDialog();
+        stopProgress(false);
     }
 
     protected void preError(NResponseModel responseModel) {
@@ -116,7 +145,8 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     }
 
     void preFailed(NRequestModel nRequestModel, NErrors error) {
-        if ((NConfig.getInstance().getOnFailedDefaultListener() != null && NConfig.getInstance().getOnFailedDefaultListener().onFailed(nRequestModel, error))
+        if ((NConfig.getInstance().getOnFailedDefaultListener() != null
+                && NConfig.getInstance().getOnFailedDefaultListener().onFailed(nRequestModel, error))
                 || (NConfig.getInstance().getOnFailedDefaultListener() == null))
             onFailed(nRequestModel, error);
     }
@@ -125,7 +155,7 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     }
 
     void preTaskCancelled(NRequestModel requestModel, String tag) {
-        stopProgressDialog();
+        stopProgress(false);
         onTaskCancelled(requestModel, tag);
     }
 

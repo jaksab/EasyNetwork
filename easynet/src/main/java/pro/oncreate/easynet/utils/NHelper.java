@@ -12,6 +12,8 @@ import pro.oncreate.easynet.models.NResponseModel;
 /**
  * Created by andrej on 17.11.15.
  */
+
+@SuppressWarnings("unused,WeakerAccess")
 public class NHelper {
 
     static public boolean isActiveInternet(Context context) {

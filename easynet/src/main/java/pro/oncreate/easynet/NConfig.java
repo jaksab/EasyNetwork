@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
@@ -13,6 +14,7 @@ import pro.oncreate.easynet.tasks.NTask;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
+@SuppressWarnings("unused,WeakerAccess")
 public class NConfig {
 
     // Init
@@ -225,6 +227,17 @@ public class NConfig {
             task.cancel(false);
         }
     }
+
+    // Other
+
+    private static final String[] SUPPORTED_METHODS = {
+            NConst.GET, NConst.POST, NConst.PUT, NConst.DELETE, NConst.OPTIONS, NConst.HEAD
+    };
+
+    public static String[] getSupportedMethods() {
+        return SUPPORTED_METHODS;
+    }
+
 
 }
 

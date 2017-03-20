@@ -7,31 +7,46 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import pro.oncreate.easynet.data.NConst;
+import pro.oncreate.easynet.methods.Method;
+import pro.oncreate.easynet.models.NRequestModel;
+import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.models.subsidiary.BindParams;
+import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.tasks.NBaseCallback;
 import pro.oncreate.easynet.tasks.NCallback;
+import pro.oncreate.easynet.tasks.NCallbackGson;
 import pro.oncreate.easynet.tasks.NCallbackParse;
 import pro.oncreate.easynet.tasks.NTask;
 import pro.oncreate.easynet.utils.NLog;
 
-import static pro.oncreate.easynet.utils.NLog.ERROR_LISTENER_NULL;
+import static pro.oncreate.easynet.methods.Method.DELETE;
+import static pro.oncreate.easynet.methods.Method.GET;
+import static pro.oncreate.easynet.methods.Method.HEAD;
+import static pro.oncreate.easynet.methods.Method.OPTIONS;
+import static pro.oncreate.easynet.methods.Method.POST;
+import static pro.oncreate.easynet.methods.Method.PUT;
+
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  * <p>
  * This class provides methods to create and customize http request
  */
+
+@SuppressWarnings("unused,WeakerAccess")
 public class NBuilder {
 
-    public static final String POST = "POST";
-    public static final String GET = "GET";
-    public static final String PUT = "PUT";
-    public static final String DELETE = "DELETE";
+
+    //
+    // Constants
+    //
+
 
     public static final String PORT_HTTP = "http://";
     public static final String PORT_HTTPS = "https://";
@@ -41,14 +56,27 @@ public class NBuilder {
     public static final String PORT_DARA = "data:";
     private static final String DEFAULT_PORT = PORT_HTTP;
 
+
+    //
+    // States and data
+    //
+
+
     private NRequestModel requestModel;
     private String contentType;
     private NTask.NTaskListener taskListener;
+
+
+    //
+    // Constructor and creator
+    //
+
 
     private NBuilder() {
         requestModel = new NRequestModel();
         requestModel.setMethod(GET);
         requestModel.setNeedParse(false);
+        requestModel.setEnablePagination(false);
         requestModel.setEnableDefaultListeners(true);
         requestModel.setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT);
         requestModel.setReadTimeout(NTask.DEFAULT_TIMEOUT_READ);
@@ -58,6 +86,12 @@ public class NBuilder {
     static NBuilder newInstance() {
         return new NBuilder();
     }
+
+
+    //
+    // Build the request type and method
+    //
+
 
     public static NBuilder create() {
         return NConfig.getInstance()
@@ -94,11 +128,66 @@ public class NBuilder {
                 .setMethod(DELETE);
     }
 
+    public static NBuilder opt() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(OPTIONS);
+    }
+
+    public static NBuilder head() {
+        return NConfig.getInstance()
+                .getDefaultNBuilder()
+                .setMethod(HEAD);
+    }
+
     public static NBuilder multipart() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setContentType(NConst.MIME_TYPE_MULTIPART_FORM_DATA);
     }
+
+    /**
+     * For multipart request default method - POST
+     *
+     * @param method the method of the request
+     */
+    public NBuilder setMethod(String method) {
+        for (int i = 0; i < NConfig.getSupportedMethods().length; i++)
+            if (method.equals(NConfig.getSupportedMethods()[i])) {
+                requestModel.setMethod(Method.getMethodByName(method));
+                break;
+            }
+        requestModel.setMethod(GET);
+        return this;
+    }
+
+    private NBuilder setMethod(Method method) {
+        requestModel.setMethod(method);
+        return this;
+    }
+
+    /**
+     * You can use default constants (MIME types) in {@link NConst} class or other.
+     *
+     * @param contentType content type of request
+     */
+    public NBuilder setContentType(String contentType) {
+        this.contentType = contentType;
+        this.requestModel.setRequestType(contentType);
+        return this;
+    }
+
+    /**
+     * Get current Builder instance
+     */
+    public NBuilder instance() {
+        return this;
+    }
+
+    //
+    // Set URL components
+    //
+
 
     /**
      * Example: http://example.com/path or example.com/path
@@ -157,7 +246,8 @@ public class NBuilder {
     }
 
     /**
-     * Set the path of request URL. You must call {@link NBuilder#setHost(String)} before use this method.
+     * You must call {@link NBuilder#setHost(String)} before use this method.
+     * Set the path of request URL.
      *
      * @param path example: path
      */
@@ -173,13 +263,14 @@ public class NBuilder {
     }
 
     /**
-     * Set the path of request URL with id. You must call {@link NBuilder#setHost(String)} before use this method.
+     * You must call {@link NBuilder#setHost(String)} before use this method.
+     * Set the path of request URL with id.
      * Example: path/{id}
      *
      * @param path url path
      * @param id   essence id
      */
-    public NBuilder setPath(String path, int id) {
+    public NBuilder setPath(String path, long id) {
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
             throw new NullPointerException("Host is empty");
         if (path == null || path.isEmpty())
@@ -191,14 +282,14 @@ public class NBuilder {
     }
 
     /**
-     * Set the path of request URL with id. You must call {@link NBuilder#setHost(String)} before use this method.
-     * Example: path/{id}
+     * You must call {@link NBuilder#setHost(String)} before use this method.
+     * Example: path/{id}/{param}
      *
      * @param path  url path
      * @param id    essence id
      * @param param essence param
      */
-    public NBuilder setPath(String path, int id, String param) {
+    public NBuilder setPath(String path, long id, String param) {
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
             throw new NullPointerException("Host is empty");
         if (path == null || path.isEmpty())
@@ -210,28 +301,60 @@ public class NBuilder {
     }
 
     /**
-     * Use only next constants: NBuilder.GET, NBuilder.POST, NBuilder.PUT, NBuilder.DELETE
-     * For multipart request default method - POST
+     * You must call {@link NBuilder#setHost(String)} before use this method.
+     * Example: path/{param1}/{param2}/{param3}
      *
-     * @param method the method of the request
+     * @param path   url path
+     * @param params params array
      */
-    public NBuilder setMethod(String method) {
-        if (method.equals(POST) || method.equals(GET) || method.equals(PUT) || method.equals(DELETE))
-            requestModel.setMethod(method);
-        else requestModel.setMethod(GET);
+    public NBuilder setPath(String path, String... params) {
+        if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
+            throw new NullPointerException("Host is empty");
+        if (path == null || path.isEmpty())
+            throw new NullPointerException("Path can not be empty");
+        if (params == null)
+            throw new NullPointerException("Params can not be null");
+
+        if (requestModel.getUrl().endsWith("/")) {
+            StringBuilder paramsString = new StringBuilder();
+            paramsString.append(requestModel.getUrl()).append(path).append("/");
+            for (String param : params) paramsString.append(param).append("/");
+            paramsString.deleteCharAt(paramsString.length() - 1);
+            requestModel.setUrl(paramsString.toString());
+        }
         return this;
     }
 
     /**
-     * You can use default constants (MIME types) in {@link NConst} class or other.
+     * You must call {@link NBuilder#setHost(String)} before use this method.
+     * Example: path/{param1}/{param2}/{param3}
      *
-     * @param contentType content type of request
+     * @param path   url path
+     * @param params params array
      */
-    public NBuilder setContentType(String contentType) {
-        this.contentType = contentType;
-        this.requestModel.setRequestType(contentType);
+    public NBuilder setPath(String path, Object... params) {
+        if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty())
+            throw new NullPointerException("Host is empty");
+        if (path == null || path.isEmpty())
+            throw new NullPointerException("Path can not be empty");
+        if (params == null)
+            throw new NullPointerException("Params can not be null");
+
+        if (requestModel.getUrl().endsWith("/")) {
+            StringBuilder paramsString = new StringBuilder();
+            paramsString.append(requestModel.getUrl()).append(path).append("/");
+            for (Object param : params) paramsString.append(String.valueOf(param)).append("/");
+            paramsString.deleteCharAt(paramsString.length() - 1);
+            requestModel.setUrl(paramsString.toString());
+        }
         return this;
     }
+
+
+    //
+    // Connection settings
+    //
+
 
     /**
      * @param mills connection timeout in milliseconds
@@ -251,15 +374,11 @@ public class NBuilder {
         return this;
     }
 
-    /**
-     * Use this method when the content type is not {@link NConst#MIME_TYPE_MULTIPART_FORM_DATA} and not {@link NConst#MIME_TYPE_X_WWW_FORM_URLENCODED}
-     *
-     * @param body the String representation of request body
-     */
-    public NBuilder setBody(String body) {
-        requestModel.setBody(body);
-        return this;
-    }
+
+    //
+    // Methods to work with headers, body and query params for any kind of request
+    //
+
 
     /**
      * Add header (property) to the request
@@ -286,6 +405,26 @@ public class NBuilder {
     }
 
     /**
+     * Use only with {@link NConst#MIME_TYPE_X_WWW_FORM_URLENCODED} content type.
+     * If the request method is supported body (POST, PUT), this collection will be added to the request body params.
+     * If the request method is not supported body (GET, DELETE), this collection will be added to the query params in URL ({@link NBuilder#addQueryParam} should be empty).
+     *
+     * @param key   param name
+     * @param value param value
+     */
+    public NBuilder addParam(String key, Object value) {
+        requestModel.getParams().add(new NKeyValueModel(key, String.valueOf(value)));
+        return this;
+    }
+
+
+    public NBuilder addParam(String key, Object value, boolean saveIfNull) {
+        if (saveIfNull || value != null)
+            requestModel.getParams().add(new NKeyValueModel(key, String.valueOf(value)));
+        return this;
+    }
+
+    /**
      * Use this method with all content types. The method add the query param to the request URL.
      *
      * @param key   query param name
@@ -298,14 +437,14 @@ public class NBuilder {
     }
 
     /**
-     * Use only with {@link NConst#MIME_TYPE_MULTIPART_FORM_DATA} content type.
-     * Method add new text part to the multipart request.
+     * Use this method with all content types. The method add the query param to the request URL.
      *
-     * @param key   text param name
-     * @param value text param value
+     * @param key   query param name
+     * @param value query param value
+     * @see NBuilder#addParam(String, String)
      */
-    public NBuilder addTextParam(String key, String value) {
-        requestModel.getParamsText().add(new NKeyValueModel(key, value));
+    public NBuilder addQueryParam(String key, Object value) {
+        requestModel.getQueryParams().add(new NKeyValueModel(key, String.valueOf(value)));
         return this;
     }
 
@@ -316,8 +455,29 @@ public class NBuilder {
      * @param key  file name
      * @param file file param
      */
-    public NBuilder addFileParam(String key, File file) {
+    public NBuilder addParam(String key, File file) {
         requestModel.getParamsFile().add(new NKeyValueFileModel(key, file));
+        return this;
+    }
+
+    /**
+     * Use only with {@link NConst#MIME_TYPE_MULTIPART_FORM_DATA} content type.
+     * Method add chunk binary file to upload task.
+     *
+     * @param chunk binary file
+     */
+    public NBuilder addParam(File chunk) {
+        requestModel.setChunk(chunk);
+        return this;
+    }
+
+    /**
+     * Use this method when the content type is not {@link NConst#MIME_TYPE_MULTIPART_FORM_DATA} and not {@link NConst#MIME_TYPE_X_WWW_FORM_URLENCODED}
+     *
+     * @param body the String representation of request body
+     */
+    public NBuilder setBody(String body) {
+        requestModel.setBody(body);
         return this;
     }
 
@@ -328,7 +488,6 @@ public class NBuilder {
         requestModel.getParams().clear();
         requestModel.getQueryParams().clear();
         requestModel.getParamsFile().clear();
-        requestModel.getParamsText().clear();
         return this;
     }
 
@@ -340,6 +499,12 @@ public class NBuilder {
         return this;
     }
 
+
+    //
+    // Setting the default request listeners
+    //
+
+
     /**
      * You can set default handlers by means of {@link NConfig} class. Default enabled = true;
      *
@@ -347,6 +512,40 @@ public class NBuilder {
      */
     public NBuilder enableDefaultListeners(boolean enabled) {
         requestModel.setEnableDefaultListeners(enabled);
+        return this;
+    }
+
+
+    //
+    // Methods for processing progress views during request
+    //
+
+
+    public NBuilder bind(View view, BindParams params) {
+        requestModel.addBindView(new BindView(view, params));
+        return this;
+    }
+
+
+    /**
+     * Set the view instance, which will be automatically set enabled or disabled in request lifecycle.
+     *
+     * @param view - view instance
+     */
+    public NBuilder bindEnabled(View view) {
+        requestModel.setEnabledView(view);
+        return this;
+    }
+
+    /**
+     * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle with content view.
+     *
+     * @param hideView content which must be hidden during the request
+     * @param state    INVISIBLE OR GONE constant
+     */
+    public NBuilder bindHideView(View hideView, int state) {
+        requestModel.setHideView(hideView);
+        requestModel.setHideViewState(state);
         return this;
     }
 
@@ -376,7 +575,11 @@ public class NBuilder {
      * @param progressView progress view request indicator
      */
     public NBuilder bindProgress(View progressView) {
-        requestModel.setProgressView(progressView);
+        if (progressView instanceof SwipeRefreshLayout)
+            requestModel.setRefreshLayout((SwipeRefreshLayout) progressView);
+        else if (progressView instanceof ProgressBar)
+            requestModel.setProgressBar((ProgressBar) progressView);
+        else requestModel.setProgressView(progressView);
         return this;
     }
 
@@ -438,14 +641,44 @@ public class NBuilder {
         return this;
     }
 
+
+    //
+    // Pagination
+    //
+
+
     /**
-     * Enable pagination with custom API keys. You must call this method before using other pagination methods.
+     * Configure pagination with custom API keys.
+     * Please, attend! You must call this method before using other pagination methods.
      *
      * @param pageNumberKey page number API key
      * @param itemsCountKey page count API key
      */
-    public NBuilder enablePagination(String pageNumberKey, String itemsCountKey) {
-        requestModel.setPaginationModel(new NPaginationModel(pageNumberKey, itemsCountKey));
+    public NBuilder configurePagination(String pageNumberKey, String itemsCountKey, String pageFromPrimaryKey) {
+        requestModel.setPaginationModel(new NPaginationModel(pageNumberKey, itemsCountKey, pageFromPrimaryKey));
+        return this;
+    }
+
+    /**
+     * Enable pagination keys in this NBuilder instance.
+     * You must call this method before using other pagination methods (setters).
+     */
+    public NBuilder enablePagination() {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call configurePagination before");
+        requestModel.setEnablePagination(true);
+        return this;
+    }
+
+    /**
+     * Enable pagination keys in this NBuilder instance with NPaginationInterface instance.
+     * You must call this method before using other pagination methods.
+     */
+    public NBuilder enablePagination(NPaginationModel.NPaginationInterface paginationInterface) {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call configurePagination before");
+        requestModel.setEnablePagination(true);
+        this.setPaginationInterface(paginationInterface);
         return this;
     }
 
@@ -456,7 +689,7 @@ public class NBuilder {
      */
     public NBuilder setPaginationCount(int count) {
         if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call enablePagination before");
+            throw new NullPointerException("You must call configurePagination before");
         requestModel.getPaginationModel().itemsCount = count;
         return this;
     }
@@ -468,21 +701,48 @@ public class NBuilder {
      */
     public NBuilder setPaginationPage(int pageNumber) {
         if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call enablePagination before");
+            throw new NullPointerException("You must call configurePagination before");
         requestModel.getPaginationModel().pageNumber = pageNumber;
         return this;
     }
 
     /**
-     * Setting the next page with automatic calculation based on the current items number
+     * Setting the next page with automatic calculation based on the current items number.
      *
      * @param itemsCountNow current items count
      */
     public NBuilder setPaginationNextPage(int itemsCountNow) {
         if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call enablePagination before");
+            throw new NullPointerException("You must call configurePagination before");
         requestModel.getPaginationModel().pageNumber = NPaginationModel.calculateNextPage(itemsCountNow,
                 requestModel.getPaginationModel().itemsCount);
+        return this;
+    }
+
+    /**
+     * The maximum number of primary key from which the page count.
+     * Use this key in dynamic lists.
+     *
+     * @param pageFromPrimaryKey last primary key id
+     */
+    public NBuilder setPaginationPrimaryKey(long pageFromPrimaryKey) {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call configurePagination before");
+        requestModel.getPaginationModel().pageFromPK = pageFromPrimaryKey;
+        return this;
+    }
+
+    /**
+     * Use way to calculate pagination states in your adapters, model etc.
+     * If you use this methods, you cannot use manual setters: {@link NBuilder#setPaginationPage}, {@link NBuilder#setPaginationPage},
+     * {@link NBuilder#setPaginationNextPage}, {@link NBuilder#setPaginationPrimaryKey}
+     *
+     * @param paginationInterface pagination interface instance
+     */
+    public NBuilder setPaginationInterface(NPaginationModel.NPaginationInterface paginationInterface) {
+        if (requestModel.getPaginationModel() == null)
+            throw new NullPointerException("You must call configurePagination before");
+        requestModel.getPaginationModel().setPaginationInterface(paginationInterface);
         return this;
     }
 
@@ -490,36 +750,43 @@ public class NBuilder {
      * Add pagination data to request params.
      */
     private void setUpPagination() {
-        if (requestModel.getPaginationModel() != null) {
-            addParam(requestModel.getPaginationModel().pageNumberKey,
-                    String.valueOf(requestModel.getPaginationModel().pageNumber));
-            addParam(requestModel.getPaginationModel().countItemsKey,
-                    String.valueOf(requestModel.getPaginationModel().itemsCount));
+        if (!requestModel.isEnablePagination() || requestModel.getPaginationModel() == null)
+            return;
+
+        NPaginationModel paginationModel = requestModel.getPaginationModel();
+        NPaginationModel.NPaginationInterface paginationInterface = requestModel
+                .getPaginationModel().getPaginationInterface();
+
+        if (paginationInterface == null) {
+            if (paginationModel.itemsCount < 0)
+                throw new NullPointerException("Items count cannot be less than zero");
+            else addParam(paginationModel.countItemsKey,
+                    String.valueOf(paginationModel.itemsCount));
+            if (paginationModel.pageNumber >= 0)
+                addParam(paginationModel.pageNumberKey,
+                        String.valueOf(paginationModel.pageNumber));
+            if (paginationModel.pageFromPK >= 0)
+                addParam(paginationModel.pageFromPrimaryKey,
+                        String.valueOf(paginationModel.pageFromPK));
+        } else {
+            if (paginationInterface.getPaginationPageCount() < 0)
+                throw new NullPointerException("Items count cannot be less than zero");
+            else addParam(paginationModel.countItemsKey,
+                    String.valueOf(paginationInterface.getPaginationPageCount()));
+            if (paginationInterface.getPaginationPageNumber() > NPaginationModel.NPaginationInterface.PAGE_NUMBER_NONE)
+                addParam(paginationModel.pageNumberKey,
+                        String.valueOf(paginationInterface.getPaginationPageNumber()));
+            if (paginationInterface.getPaginationLastPrimaryKey() > NPaginationModel.NPaginationInterface.LAST_PRIMARY_KEY_NONE)
+                addParam(paginationModel.pageFromPrimaryKey,
+                        String.valueOf(paginationInterface.getPaginationLastPrimaryKey()));
         }
     }
 
-    /**
-     * Use this method for intercepting header values. The callback will be called if the header is present.
-     *
-     * @param waitHeaderCallback header callback
-     */
-    public NBuilder waitHeader(NBaseCallback.WaitHeaderCallback waitHeaderCallback) {
-        requestModel.addWaitHeaderCallbacks(waitHeaderCallback);
-        return this;
-    }
 
-    /**
-     * Now we recommend using {@link NCallbackParse}, which do simplify work with http request lifecycle.
-     * {@link NTask.NTaskListener} is no longer used for the manual implementation of the client, but you can do if necessary.
-     *
-     * @see NBuilder#start(NCallback)
-     * @see NBuilder#startWithParse(NCallbackParse)
-     */
-    @Deprecated
-    public NBuilder setListener(NTask.NTaskListener listener) {
-        this.taskListener = listener;
-        return this;
-    }
+    //
+    // Start the request
+    //
+
 
     /**
      * Use this method, if you want to take response together with the representation model.
@@ -527,7 +794,18 @@ public class NBuilder {
      *
      * @param taskListener request lifecycle callback
      */
+    @Deprecated
     public void startWithParse(NCallbackParse taskListener) {
+        this.taskListener = taskListener;
+        this.requestModel.setNeedParse(true);
+        this.startTask();
+    }
+
+    /**
+     * @param taskListener request lifecycle callback
+     */
+    @Deprecated
+    public void startWithParse(NCallbackGson taskListener) {
         this.taskListener = taskListener;
         this.requestModel.setNeedParse(true);
         this.startTask();
@@ -543,8 +821,15 @@ public class NBuilder {
         this.startTask();
     }
 
-    @Deprecated
-    public void start() {
+    /**
+     * Use this method, if you want to take response without representation model.
+     *
+     * @param taskListener instance of callback
+     */
+    public void start(NBaseCallback taskListener) {
+        if (taskListener instanceof NCallbackGson || taskListener instanceof NCallbackParse)
+            this.requestModel.setNeedParse(true);
+        this.taskListener = taskListener;
         this.startTask();
     }
 
@@ -553,40 +838,88 @@ public class NBuilder {
             addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
             if (contentType == null)
                 this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
-
             setUpPagination();
+
             switch (contentType) {
                 case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
                     requestModel.setMethod(POST);
                     break;
                 }
             }
-            NTask task = new NTask(taskListener, requestModel);
-            task.execute();
+            new NTask(taskListener, requestModel).execute();
         }
     }
+
+    /**
+     * Execute request synchronously
+     */
+    public NResponseModel getSynchronously() throws ExecutionException, InterruptedException {
+        if (validateRequest()) {
+            addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
+            if (contentType == null)
+                this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+            setUpPagination();
+
+            switch (contentType) {
+                case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
+                    requestModel.setMethod(POST);
+                    break;
+                }
+            }
+            return new NTask(taskListener, requestModel).execute().get();
+        }
+        return null;
+    }
+
+    /**
+     * Use this method for intercepting header values. The callback will be called if the header is present.
+     *
+     * @param waitHeaderCallback header callback
+     */
+    public NBuilder waitHeader(NBaseCallback.WaitHeaderCallback waitHeaderCallback) {
+        requestModel.addWaitHeaderCallbacks(waitHeaderCallback);
+        return this;
+    }
+
+
+    //
+    // Validate request data
+    //
+
 
     private boolean validateRequest() {
         boolean valid = true;
 
         if (requestModel == null) {
-            NLog.logE(NLog.ERROR_REQUEST_NULL);
+            NLog.logE("Request model cannot be null");
             valid = false;
         }
 
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty()) {
-            NLog.logE(NLog.ERROR_URL_EMPTY);
+            NLog.logE("URL cannot be empty");
             valid = false;
         } else if (!Pattern.matches(Patterns.WEB_URL.pattern(), requestModel.getUrl())) {
-            NLog.logE(NLog.ERROR_URL_INVALID);
+            NLog.logE("Invalid URL");
             valid = false;
         }
-
-        if (taskListener == null) {
-            NLog.logE(NLog.ERROR_LISTENER_NULL);
-            throw new NullPointerException(ERROR_LISTENER_NULL);
-        }
-
         return valid;
+    }
+
+
+    //
+    // Deprecated
+    //
+
+    /**
+     * Now we recommend using {@link NCallbackParse}, which do simplify work with http request lifecycle.
+     * {@link NTask.NTaskListener} is no longer used for the manual implementation of the client, but you can do if necessary.
+     *
+     * @see NBuilder#start(NCallback)
+     * @see NBuilder#startWithParse(NCallbackParse)
+     */
+    @Deprecated
+    public NBuilder setListener(NTask.NTaskListener listener) {
+        this.taskListener = listener;
+        return this;
     }
 }

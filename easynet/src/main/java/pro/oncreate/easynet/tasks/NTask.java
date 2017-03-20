@@ -2,9 +2,13 @@ package pro.oncreate.easynet.tasks;
 
 import android.os.AsyncTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,14 +23,15 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
-import pro.oncreate.easynet.NBuilder;
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
-import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
-import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
+import pro.oncreate.easynet.methods.EntityMethod;
+import pro.oncreate.easynet.methods.QueryMethod;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.utils.NDataBuilder;
 import pro.oncreate.easynet.utils.NLog;
 
@@ -34,13 +39,15 @@ import pro.oncreate.easynet.utils.NLog;
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
+
+@SuppressWarnings("unused,WeakerAccess")
 public class NTask extends AsyncTask<String, Integer, NResponseModel> {
 
     public final static int DEFAULT_TIMEOUT_READ = 10000;
     public final static int DEFAULT_TIMEOUT_CONNECT = 7500;
 
     private static final int BUFFER_SIZE = 8192;
-    private static final String LINE_FEED = "\r\n";
+    private static final String LINE_END = "\r\n";
     private final String boundary = "===" + System.currentTimeMillis() + "===";
     private static final String charset = "UTF-8";
 
@@ -82,7 +89,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
 
         try {
             // Request
-            NLog.logD(NLog.DEBUG_START_CONNECTION);
+            NLog.logD("======== START REQUEST ========");
             if (NConfig.getInstance().isWriteLogs())
                 NLog.logD("[" + requestModel.getMethod() + "] " + requestModel.getUrl());
 
@@ -95,9 +102,20 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
                     addEntityParams(connection);
                     break;
                 case NConst.MIME_TYPE_MULTIPART_FORM_DATA:
-                    connection = setUpMultipartConnection();
+                    if (requestModel.getChunk() == null) {
+                        connection = setUpMultipartConnection();
+                        addHeaders(connection);
+                        addMultipartParams(connection);
+                    } else {
+                        connection = setUpChunkConnection();
+                        addHeaders(connection);
+                        chunk(connection, requestModel.getChunk());
+                    }
+                    break;
+                case NConst.MIME_TYPE_JSON:
+                    connection = setUpConnection();
                     addHeaders(connection);
-                    addMultipartParams(connection);
+                    setJSONBody(connection);
                     break;
                 default:
                     connection = setUpConnection();
@@ -111,7 +129,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
 
             int responseCode = connection.getResponseCode();
             if (NConfig.getInstance().isWriteLogs())
-                NLog.logD(NLog.DEBUG_RESPONSE_CODE + responseCode);
+                NLog.logD("[Status code]: " + responseCode);
 
             inputStream = getInputStreamFromConnection(connection);
             body = readData(inputStream, BUFFER_SIZE);
@@ -122,7 +140,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
 
             if (NConfig.getInstance().isWriteLogs())
-                NLog.logD(NLog.DEBUG_RESPONSE_TIME + responseModel.getResponseTime() + " ms");
+                NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
 
             if (listener != null)
                 listener.finish(responseModel);
@@ -130,7 +148,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         } catch (Exception e) {
             responseModel = null;
             if (NConfig.getInstance().isWriteLogs())
-                NLog.logD(NLog.ERROR_EXCEPTION + e.toString());
+                NLog.logD("[Error]: " + e.toString());
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -171,21 +189,20 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
     private void addUrlParams() throws UnsupportedEncodingException {
         String urlParams;
 
-        if ((requestModel.getMethod().equals(NBuilder.GET) || requestModel.getMethod().equals(NBuilder.DELETE))
-                && requestModel.getRequestType().equals(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED)
+        if ((requestModel.getMethod() instanceof QueryMethod)
                 && requestModel.getQueryParams().isEmpty() && !requestModel.getParams().isEmpty()) {
             urlParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
             if (!urlParams.isEmpty()) {
                 requestModel.setUrl(requestModel.getUrl() + "?" + urlParams);
                 if (NConfig.getInstance().isWriteLogs())
-                    NLog.logD(NLog.DEBUG_NO_BODY_PARAMS + urlParams.replace("&", "; "));
+                    NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         } else if (!requestModel.getQueryParams().isEmpty()) {
             urlParams = NDataBuilder.getQuery(requestModel.getQueryParams(), charset);
             if (!urlParams.isEmpty()) {
                 requestModel.setUrl(requestModel.getUrl() + "?" + urlParams);
                 if (NConfig.getInstance().isWriteLogs())
-                    NLog.logD(NLog.DEBUG_NO_BODY_PARAMS + urlParams.replace("&", "; "));
+                    NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         }
     }
@@ -194,12 +211,13 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         String logHeaders = "";
         for (NKeyValueModel header : requestModel.getHeaders()) {
             logHeaders += String.format("%s=%s; ", header.getKey(), header.getValue());
-            if (header.getKey().equals(NConst.CONTENT_TYPE) && requestModel.getRequestType().equals(NConst.MIME_TYPE_MULTIPART_FORM_DATA))
+            if (header.getKey().equals(NConst.CONTENT_TYPE)
+                    && requestModel.getRequestType().equals(NConst.MIME_TYPE_MULTIPART_FORM_DATA))
                 connection.setRequestProperty(header.getKey(), header.getValue() + "; boundary=" + boundary);
             else connection.setRequestProperty(header.getKey(), header.getValue());
         }
         if (NConfig.getInstance().isWriteLogs())
-            NLog.logD(NLog.DEBUG_HEADERS + logHeaders);
+            NLog.logD("[Headers]: " + logHeaders);
     }
 
     private Map<String, List<String>> getResponseHeaders(HttpURLConnection connection, String body) {
@@ -208,19 +226,18 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             if (headers != null) {
                 String headersLog = "";
                 for (Map.Entry<String, List<String>> entry : headers.entrySet())
-                    headersLog += entry.getKey() + ": " + entry.getValue().toString() + "; ";
-                NLog.logD(NLog.DEBUG_RESPONSE_HEADERS_COUNT.replace("x", "" + headers.size()) + " " + headersLog);
-            } else NLog.logD(NLog.DEBUG_RESPONSE_NO_HEADERS);
+                    headersLog += entry.getKey() + "=" + entry.getValue().toString() + "; ";
+                NLog.logD("[Getting x headers]: ".replace("x", "" + headers.size()) + headersLog);
+            } else NLog.logD("[Headers empty]");
 
             if (!body.isEmpty())
-                NLog.logD(NLog.DEBUG_RESPONSE_BODY + body);
-            else NLog.logD(NLog.DEBUG_RESPONSE_NO_BODY);
+                NLog.logD("[Body]: " + body);
+            else NLog.logD("[Body=null]");
         }
         return headers;
     }
 
     private InputStream getInputStreamFromConnection(HttpURLConnection connection) throws IOException {
-        // For only 2xx codes
         if (connection.getResponseCode() / 100 == 2)
             return connection.getInputStream();
         else return connection.getErrorStream();
@@ -269,7 +286,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
     //
 
     private void addEntityParams(HttpURLConnection connection) throws IOException {
-        if (requestModel.getMethod().equals(NBuilder.POST) || requestModel.getMethod().equals(NBuilder.PUT)) {
+        if (requestModel.getMethod() instanceof EntityMethod) {
             connection.setDoOutput(true);
             String bodyParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
             OutputStream os = connection.getOutputStream();
@@ -280,20 +297,19 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             writer.close();
             os.close();
             if (NConfig.getInstance().isWriteLogs())
-                NLog.logD(NLog.DEBUG_BODY_PARAMS + bodyParams.replace("&", "; "));
+                NLog.logD("[Body params]: " + bodyParams.replace("&", "; "));
         }
     }
 
     private HttpURLConnection setUpConnection() throws Exception {
         HttpURLConnection connection = openConnection();
-        connection.setRequestMethod(requestModel.getMethod());
+        connection.setRequestMethod(requestModel.getMethod().name());
         connection.setReadTimeout(DEFAULT_TIMEOUT_READ);
         connection.setConnectTimeout(DEFAULT_TIMEOUT_CONNECT);
         connection.setUseCaches(false);
         connection.setDoInput(true);
         return connection;
     }
-
 
     // Multipart
     //
@@ -303,28 +319,27 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
                 true);
 
-        String debug = "Request text params: ";
-        for (int i = 0; i < requestModel.getParamsText().size(); i++) {
-            addFormField(requestModel.getParamsText().get(i));
-            debug += requestModel.getParamsText().get(i).getKey() + ">" +
-                    requestModel.getParamsText().get(i).getValue() + "; ";
+        String debug = "[Request text params]: ";
+        for (int i = 0; i < requestModel.getParams().size(); i++) {
+            addFormField(requestModel.getParams().get(i));
+            debug += requestModel.getParams().get(i).getKey() + "=" +
+                    requestModel.getParams().get(i).getValue() + "; ";
         }
         if (NConfig.getInstance().isWriteLogs())
             NLog.logD(debug);
 
-
-        debug = "Request file params: ";
+        debug = "[Request file params]: ";
         for (int i = 0; i < requestModel.getParamsFile().size(); i++) {
             addFilePart(requestModel.getParamsFile().get(i));
-            debug += requestModel.getParamsFile().get(i).getKey() + ">" +
+            debug += requestModel.getParamsFile().get(i).getKey() + " > " +
                     requestModel.getParamsFile().get(i).getValue() + "; ";
         }
         if (NConfig.getInstance().isWriteLogs())
             NLog.logD(debug);
 
         // Response
-        writer.append(LINE_FEED).flush();
-        writer.append("--" + boundary + "--").append(LINE_FEED);
+        writer.append(LINE_END).flush();
+        writer.append("--").append(boundary).append("--").append(LINE_END);
         writer.close();
     }
 
@@ -338,31 +353,40 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         return connection;
     }
 
+    private HttpURLConnection setUpChunkConnection() throws Exception {
+        HttpURLConnection connection = openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty(NConst.CONNECTION, "Keep-Alive");
+        connection.setRequestProperty(NConst.CACHE_CONTROL, "no-cache");
+        connection.setDoInput(true);
+        connection.setDoOutput(true);
+        connection.setUseCaches(false);
+        connection.setChunkedStreamingMode(1024);
+        return connection;
+    }
+
     private void addFormField(NKeyValueModel model) {
-        writer.append("--" + boundary).append(LINE_FEED);
-        writer.append("Content-Disposition: form-data; name=\"" + model.getKey() + "\"")
-                .append(LINE_FEED);
+        writer.append("--").append(boundary).append(LINE_END);
+        writer.append("Content-Disposition: form-data; name=\"").append(model.getKey()).append("\"")
+                .append(LINE_END);
         writer.append("Content-Type: text/plain; charset=" + charset).append(
-                LINE_FEED);
-        writer.append(LINE_FEED);
-        writer.append(model.getValue()).append(LINE_FEED);
+                LINE_END);
+        writer.append(LINE_END);
+        writer.append(model.getValue()).append(LINE_END);
         writer.flush();
     }
 
     private void addFilePart(NKeyValueFileModel model)
             throws IOException {
         String fileName = model.getValue().getName();
-        writer.append("--" + boundary).append(LINE_FEED);
-        writer.append(
-                "Content-Disposition: form-data; name=\"" + model.getKey()
-                        + "\"; filename=\"" + fileName + "\"")
-                .append(LINE_FEED);
-        writer.append(
-                "Content-Type: "
-                        + URLConnection.guessContentTypeFromName(fileName))
-                .append(LINE_FEED);
-        writer.append("Content-Transfer-Encoding: binary").append(LINE_FEED);
-        writer.append(LINE_FEED);
+        writer.append("--").append(boundary).append(LINE_END);
+        writer.append("Content-Disposition: form-data; name=\"")
+                .append(model.getKey()).append("\"; filename=\"").append(fileName).append("\"")
+                .append(LINE_END);
+        writer.append("Content-Type: ").append(URLConnection.guessContentTypeFromName(fileName))
+                .append(LINE_END);
+        writer.append("Content-Transfer-Encoding: binary").append(LINE_END);
+        writer.append(LINE_END);
         writer.flush();
 
         FileInputStream inputStream = new FileInputStream(model.getValue());
@@ -374,25 +398,93 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         outputStream.flush();
         inputStream.close();
 
-        writer.append(LINE_FEED);
+        writer.append(LINE_END);
         writer.flush();
+    }
+
+    private void chunk(HttpURLConnection connection, File file) throws Exception {
+        outputStream = connection.getOutputStream();
+        writer = new PrintWriter(new OutputStreamWriter(outputStream, charset),
+                true);
+
+        String fileName = file.getName();
+        writer.append("--").append(boundary).append(LINE_END);
+        writer.append("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"")
+                .append(fileName).append("\"").append(LINE_END);
+        writer.append("Content-Type: ").append(URLConnection.guessContentTypeFromName(fileName))
+                .append(LINE_END);
+        writer.append("Content-Transfer-Encoding: binary").append(LINE_END);
+        writer.append(LINE_END);
+        writer.flush();
+
+        if (NConfig.getInstance().isWriteLogs())
+            NLog.logD("Start upload file: " + fileName);
+
+        FileInputStream inputStream = new FileInputStream(file);
+
+        int maxBufferSize = 1024;
+        int bytesAvailable = inputStream.available();
+        int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        byte[] buffer = new byte[bufferSize];
+
+        int bytesRead;
+        bytesRead = inputStream.read(buffer, 0, bufferSize);
+
+        while (bytesRead > 0) {
+            try {
+                outputStream.write(buffer, 0, bufferSize);
+            } catch (OutOfMemoryError e) {
+                e.printStackTrace();
+                throw new Exception("OutOfMemory");
+            }
+            bytesAvailable = inputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            bytesRead = inputStream.read(buffer, 0, bufferSize);
+        }
+
+        outputStream.flush();
+        inputStream.close();
+
+        writer.append(LINE_END).flush();
+        writer.append("--").append(boundary).append("--").append(LINE_END);
+        writer.close();
     }
 
     // Raw
     //
 
-    private void setRawBody(HttpURLConnection connection) throws IOException {
-        if (requestModel.getMethod().equals(NBuilder.POST) || requestModel.getMethod().equals(NBuilder.PUT)) {
+    private void setRawBody(HttpURLConnection connection, String body) throws IOException {
+        if (requestModel.getMethod() instanceof EntityMethod) {
             connection.setDoOutput(true);
             OutputStream os = connection.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(os, charset));
-            writer.write(requestModel.getBody());
+            writer.write(body);
             writer.flush();
             writer.close();
             os.close();
             if (NConfig.getInstance().isWriteLogs())
-                NLog.logD(NLog.DEBUG_RAW_BODY + requestModel.getBody());
+                NLog.logD("[Request body]: " + body);
+        }
+    }
+
+    private void setRawBody(HttpURLConnection connection) throws IOException {
+        setRawBody(connection, requestModel.getBody());
+    }
+
+    // JSON
+    //
+    private void setJSONBody(HttpURLConnection connection) throws IOException {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            for (int i = 0; i < requestModel.getParams().size(); i++) {
+                jsonObject.put(requestModel.getParams().get(i).getKey(),
+                        requestModel.getParams().get(i).getValue());
+            }
+
+            setRawBody(connection, jsonObject.toString().replaceAll("\"\\[", "[").replaceAll("]\"", "]"));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 

@@ -5,6 +5,8 @@ import java.io.File;
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
+
+@SuppressWarnings("unused,WeakerAccess")
 public class NKeyValueFileModel extends NKeyModel {
 
     private File file;

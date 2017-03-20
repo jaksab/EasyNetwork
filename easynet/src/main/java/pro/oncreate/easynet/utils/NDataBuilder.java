@@ -9,6 +9,8 @@ import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
+
+@SuppressWarnings("unused,WeakerAccess")
 public class NDataBuilder {
 
     public static String getQuery(List<NKeyValueModel> params, String charset) throws UnsupportedEncodingException {

@@ -1,30 +1,25 @@
 package pro.oncreate.easynet.tasks;
 
-import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NErrors;
-import pro.oncreate.easynet.models.NBaseModel;
 import pro.oncreate.easynet.models.NResponseModel;
-import pro.oncreate.easynet.utils.NLog;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
 @SuppressWarnings("unused,WeakerAccess")
-public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
+public class NCallbackGson<T extends Object> extends NBaseCallback {
 
     private T model;
-    protected ArrayList<T> models;
+    protected List<T> models;
     private Class<T> tClass;
 
-    public NCallbackParse(Class<T> tClass) {
+    public NCallbackGson(Class<T> tClass) {
         this.tClass = tClass;
     }
 
@@ -58,38 +53,58 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
             if (requestModel.isNeedParse()) {
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
                     try {
-                        model = tClass.cast(tClass.newInstance().parse(responseModel, new JSONObject(responseModel.getBody())));
+                        Class[] fromJsonParams = new Class[2];
+                        fromJsonParams[0] = String.class;
+                        fromJsonParams[1] = Class.class;
+
+                        Class<? extends Object> aClass = Class.forName("com.google.gson.Gson");
+                        Object gson = aClass.newInstance();
+                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
+
+                        model = (T) method.invoke(gson, responseModel.getBody(), tClass);
                     } catch (Exception e) {
-                        Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
+                        e.printStackTrace();
                     }
                 else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
                     try {
-                        JSONArray jsonArray = new JSONArray(responseModel.getBody());
-                        models = new ArrayList<>();
-                        for (int i = 0; i < jsonArray.length(); i++)
-                            models.add(tClass.cast(tClass.newInstance().parse(responseModel, jsonArray.getJSONObject(i))));
+                        Class[] fromJsonParams = new Class[2];
+                        fromJsonParams[0] = String.class;
+                        fromJsonParams[1] = Class.class;
+
+                        Class<? extends Object> aClass = Class.forName("com.google.gson.Gson");
+                        Object gson = aClass.newInstance();
+                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
+
+                        Class t = java.lang.reflect.Array.newInstance(tClass, 0).getClass();
+
+                        T[] array = (T[]) method.invoke(gson, responseModel.getBody(), t);
+                        models = Arrays.asList(array);
+
                     } catch (Exception e) {
-                        Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
+                        e.printStackTrace();
                     }
                 }
             }
         }
     }
 
+
     private void preSuccess(T model, NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null) || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null)
+                || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(model, responseModel);
     }
 
-    private void preSuccess(ArrayList<T> models, NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null) || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+    private void preSuccess(List<T> models, NResponseModel responseModel) {
+        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null)
+                || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(models, responseModel);
     }
 
     public void onSuccess(T model, NResponseModel responseModel) {
     }
 
-    public void onSuccess(ArrayList<T> models, NResponseModel responseModel) {
+    public void onSuccess(List<T> models, NResponseModel responseModel) {
     }
 
 }

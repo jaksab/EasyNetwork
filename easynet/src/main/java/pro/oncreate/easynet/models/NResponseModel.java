@@ -6,6 +6,8 @@ import java.util.Map;
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
+
+@SuppressWarnings("unused,WeakerAccess")
 public class NResponseModel {
 
     public static final int STATUS_TYPE_SUCCESS = 1, STATUS_TYPE_ERROR = 2;

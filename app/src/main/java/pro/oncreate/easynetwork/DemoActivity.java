@@ -63,7 +63,6 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                 .addParam("expand", "name")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
                 .bindProgress(progressBar, recyclerview)
-                .setMethod(NBuilder.GET) // default
                 .enableDefaultListeners(true) // default
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
                 .setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT) // default
@@ -80,7 +79,7 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d("EasyNetDemo", values.toString());
                     }
                 })
-                .startWithParse(new NCallbackParse<CountryModel>(CountryModel.class) {
+                .start(new NCallbackParse<CountryModel>(CountryModel.class) {
                     @Override
                     public void onStart(NRequestModel requestModel) {
                         edtToolbar.setText(requestModel.getMethod() + " " + requestModel.getUrl());

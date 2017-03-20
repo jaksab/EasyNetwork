@@ -6,6 +6,7 @@ import pro.oncreate.easynet.tasks.NTask;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
+@SuppressWarnings("unused,WeakerAccess")
 public enum NErrors {
     /**
      * Error during connection process in {@link NTask#doInBackground}

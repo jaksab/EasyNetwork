@@ -1,3 +1,5 @@
+[ ![Download](https://api.bintray.com/packages/jaksab/EasyNetwork/easynet/images/download.svg) ](https://bintray.com/jaksab/EasyNetwork/easynet/_latestVersion)
+
 # EasyNetwork
 
 EasyNetwork - is powerful and easy-to-use http library for Android.
@@ -18,43 +20,16 @@ Make request by means of `NBuilder` and start execution:
 
 
 ```java
-NBuilder.get()
-                // can also be used: post() etc, multipart(), create(NBuilder.GET) or setMethod(NBuilder.GET)
-                .setUrl("http://example.com/api/path")
-                .addParam("id", "10")
-                .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
-                .bindProgress(progressBar) // You can bind progressDailog, progressView or other View, that will be show\hide automatically in request lifecycle
-                .enableDefaultListeners(true) // default
-                .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
-                .setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT) // default
-                .setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED) // default
-                .startWithParse(new NCallbackParse<CountryModel>(CountryModel.class) {
-                    @Override
-                    public void onStart(NRequestModel requestModel) {
-                      // Called before the start of the request
-                    }
 
+   NBuilder.get().setUrl("https://my.api.com", "route")
+                .addHeader("Accept", "application/json")
+                .start(new NCallback() {
                     @Override
-                    public void onSuccess(CountryModel model, NResponseModel responseModel) {
-                      // Called when request is executed successfully
-                    }
-
-                    @Override
-                    public void onError(NResponseModel responseModel) {
-                      // Server error handling
-                    }
-
-                    @Override
-                    public void onFailed(NRequestModel nRequestModel, NErrors error) {
-                      // Processing a fatal error
-                    }
-                    
-                    @Override
-                    public void onTaskCancelled(NRequestModel requestModel, String tag) {
-                      // Will be called, if task was manually cancelled 
+                    public void onSuccess(NResponseModel responseModel) {
+                        
                     }
                 });
-    }
+                
 ```
 
 You can define the default listeners and set up basic `NBuilder` instance with `NConfig`. We recommended do this in Application class:
@@ -71,9 +46,9 @@ public class App extends Application {
         netConfig.setDefaultNBuilderListener(new NConfig.NBuilderDefaultListener() {
             @Override
             public NBuilder defaultConfig(NBuilder nBuilder) {
-                nBuilder.setHost("https://example.com/api");
-                nBuilder.addHeader("Accept-Language", Locale.getDefault().toString());
-                return nBuilder;
+                return nBuilder
+                        .setHost("https://example.com/api")
+                        .addHeader("Accept-Language", Locale.getDefault().toString());
             }
         });
         netConfig.setDefaultOnSuccessListener(new NConfig.OnSuccessDefaultListener() {

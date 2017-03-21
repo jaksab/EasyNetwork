@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_blue"
+    tools:context="pro.oncreate.easynetwork.DevActivity">
+
+    <ProgressBar
+        android:id="@+id/pb"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/view"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
+        android:background="@color/black_overlay" />
+
+    <FrameLayout
+        android:id="@+id/view2"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom"
+        android:background="@color/black_overlay" />
+
+    <FrameLayout
+        android:id="@+id/view3"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="top"
+        android:background="@color/black_overlay" />
+
+</FrameLayout>

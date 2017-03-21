@@ -104,42 +104,49 @@ public class NBuilder {
                 .setMethod(method);
     }
 
+    @Deprecated
     public static NBuilder get() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setMethod(GET);
     }
 
+    @Deprecated
     public static NBuilder post() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setMethod(POST);
     }
 
+    @Deprecated
     public static NBuilder put() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setMethod(PUT);
     }
 
+    @Deprecated
     public static NBuilder delete() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setMethod(DELETE);
     }
 
+    @Deprecated
     public static NBuilder opt() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setMethod(OPTIONS);
     }
 
+    @Deprecated
     public static NBuilder head() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
                 .setMethod(HEAD);
     }
 
+    @Deprecated
     public static NBuilder multipart() {
         return NConfig.getInstance()
                 .getDefaultNBuilder()
@@ -528,33 +535,11 @@ public class NBuilder {
 
 
     /**
-     * Set the view instance, which will be automatically set enabled or disabled in request lifecycle.
-     *
-     * @param view - view instance
-     */
-    public NBuilder bindEnabled(View view) {
-        requestModel.setEnabledView(view);
-        return this;
-    }
-
-    /**
-     * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle with content view.
-     *
-     * @param hideView content which must be hidden during the request
-     * @param state    INVISIBLE OR GONE constant
-     */
-    public NBuilder bindHideView(View hideView, int state) {
-        requestModel.setHideView(hideView);
-        requestModel.setHideViewState(state);
-        return this;
-    }
-
-    /**
      * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle.
      *
      * @param progressDialog - progressDialog request indicator
      */
-    public NBuilder bindProgress(Dialog progressDialog) {
+    public NBuilder bind(Dialog progressDialog) {
         requestModel.setProgressDialog(progressDialog);
         return this;
     }
@@ -564,7 +549,7 @@ public class NBuilder {
      *
      * @param progressBar - progressBar request indicator
      */
-    public NBuilder bindProgress(ProgressBar progressBar) {
+    public NBuilder bind(ProgressBar progressBar) {
         requestModel.setProgressBar(progressBar);
         return this;
     }
@@ -574,7 +559,7 @@ public class NBuilder {
      *
      * @param progressView progress view request indicator
      */
-    public NBuilder bindProgress(View progressView) {
+    public NBuilder bind(View progressView) {
         if (progressView instanceof SwipeRefreshLayout)
             requestModel.setRefreshLayout((SwipeRefreshLayout) progressView);
         else if (progressView instanceof ProgressBar)
@@ -588,7 +573,7 @@ public class NBuilder {
      *
      * @param swipeRefreshLayout SwipeRefreshLayout request indicator
      */
-    public NBuilder bindProgress(SwipeRefreshLayout swipeRefreshLayout) {
+    public NBuilder bind(SwipeRefreshLayout swipeRefreshLayout) {
         requestModel.setRefreshLayout(swipeRefreshLayout);
         return this;
     }
@@ -597,11 +582,11 @@ public class NBuilder {
      * Set the SwipeRefreshLayout instance, which will be automatically start\dismiss in request lifecycle with content view.
      *
      * @param swipeRefreshLayout SwipeRefreshLayout request indicator
-     * @param hideView           content which must be hidden during the request
+     * @param viewsToHide        content which must be hidden during the request
      */
-    public NBuilder bindProgress(SwipeRefreshLayout swipeRefreshLayout, View hideView) {
-        bindProgress(swipeRefreshLayout);
-        requestModel.setHideView(hideView);
+    public NBuilder bind(SwipeRefreshLayout swipeRefreshLayout, View... viewsToHide) {
+        bind(swipeRefreshLayout);
+        setViewsToHide(viewsToHide);
         return this;
     }
 
@@ -609,11 +594,11 @@ public class NBuilder {
      * Set the progressDialog instance, which will be automatically start\dismiss in request lifecycle with content view.
      *
      * @param progressDialog progressDialog request indicator
-     * @param hideView       content which must be hidden during the request
+     * @param viewsToHide    content which must be hidden during the request
      */
-    public NBuilder bindProgress(Dialog progressDialog, View hideView) {
-        bindProgress(progressDialog);
-        requestModel.setHideView(hideView);
+    public NBuilder bind(Dialog progressDialog, View... viewsToHide) {
+        bind(progressDialog);
+        setViewsToHide(viewsToHide);
         return this;
     }
 
@@ -621,11 +606,11 @@ public class NBuilder {
      * Set the progressBar instance, which will be automatically show\hide in request lifecycle  with content view.
      *
      * @param progressBar - progressBar request indicator
-     * @param hideView    - content which must be hidden during the request
+     * @param viewsToHide - content which must be hidden during the request
      */
-    public NBuilder bindProgress(ProgressBar progressBar, View hideView) {
-        bindProgress(progressBar);
-        requestModel.setHideView(hideView);
+    public NBuilder bind(ProgressBar progressBar, View... viewsToHide) {
+        bind(progressBar);
+        setViewsToHide(viewsToHide);
         return this;
     }
 
@@ -633,12 +618,19 @@ public class NBuilder {
      * Set the other progress view instance, which will be automatically show\hide in request lifecycle with content view.
      *
      * @param progressView progress view request indicator
-     * @param hideView     content which must be hidden during the request
+     * @param viewsToHide  content which must be hidden during the request
      */
-    public NBuilder bindProgress(View progressView, View hideView) {
-        bindProgress(progressView);
-        requestModel.setHideView(hideView);
+    public NBuilder bind(View progressView, View... viewsToHide) {
+        bind(progressView);
+        setViewsToHide(viewsToHide);
         return this;
+    }
+
+    private void setViewsToHide(View... viewsToHide) {
+        if (viewsToHide != null) {
+            for (View aViewsToHide : viewsToHide)
+                bind(aViewsToHide, new BindParams(BindParams.Type.HIDE_AND_SHOW_AFTER));
+        }
     }
 
 

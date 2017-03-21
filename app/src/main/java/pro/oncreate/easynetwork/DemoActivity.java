@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import pro.oncreate.easynet.NBuilder;
+import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
-import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.tasks.NBaseCallback;
 import pro.oncreate.easynet.tasks.NCallbackParse;
 import pro.oncreate.easynet.tasks.NTask;
@@ -58,11 +58,11 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        NBuilder.get()
+        EasyNet.get()
                 .setPath("countries", 100)
                 .addParam("expand", "name")
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
-                .bindProgress(progressBar, recyclerview)
+                .bind(progressBar, recyclerview)
                 .enableDefaultListeners(true) // default
                 .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
                 .setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT) // default
@@ -105,11 +105,6 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.HEADER, "Body"));
                         adapter.addItem(new ExpandableListAdapter.Item(ExpandableListAdapter.CHILD, responseModel.getBody()));
                     }
-
-                    // Use this overload if API return collection models
-//                    @Override
-//                    public void onSuccess(ArrayList<CountryModel> models, NResponseModel responseModel) {
-//                    }
 
                     @Override
                     public void onError(NResponseModel responseModel) {

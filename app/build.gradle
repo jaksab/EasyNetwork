@@ -35,6 +35,7 @@ dependencies {
     compile "com.android.support:design:$supportLibraryVersion"
     compile "com.android.support:support-v4:$supportLibraryVersion"
 
-    testCompile 'junit:junit:4.12'
     compile project(path: ':easynet')
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testCompile 'junit:junit:4.12'
 }

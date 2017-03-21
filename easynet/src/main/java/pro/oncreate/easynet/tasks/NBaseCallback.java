@@ -64,11 +64,6 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
                     bindView.onStart();
                 }
             }
-
-            if (requestModel.getHideView() != null)
-                requestModel.getHideView().setVisibility(requestModel.getHideViewState());
-            if (requestModel.getEnabledView() != null)
-                requestModel.getEnabledView().setEnabled(false);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -90,12 +85,8 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
                 requestModel.getProgressBar().setVisibility(View.GONE);
             if (requestModel.getProgressView() != null && requestModel.getProgressView().getVisibility() == View.VISIBLE)
                 requestModel.getProgressView().setVisibility(View.GONE);
-            if (requestModel.getHideView() != null && requestModel.getHideView().getVisibility() != View.VISIBLE)
-                requestModel.getHideView().setVisibility(View.VISIBLE);
             if (requestModel.getRefreshLayout() != null && requestModel.getRefreshLayout().isRefreshing())
                 requestModel.getRefreshLayout().setRefreshing(false);
-            if (requestModel.getEnabledView() != null)
-                requestModel.getEnabledView().setEnabled(true);
         } catch (Exception e) {
             Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
         }
@@ -179,5 +170,14 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
         }
 
         abstract public void takeHeader(List<String> values);
+    }
+
+    @Override
+    public boolean redirect(String location) {
+        return onRedirect(location);
+    }
+
+    public boolean onRedirect(String location) {
+        return true;
     }
 }

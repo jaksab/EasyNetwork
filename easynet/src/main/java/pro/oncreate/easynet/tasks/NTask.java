@@ -86,65 +86,92 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
     protected NResponseModel doInBackground(String... params) {
         NResponseModel responseModel;
         HttpURLConnection connection = null;
+        String body;
+        InputStream inputStream;
 
         try {
             // Request
             NLog.logD("======== START REQUEST ========");
+
             if (NConfig.getInstance().isWriteLogs())
                 NLog.logD("[" + requestModel.getMethod() + "] " + requestModel.getUrl());
 
-            addUrlParams();
+            while (true) {
+                addUrlParams();
 
-            switch (requestModel.getRequestType()) {
-                case NConst.MIME_TYPE_X_WWW_FORM_URLENCODED:
-                    connection = setUpConnection();
-                    addHeaders(connection);
-                    addEntityParams(connection);
-                    break;
-                case NConst.MIME_TYPE_MULTIPART_FORM_DATA:
-                    if (requestModel.getChunk() == null) {
-                        connection = setUpMultipartConnection();
+                switch (requestModel.getRequestType()) {
+                    case NConst.MIME_TYPE_X_WWW_FORM_URLENCODED:
+                        connection = setUpConnection();
                         addHeaders(connection);
-                        addMultipartParams(connection);
+                        addEntityParams(connection);
+                        break;
+                    case NConst.MIME_TYPE_MULTIPART_FORM_DATA:
+                        if (requestModel.getChunk() == null) {
+                            connection = setUpMultipartConnection();
+                            addHeaders(connection);
+                            addMultipartParams(connection);
+                        } else {
+                            connection = setUpMultipartConnection();
+                            connection.setChunkedStreamingMode(1024);
+                            addHeaders(connection);
+                            chunk(connection, requestModel.getChunk());
+                        }
+                        break;
+                    case NConst.MIME_TYPE_JSON:
+                        connection = setUpConnection();
+                        addHeaders(connection);
+                        setJSONBody(connection);
+                        break;
+                    default:
+                        connection = setUpConnection();
+                        addHeaders(connection);
+                        setRawBody(connection);
+                }
+
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
+                        || responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                        || responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+                    String newUrl = connection.getHeaderField("Location");
+
+                    boolean next = true;
+                    if (listener != null)
+                        next = listener.redirect(newUrl);
+
+                    if (!next) {
+                        NLog.logD("[The redirect is forbidden]: " + newUrl);
+                        responseModel = null;
+                        break;
                     } else {
-                        connection = setUpChunkConnection();
-                        addHeaders(connection);
-                        chunk(connection, requestModel.getChunk());
+                        if (NConfig.getInstance().isWriteLogs())
+                            NLog.logD("[Redirect]: " + newUrl);
+
+                        requestModel.setUrl(newUrl);
+                        requestModel.clearParams();
+                        requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+                        connection.disconnect();
                     }
+                } else {
+                    if (NConfig.getInstance().isWriteLogs())
+                        NLog.logD("[Status code]: " + responseCode);
+
+                    inputStream = getInputStreamFromConnection(connection);
+                    body = readData(inputStream, BUFFER_SIZE);
+                    Map<String, List<String>> headers = getResponseHeaders(connection, body);
+
+                    responseModel = new NResponseModel(requestModel.getUrl(), responseCode, body, headers);
+                    responseModel.setEndTime(System.currentTimeMillis());
+                    responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
+
+                    if (NConfig.getInstance().isWriteLogs())
+                        NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
+
+                    if (listener != null)
+                        listener.finish(responseModel);
                     break;
-                case NConst.MIME_TYPE_JSON:
-                    connection = setUpConnection();
-                    addHeaders(connection);
-                    setJSONBody(connection);
-                    break;
-                default:
-                    connection = setUpConnection();
-                    addHeaders(connection);
-                    setRawBody(connection);
+                }
             }
-
-            // Response
-            String body;
-            InputStream inputStream;
-
-            int responseCode = connection.getResponseCode();
-            if (NConfig.getInstance().isWriteLogs())
-                NLog.logD("[Status code]: " + responseCode);
-
-            inputStream = getInputStreamFromConnection(connection);
-            body = readData(inputStream, BUFFER_SIZE);
-            Map<String, List<String>> headers = getResponseHeaders(connection, body);
-
-            responseModel = new NResponseModel(requestModel.getUrl(), responseCode, body, headers);
-            responseModel.setEndTime(System.currentTimeMillis());
-            responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
-
-            if (NConfig.getInstance().isWriteLogs())
-                NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
-
-            if (listener != null)
-                listener.finish(responseModel);
-
         } catch (Exception e) {
             responseModel = null;
             if (NConfig.getInstance().isWriteLogs())
@@ -304,15 +331,27 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
     private HttpURLConnection setUpConnection() throws Exception {
         HttpURLConnection connection = openConnection();
         connection.setRequestMethod(requestModel.getMethod().name());
-        connection.setReadTimeout(DEFAULT_TIMEOUT_READ);
-        connection.setConnectTimeout(DEFAULT_TIMEOUT_CONNECT);
+        connection.setReadTimeout((int) requestModel.getReadTimeout());
+        connection.setConnectTimeout((int) requestModel.getConnectTimeout());
         connection.setUseCaches(false);
         connection.setDoInput(true);
+        connection.setInstanceFollowRedirects(true);
         return connection;
     }
 
     // Multipart
     //
+
+    private HttpURLConnection setUpMultipartConnection() throws Exception {
+        HttpURLConnection connection = openConnection();
+        connection.setRequestProperty(NConst.CONNECTION, "Keep-Alive");
+        connection.setRequestProperty(NConst.CACHE_CONTROL, "no-cache");
+        connection.setUseCaches(false);
+        connection.setDoOutput(true);
+        connection.setDoInput(true);
+        connection.setInstanceFollowRedirects(true);
+        return connection;
+    }
 
     private void addMultipartParams(HttpURLConnection connection) throws IOException {
         outputStream = connection.getOutputStream();
@@ -341,28 +380,6 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         writer.append(LINE_END).flush();
         writer.append("--").append(boundary).append("--").append(LINE_END);
         writer.close();
-    }
-
-    private HttpURLConnection setUpMultipartConnection() throws Exception {
-        HttpURLConnection connection = openConnection();
-        connection.setRequestProperty(NConst.CONNECTION, "Keep-Alive");
-        connection.setRequestProperty(NConst.CACHE_CONTROL, "no-cache");
-        connection.setUseCaches(false);
-        connection.setDoOutput(true);
-        connection.setDoInput(true);
-        return connection;
-    }
-
-    private HttpURLConnection setUpChunkConnection() throws Exception {
-        HttpURLConnection connection = openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty(NConst.CONNECTION, "Keep-Alive");
-        connection.setRequestProperty(NConst.CACHE_CONTROL, "no-cache");
-        connection.setDoInput(true);
-        connection.setDoOutput(true);
-        connection.setUseCaches(false);
-        connection.setChunkedStreamingMode(1024);
-        return connection;
     }
 
     private void addFormField(NKeyValueModel model) {
@@ -495,5 +512,11 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         void finishUI(NResponseModel responseModel);
 
         void finish(NResponseModel responseModel);
+
+        /**
+         * @param location new URL
+         * @return true - if you want to continue redirect
+         */
+        boolean redirect(String location);
     }
 }

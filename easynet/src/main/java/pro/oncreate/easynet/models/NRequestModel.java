@@ -37,31 +37,22 @@ public class NRequestModel {
     private File chunk;
     private NPaginationModel paginationModel;
 
-    // States
+    // Etc
     private long connectTimeout;
     private long readTimeout;
     private long startTime;
-
-    // Parse
     private boolean needParse;
     private boolean enablePagination;
-
-    // Listeners
     private boolean enableDefaultListeners;
     private ArrayList<NBaseCallback.WaitHeaderCallback> waitHeaderCallbacks;
 
     // Progress
     private List<BindView> bindViews;
-
     private Dialog progressDialog;
     private ProgressBar progressBar;
     private View progressView;
-    private View enabledView;
     private SwipeRefreshLayout refreshLayout;
-    private View hideView;
-    private int hideViewState = View.INVISIBLE;
 
-    // Getters and setters
 
     public String getUrl() {
         return url;
@@ -228,7 +219,6 @@ public class NRequestModel {
         bindViews.add(bindView);
     }
 
-
     public Dialog getProgressDialog() {
         return progressDialog;
     }
@@ -253,22 +243,6 @@ public class NRequestModel {
         this.progressView = progressView;
     }
 
-    public int getHideViewState() {
-        return hideViewState;
-    }
-
-    public void setHideViewState(int hideViewState) {
-        this.hideViewState = hideViewState;
-    }
-
-    public View getHideView() {
-        return hideView;
-    }
-
-    public void setHideView(View hideView) {
-        this.hideView = hideView;
-    }
-
     public SwipeRefreshLayout getRefreshLayout() {
         return refreshLayout;
     }
@@ -277,12 +251,15 @@ public class NRequestModel {
         this.refreshLayout = refreshLayout;
     }
 
-    public View getEnabledView() {
-        return enabledView;
+    public void clearParams() {
+        if (this.queryParams != null)
+            this.queryParams.clear();
+        if (this.params != null)
+            this.params.clear();
+        if (this.paramsFile != null)
+            this.paramsFile.clear();
+        this.body = null;
     }
 
-    public void setEnabledView(View enabledView) {
-        this.enabledView = enabledView;
-    }
 
 }

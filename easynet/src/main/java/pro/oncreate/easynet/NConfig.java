@@ -52,8 +52,9 @@ public class NConfig {
      *
      * @param writeLogs
      */
-    public void setWriteLogs(boolean writeLogs) {
+    public NConfig setWriteLogs(boolean writeLogs) {
         this.writeLogs = writeLogs;
+        return this;
     }
 
 
@@ -69,8 +70,9 @@ public class NConfig {
      *
      * @param defaultNBuilderListener callback default NBuilder
      */
-    public void setDefaultNBuilderListener(NBuilderDefaultListener defaultNBuilderListener) {
+    public NConfig setDefaultNBuilderListener(NBuilderDefaultListener defaultNBuilderListener) {
         this.defaultNBuilderListener = defaultNBuilderListener;
+        return this;
     }
 
     public NBuilder getDefaultNBuilder() {
@@ -99,8 +101,9 @@ public class NConfig {
      *
      * @param onSuccessDefaultListener OnSuccessDefaultListener instance
      */
-    public void setDefaultOnSuccessListener(OnSuccessDefaultListener onSuccessDefaultListener) {
+    public NConfig setDefaultOnSuccessListener(OnSuccessDefaultListener onSuccessDefaultListener) {
         this.onSuccessDefaultListener = onSuccessDefaultListener;
+        return this;
     }
 
     public OnSuccessDefaultListener getOnSuccessDefaultListener() {
@@ -120,8 +123,9 @@ public class NConfig {
      *
      * @param onFailedDefaultListener OnFailedDefaultListener instance
      */
-    public void setDefaultOnFailedListener(OnFailedDefaultListener onFailedDefaultListener) {
+    public NConfig setDefaultOnFailedListener(OnFailedDefaultListener onFailedDefaultListener) {
         this.onFailedDefaultListener = onFailedDefaultListener;
+        return this;
     }
 
     public OnFailedDefaultListener getOnFailedDefaultListener() {
@@ -146,8 +150,9 @@ public class NConfig {
      *
      * @param onErrorDefaultListener OnErrorDefaultListenerWithCode instance
      */
-    public void addOnErrorDefaultListener(OnErrorDefaultListenerWithCode onErrorDefaultListener) {
+    public NConfig addOnErrorDefaultListener(OnErrorDefaultListenerWithCode onErrorDefaultListener) {
         onErrorDefaultListenersCollection.add(onErrorDefaultListener);
+        return this;
     }
 
     public OnErrorDefaultListener getOnErrorDefaultListener() {
@@ -159,8 +164,9 @@ public class NConfig {
      *
      * @param onErrorDefaultListener OnErrorDefaultListener instance
      */
-    public void setOnErrorDefaultListener(OnErrorDefaultListener onErrorDefaultListener) {
+    public NConfig setOnErrorDefaultListener(OnErrorDefaultListener onErrorDefaultListener) {
         this.onErrorDefaultListener = onErrorDefaultListener;
+        return this;
     }
 
     public static abstract class OnErrorDefaultListenerWithCode extends OnErrorDefaultListener {

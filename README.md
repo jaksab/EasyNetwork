@@ -30,7 +30,7 @@ Make request by means of `NBuilder` and start execution:
                 
 ```
 
-You can define the default listeners and set up basic `NBuilder` instance with `NConfig`. We recommended do this in Application class:
+Primary configuration example (with `NConfig` instance):
 
 ```java
 public class App extends Application {
@@ -38,7 +38,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         NConfig netConfig = NConfig.getInstance();
         netConfig.setWriteLogs(true); // Default
         netConfig.setDefaultNBuilderListener(new NConfig.NBuilderDefaultListener() {
@@ -47,20 +46,6 @@ public class App extends Application {
                 return nBuilder
                         .setHost("https://example.com/api")
                         .addHeader("Accept-Language", Locale.getDefault().toString());
-            }
-        });
-        netConfig.setDefaultOnSuccessListener(new NConfig.OnSuccessDefaultListener() {
-            @Override
-            public boolean onSuccess(NResponseModel responseModel) {
-                // Processing all successful request
-                return true; // Return true, if you want to call the final handler
-            }
-        });
-        netConfig.setDefaultOnFailedListener(new NConfig.OnFailedDefaultListener() {
-            @Override
-            public boolean onFailed(NRequestModel nRequestModel, NErrors error) {
-                // Fatal errors callback
-                return true; // Return true, if you want to call the final handler
             }
         });
         netConfig.addOnErrorDefaultListener(new NConfig.OnErrorDefaultListenerWithCode(404) {
@@ -72,13 +57,16 @@ public class App extends Application {
     }
 }
 ```
-Notes:
 
-- You don't have to override all the methods of callback lifecycle.
+# Features
 
-- Use `NConfig.getInstance().cancelAllTasks();` to cancel current tasks.
-
-- `NConfig.getInstance().isCurrentTasks();` return true, if task queue not empty
+- Functional "from the box": without mandatory primary configuration, anywhere in the code, functionally and simply.
+- Integration with GSON.
+- There is a flexible functionality for hiding\showing\disabled the views, progress dialogs, swipeRefresh layout when the query is executed.
+- Visual logs.
+- Controll the tasks exucution: cancel all tasks, cancel task by tag and other. Example: `NConfig.getInstance().cancelAllTasks();`.
+- The ability to intercept the results of a query with certain parameters.
+- Separation of errors into: error (server) and failed (connection).
 
 # License
 

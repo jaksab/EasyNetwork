@@ -162,7 +162,7 @@ public class NBuilder {
         for (int i = 0; i < NConfig.getSupportedMethods().length; i++)
             if (method.equals(NConfig.getSupportedMethods()[i])) {
                 requestModel.setMethod(Method.getMethodByName(method));
-                break;
+                return this;
             }
         requestModel.setMethod(GET);
         return this;

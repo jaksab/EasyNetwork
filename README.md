@@ -67,6 +67,7 @@ public class App extends Application {
 - Controll the tasks exucution: cancel all tasks, cancel task by tag and other. Example: `NConfig.getInstance().cancelAllTasks();`.
 - The ability to intercept the results of a query with certain parameters.
 - Separation of errors into: error (server) and failed (connection).
+- Handling the redirects
 
 # License
 

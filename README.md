@@ -14,12 +14,12 @@ dependencies {
 
 # Usage
 
-Make request by means of `NBuilder` and start execution: 
+Make simple request by means of `NBuilder` and start execution: 
 
 
 ```java
 
-   NBuilder.get().setUrl("https://my.api.com", "route")
+   NBuilder.get("users", id)
                 .addHeader("Accept", "application/json")
                 .start(new NCallback() {
                     @Override

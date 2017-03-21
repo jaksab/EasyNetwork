@@ -19,7 +19,7 @@ Make simple request by means of `NBuilder` and start execution:
 
 ```java
 
-   NBuilder.get("users", id)
+   EasyNet.get("users", id)
                 .addHeader("Accept", "application/json")
                 .start(new NCallback() {
                     @Override

@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import java.io.File;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
@@ -395,6 +398,28 @@ public class NBuilder {
      */
     public NBuilder addHeader(String key, String value) {
         requestModel.getHeaders().add(new NKeyValueModel(key, value));
+        return this;
+    }
+
+    public NBuilder addParams(String arrayName, List<? extends Object> params) {
+        if (params != null && params.size() > 0)
+            for (int i = 0; i < params.size(); i++)
+                addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), params.get(i));
+        return this;
+    }
+
+    public NBuilder addParams(String arrayName, Object... params) {
+        if (params != null && params.length > 0)
+            for (int i = 0; i < params.length; i++)
+                addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), params[i]);
+        return this;
+    }
+
+    public NBuilder addParams(Map<?, ?> params) {
+        if (params != null && !params.isEmpty())
+            for (Map.Entry<?, ?> entry : params.entrySet()) {
+                addParam(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+            }
         return this;
     }
 

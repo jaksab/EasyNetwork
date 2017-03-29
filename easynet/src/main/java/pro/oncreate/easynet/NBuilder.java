@@ -401,24 +401,32 @@ public class NBuilder {
         return this;
     }
 
-    public NBuilder addParams(String arrayName, List<? extends Object> params) {
+    public NBuilder addParams(String arrayName, List<?> params) {
         if (params != null && params.size() > 0)
             for (int i = 0; i < params.size(); i++)
-                addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), params.get(i));
+                if (params.get(i) instanceof File)
+                    addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), (File) params.get(i));
+                else
+                    addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), params.get(i));
+
         return this;
     }
 
     public NBuilder addParams(String arrayName, Object... params) {
         if (params != null && params.length > 0)
             for (int i = 0; i < params.length; i++)
-                addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), params[i]);
+                if (params[i] instanceof File)
+                    addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), (File) params[i]);
+                else addParam(arrayName + String.format(Locale.getDefault(), "[%d]", i), params[i]);
         return this;
     }
 
     public NBuilder addParams(Map<?, ?> params) {
         if (params != null && !params.isEmpty())
             for (Map.Entry<?, ?> entry : params.entrySet()) {
-                addParam(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+                if (entry.getValue() instanceof File)
+                    addParam(String.valueOf(entry.getKey()), (File) entry.getValue());
+                else addParam(String.valueOf(entry.getKey()), entry.getValue());
             }
         return this;
     }

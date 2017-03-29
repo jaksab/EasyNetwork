@@ -15,5 +15,9 @@ public enum NErrors {
     /**
      * Error in parse model algorithm
      */
-    PARSE_ERROR
+    PARSE_ERROR,
+    /**
+     * Redirect was interrupted
+     */
+    REDIRECT_INTERRUPT
 }

@@ -180,4 +180,6 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     public boolean onRedirect(String location) {
         return true;
     }
+
+    abstract public void onRedirectInterrupted(String location, NResponseModel responseModel);
 }

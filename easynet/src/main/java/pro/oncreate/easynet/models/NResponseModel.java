@@ -18,6 +18,8 @@ public class NResponseModel {
     private Map<String, List<String>> headers;
     private long endTime;
     private int responseTime;
+    private boolean redirectInterrupted;
+    private String redirectLocation;
 
     public NResponseModel(String url, int statusCode, String body, Map<String, List<String>> headers) {
         this.url = url;
@@ -76,5 +78,21 @@ public class NResponseModel {
 
     public int statusType() {
         return statusCode / 100 == 2 ? STATUS_TYPE_SUCCESS : STATUS_TYPE_ERROR;
+    }
+
+    public boolean isRedirectInterrupted() {
+        return redirectInterrupted;
+    }
+
+    public void setRedirectInterrupted(boolean redirectInterrupted) {
+        this.redirectInterrupted = redirectInterrupted;
+    }
+
+    public String getRedirectLocation() {
+        return redirectLocation;
+    }
+
+    public void setRedirectLocation(String redirectLocation) {
+        this.redirectLocation = redirectLocation;
     }
 }

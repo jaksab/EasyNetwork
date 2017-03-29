@@ -141,7 +141,10 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
 
                     if (!next) {
                         NLog.logD("[The redirect is forbidden]: " + newUrl);
-                        responseModel = null;
+                        responseModel = new NResponseModel(requestModel.getUrl(), responseCode,
+                                null, null);
+                        responseModel.setRedirectInterrupted(true);
+                        responseModel.setRedirectLocation(newUrl);
                         break;
                     } else {
                         if (NConfig.getInstance().isWriteLogs())
@@ -193,9 +196,14 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
     protected void onPostExecute(NResponseModel responseModel) {
         super.onPostExecute(responseModel);
         if (listener != null) {
-            if (responseModel != null)
-                listener.finishUI(responseModel);
-            else if (listener instanceof NBaseCallback) {
+            if (responseModel != null) {
+                if (!responseModel.isRedirectInterrupted())
+                    listener.finishUI(responseModel);
+                else if (listener instanceof NBaseCallback) {
+                    ((NBaseCallback) listener).finishUIFailed();
+                    ((NBaseCallback) listener).onRedirectInterrupted(responseModel.getRedirectLocation(), responseModel);
+                }
+            } else if (listener instanceof NBaseCallback) {
                 ((NBaseCallback) listener).finishUIFailed();
                 if (requestModel.isEnableDefaultListeners())
                     ((NBaseCallback) listener).preFailed(requestModel, NErrors.CONNECTION_ERROR);

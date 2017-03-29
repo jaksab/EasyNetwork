@@ -26,6 +26,11 @@ public class NCallback extends NBaseCallback {
     }
 
     @Override
+    public void onRedirectInterrupted(String location, NResponseModel responseModel) {
+
+    }
+
+    @Override
     public void finish(NResponseModel responseModel) {
     }
 

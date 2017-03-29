@@ -53,6 +53,11 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
     }
 
     @Override
+    public void onRedirectInterrupted(String location, NResponseModel responseModel) {
+
+    }
+
+    @Override
     public void finish(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
             if (requestModel.isNeedParse()) {

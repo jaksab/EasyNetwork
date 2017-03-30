@@ -556,6 +556,12 @@ public class NBuilder {
     }
 
 
+    public NBuilder enableManualRedirect(boolean enabled) {
+        requestModel.setEnableAutoRedirect(!enabled);
+        return this;
+    }
+
+
     //
     // Methods for processing progress views during request
     //

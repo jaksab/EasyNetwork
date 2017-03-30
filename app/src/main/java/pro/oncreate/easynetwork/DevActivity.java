@@ -36,6 +36,7 @@ public class DevActivity extends AppCompatActivity {
 
     private void start() {
         EasyNet.get()
+                .manualRedirect(true)
                 .bind(progressBar, view, view2, view3)
                 .start(new NCallback() {
                     @Override
@@ -47,6 +48,16 @@ public class DevActivity extends AppCompatActivity {
                     public void onError(NResponseModel responseModel) {
                         super.onError(responseModel);
                     }
+
+//                    @Override
+//                    public boolean onRedirect(String location) {
+//                        return false;
+//                    }
+//
+//                    @Override
+//                    public void onRedirectInterrupted(String location, NResponseModel responseModel) {
+//                        Toast.makeText(DevActivity.this, "onRedirectInterrupted", Toast.LENGTH_LONG).show();
+//                    }
                 });
     }
 }

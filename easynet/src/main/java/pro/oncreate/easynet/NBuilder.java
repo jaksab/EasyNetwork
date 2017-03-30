@@ -555,9 +555,11 @@ public class NBuilder {
         return this;
     }
 
-
-    public NBuilder enableManualRedirect(boolean enabled) {
-        requestModel.setEnableAutoRedirect(!enabled);
+    /**
+     * Redirect from http to https and from https to http always true.
+     */
+    public NBuilder manualRedirect(boolean enabled) {
+        requestModel.setEnableManualRedirect(enabled);
         return this;
     }
 

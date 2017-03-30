@@ -43,7 +43,7 @@ public class NRequestModel {
     private long startTime;
     private boolean needParse;
     private boolean enablePagination;
-    private boolean enableAutoRedirect = true;
+    private boolean enableManualRedirect;
     private boolean enableDefaultListeners;
     private ArrayList<NBaseCallback.WaitHeaderCallback> waitHeaderCallbacks;
 
@@ -201,12 +201,12 @@ public class NRequestModel {
         this.waitHeaderCallbacks.add(waitHeaderCallback);
     }
 
-    public boolean isEnableAutoRedirect() {
-        return enableAutoRedirect;
+    public boolean isEnableManualRedirect() {
+        return enableManualRedirect;
     }
 
-    public void setEnableAutoRedirect(boolean enableAutoRedirect) {
-        this.enableAutoRedirect = enableAutoRedirect;
+    public void setEnableManualRedirect(boolean enableManuadlRedirect) {
+        this.enableManualRedirect = enableManuadlRedirect;
     }
 
     //

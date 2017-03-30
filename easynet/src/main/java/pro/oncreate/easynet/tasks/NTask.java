@@ -343,10 +343,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         connection.setConnectTimeout((int) requestModel.getConnectTimeout());
         connection.setUseCaches(false);
         connection.setDoInput(true);
-        if (!requestModel.isEnableAutoRedirect()) {
-            connection.setInstanceFollowRedirects(true);
-            HttpURLConnection.setFollowRedirects(true);
-        }
+        connection.setInstanceFollowRedirects(!requestModel.isEnableManualRedirect());
         return connection;
     }
 
@@ -360,10 +357,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         connection.setUseCaches(false);
         connection.setDoOutput(true);
         connection.setDoInput(true);
-        if (!requestModel.isEnableAutoRedirect()) {
-            connection.setInstanceFollowRedirects(true);
-            HttpURLConnection.setFollowRedirects(true);
-        }
+        connection.setInstanceFollowRedirects(!requestModel.isEnableManualRedirect());
         return connection;
     }
 

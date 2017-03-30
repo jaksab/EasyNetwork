@@ -23,7 +23,7 @@ public class App extends Application {
                     @Override
                     public NBuilder defaultConfig(NBuilder nBuilder) {
                         return nBuilder
-                                .setHost("http://infitting.net")
+                                .setHost("http://oncreate.com.ua")
                                 .addHeader("Accept-Language", Locale.getDefault().toString().replace("_", "-"));
                     }
                 })

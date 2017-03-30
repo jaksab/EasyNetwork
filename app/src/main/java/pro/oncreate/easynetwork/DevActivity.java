@@ -31,7 +31,6 @@ public class DevActivity extends AppCompatActivity {
                 start();
             }
         });
-
     }
 
     private void start() {

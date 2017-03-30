@@ -460,7 +460,13 @@ public class NBuilder {
 
     public NBuilder addParam(String key, Object value, boolean saveIfNull) {
         if (saveIfNull || value != null)
-            requestModel.getParams().add(new NKeyValueModel(key, String.valueOf(value)));
+            addParam(key, value);
+        return this;
+    }
+
+    public NBuilder addParam(String key, File value, boolean saveIfNull) {
+        if (saveIfNull || value != null)
+            addParam(key, value);
         return this;
     }
 

@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-import pro.oncreate.easynet.NConfig;
+import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NResponseModel;
 
@@ -22,6 +22,8 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     public NCallbackGson(Class<T> tClass) {
         this.tClass = tClass;
     }
+
+
 
     @Override
     public void finishUI(NResponseModel responseModel) {
@@ -95,14 +97,14 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
 
     private void preSuccess(T model, NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null)
-                || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+        if ((EasyNet.getInstance().getOnSuccessDefaultListener() == null)
+                || EasyNet.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(model, responseModel);
     }
 
     private void preSuccess(List<T> models, NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null)
-                || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+        if ((EasyNet.getInstance().getOnSuccessDefaultListener() == null)
+                || EasyNet.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(models, responseModel);
     }
 

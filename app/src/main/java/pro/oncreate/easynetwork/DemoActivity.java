@@ -18,7 +18,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.NConfig;
 import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
@@ -133,8 +132,8 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        if (NConfig.getInstance().isCurrentTasks())
-            NConfig.getInstance().cancelAllTasks();
+        if (EasyNet.getInstance().isCurrentTasks())
+            EasyNet.getInstance().cancelAllTasks();
         else super.onBackPressed();
     }
 }

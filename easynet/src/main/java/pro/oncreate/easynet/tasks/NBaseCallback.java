@@ -7,7 +7,7 @@ import android.view.View;
 
 import java.util.List;
 
-import pro.oncreate.easynet.NConfig;
+import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
@@ -108,12 +108,12 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     }
 
     protected void preError(NResponseModel responseModel) {
-        if (NConfig.getInstance().getOnErrorDefaultListener() != null) {
-            NConfig.getInstance().getOnErrorDefaultListener().onError(responseModel);
+        if (EasyNet.getInstance().getOnErrorDefaultListener() != null) {
+            EasyNet.getInstance().getOnErrorDefaultListener().onError(responseModel);
         } else {
-            for (int i = 0; i < NConfig.getInstance().getOnErrorDefaultListenersCollection().size(); i++) {
-                if (NConfig.getInstance().getOnErrorDefaultListenersCollection().get(i).getCode() == responseModel.getStatusCode()) {
-                    NConfig.getInstance().getOnErrorDefaultListenersCollection().get(i).onError(responseModel);
+            for (int i = 0; i < EasyNet.getInstance().getOnErrorDefaultListenersCollection().size(); i++) {
+                if (EasyNet.getInstance().getOnErrorDefaultListenersCollection().get(i).getCode() == responseModel.getStatusCode()) {
+                    EasyNet.getInstance().getOnErrorDefaultListenersCollection().get(i).onError(responseModel);
                     break;
                 }
             }
@@ -136,9 +136,9 @@ public abstract class NBaseCallback implements NTask.NTaskListener {
     }
 
     void preFailed(NRequestModel nRequestModel, NErrors error) {
-        if ((NConfig.getInstance().getOnFailedDefaultListener() != null
-                && NConfig.getInstance().getOnFailedDefaultListener().onFailed(nRequestModel, error))
-                || (NConfig.getInstance().getOnFailedDefaultListener() == null))
+        if ((EasyNet.getInstance().getOnFailedDefaultListener() != null
+                && EasyNet.getInstance().getOnFailedDefaultListener().onFailed(nRequestModel, error))
+                || (EasyNet.getInstance().getOnFailedDefaultListener() == null))
             onFailed(nRequestModel, error);
     }
 

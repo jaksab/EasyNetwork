@@ -23,7 +23,7 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
-import pro.oncreate.easynet.NConfig;
+import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.methods.EntityMethod;
@@ -79,7 +79,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             listener.start(requestModel);
         requestModel.setStartTime(System.currentTimeMillis());
         setTag("task#" + requestModel.getStartTime());
-        NConfig.getInstance().addTask(this.tag, this);
+        EasyNet.getInstance().addTask(this.tag, this);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             // Request
             NLog.logD("======== START REQUEST ========");
 
-            if (NConfig.getInstance().isWriteLogs())
+            if (EasyNet.getInstance().isWriteLogs())
                 NLog.logD("[" + requestModel.getMethod() + "] " + requestModel.getUrl());
 
             while (true) {
@@ -147,7 +147,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
                         responseModel.setRedirectLocation(newUrl);
                         break;
                     } else {
-                        if (NConfig.getInstance().isWriteLogs())
+                        if (EasyNet.getInstance().isWriteLogs())
                             NLog.logD("[Redirect]: " + newUrl);
 
                         requestModel.setUrl(newUrl);
@@ -156,7 +156,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
                         connection.disconnect();
                     }
                 } else {
-                    if (NConfig.getInstance().isWriteLogs())
+                    if (EasyNet.getInstance().isWriteLogs())
                         NLog.logD("[Status code]: " + responseCode);
 
                     inputStream = getInputStreamFromConnection(connection);
@@ -167,7 +167,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
                     responseModel.setEndTime(System.currentTimeMillis());
                     responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
 
-                    if (NConfig.getInstance().isWriteLogs())
+                    if (EasyNet.getInstance().isWriteLogs())
                         NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
 
                     if (listener != null)
@@ -177,13 +177,13 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             }
         } catch (Exception e) {
             responseModel = null;
-            if (NConfig.getInstance().isWriteLogs())
+            if (EasyNet.getInstance().isWriteLogs())
                 NLog.logD("[Error]: " + e.toString());
         } finally {
             if (connection != null) {
                 connection.disconnect();
             }
-            NConfig.getInstance().removeTask(getTag());
+            EasyNet.getInstance().removeTask(getTag());
         }
         return responseModel;
     }
@@ -229,14 +229,14 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             urlParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
             if (!urlParams.isEmpty()) {
                 requestModel.setUrl(requestModel.getUrl() + "?" + urlParams);
-                if (NConfig.getInstance().isWriteLogs())
+                if (EasyNet.getInstance().isWriteLogs())
                     NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         } else if (!requestModel.getQueryParams().isEmpty()) {
             urlParams = NDataBuilder.getQuery(requestModel.getQueryParams(), charset);
             if (!urlParams.isEmpty()) {
                 requestModel.setUrl(requestModel.getUrl() + "?" + urlParams);
-                if (NConfig.getInstance().isWriteLogs())
+                if (EasyNet.getInstance().isWriteLogs())
                     NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         }
@@ -251,13 +251,13 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
                 connection.setRequestProperty(header.getKey(), header.getValue() + "; boundary=" + boundary);
             else connection.setRequestProperty(header.getKey(), header.getValue());
         }
-        if (NConfig.getInstance().isWriteLogs())
+        if (EasyNet.getInstance().isWriteLogs())
             NLog.logD("[Headers]: " + logHeaders);
     }
 
     private Map<String, List<String>> getResponseHeaders(HttpURLConnection connection, String body) {
         Map<String, List<String>> headers = connection.getHeaderFields();
-        if (NConfig.getInstance().isWriteLogs()) {
+        if (EasyNet.getInstance().isWriteLogs()) {
             if (headers != null) {
                 String headersLog = "";
                 for (Map.Entry<String, List<String>> entry : headers.entrySet())
@@ -331,7 +331,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             writer.flush();
             writer.close();
             os.close();
-            if (NConfig.getInstance().isWriteLogs())
+            if (EasyNet.getInstance().isWriteLogs())
                 NLog.logD("[Body params]: " + bodyParams.replace("&", "; "));
         }
     }
@@ -372,7 +372,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             debug += requestModel.getParams().get(i).getKey() + "=" +
                     requestModel.getParams().get(i).getValue() + "; ";
         }
-        if (NConfig.getInstance().isWriteLogs())
+        if (EasyNet.getInstance().isWriteLogs())
             NLog.logD(debug);
 
         debug = "[Request file params]: ";
@@ -381,7 +381,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             debug += requestModel.getParamsFile().get(i).getKey() + " > " +
                     requestModel.getParamsFile().get(i).getValue() + "; ";
         }
-        if (NConfig.getInstance().isWriteLogs())
+        if (EasyNet.getInstance().isWriteLogs())
             NLog.logD(debug);
 
         // Response
@@ -442,7 +442,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
         writer.append(LINE_END);
         writer.flush();
 
-        if (NConfig.getInstance().isWriteLogs())
+        if (EasyNet.getInstance().isWriteLogs())
             NLog.logD("Start upload file: " + fileName);
 
         FileInputStream inputStream = new FileInputStream(file);
@@ -488,7 +488,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             writer.flush();
             writer.close();
             os.close();
-            if (NConfig.getInstance().isWriteLogs())
+            if (EasyNet.getInstance().isWriteLogs())
                 NLog.logD("[Request body]: " + body);
         }
     }

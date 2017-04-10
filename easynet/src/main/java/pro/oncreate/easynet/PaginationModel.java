@@ -5,7 +5,7 @@ package pro.oncreate.easynet;
  */
 
 @SuppressWarnings("unused,WeakerAccess")
-public class NPaginationModel {
+public class PaginationModel {
 
     // DEFAULT VALUES
     private static final int DEFAULT_ITEMS_COUNT = 20;
@@ -24,7 +24,7 @@ public class NPaginationModel {
     private NPaginationInterface paginationInterface;
 
     // CONSTRUCTOR
-    NPaginationModel(String pageNumberKEY, String countItemsKEY, String pageFromPrimaryKEY) {
+    PaginationModel(String pageNumberKEY, String countItemsKEY, String pageFromPrimaryKEY) {
         this.pageNumberKey = pageNumberKEY;
         this.countItemsKey = countItemsKEY;
         this.pageFromPrimaryKey = pageFromPrimaryKEY;
@@ -49,9 +49,9 @@ public class NPaginationModel {
 
     // USE THIS INTERFACE IN ADAPTERS OR OTHER CLASSES TO SIMPLIFY PAGINATION FUNCTIONS
     public interface NPaginationInterface {
-        int DEFAULT_ITEMS_COUNT = NPaginationModel.DEFAULT_ITEMS_COUNT;
-        int PAGE_NUMBER_NONE = NPaginationModel.DEFAULT_PAGE_NUMBER;
-        int LAST_PRIMARY_KEY_NONE = NPaginationModel.DEFAULT_PAGE_FROM_PRIMARY_KEY;
+        int DEFAULT_ITEMS_COUNT = PaginationModel.DEFAULT_ITEMS_COUNT;
+        int PAGE_NUMBER_NONE = PaginationModel.DEFAULT_PAGE_NUMBER;
+        int LAST_PRIMARY_KEY_NONE = PaginationModel.DEFAULT_PAGE_FROM_PRIMARY_KEY;
 
         int getPaginationPageCount();
 

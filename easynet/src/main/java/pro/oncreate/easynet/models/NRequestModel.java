@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import pro.oncreate.easynet.NPaginationModel;
+import pro.oncreate.easynet.PaginationModel;
 import pro.oncreate.easynet.methods.Method;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
@@ -35,7 +35,7 @@ public class NRequestModel {
     private ArrayList<NKeyValueFileModel> paramsFile;
     private String body;
     private File chunk;
-    private NPaginationModel paginationModel;
+    private PaginationModel paginationModel;
 
     // Etc
     private long connectTimeout;
@@ -167,11 +167,11 @@ public class NRequestModel {
         this.body = body;
     }
 
-    public NPaginationModel getPaginationModel() {
+    public PaginationModel getPaginationModel() {
         return paginationModel;
     }
 
-    public void setPaginationModel(NPaginationModel paginationModel) {
+    public void setPaginationModel(PaginationModel paginationModel) {
         this.paginationModel = paginationModel;
     }
 

@@ -9,7 +9,7 @@ import android.util.Log;
 @SuppressWarnings("WeakerAccess")
 public class NLog {
 
-    public static final String LOG_NAME_DEFAULT = "EasyNet";
+    public static final String LOG_NAME_DEFAULT = "EasyNetwork";
 
     public static void logD(String text) {
         Log.i(LOG_NAME_DEFAULT, text);

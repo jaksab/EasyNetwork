@@ -7,7 +7,6 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.tasks.NCallback;
 
 public class DevActivity extends AppCompatActivity {
@@ -35,28 +34,9 @@ public class DevActivity extends AppCompatActivity {
 
     private void start() {
         EasyNet.get()
-                .manualRedirect(true)
                 .bind(progressBar, view, view2, view3)
                 .start(new NCallback() {
-                    @Override
-                    public void onSuccess(NResponseModel responseModel) {
-                        super.onSuccess(responseModel);
-                    }
 
-                    @Override
-                    public void onError(NResponseModel responseModel) {
-                        super.onError(responseModel);
-                    }
-
-//                    @Override
-//                    public boolean onRedirect(String location) {
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public void onRedirectInterrupted(String location, NResponseModel responseModel) {
-//                        Toast.makeText(DevActivity.this, "onRedirectInterrupted", Toast.LENGTH_LONG).show();
-//                    }
                 });
     }
 }

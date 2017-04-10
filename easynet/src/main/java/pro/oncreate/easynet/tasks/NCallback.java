@@ -1,6 +1,6 @@
 package pro.oncreate.easynet.tasks;
 
-import pro.oncreate.easynet.NConfig;
+import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.models.NResponseModel;
 
 /**
@@ -35,8 +35,8 @@ public class NCallback extends NBaseCallback {
     }
 
     private void preSuccess(NResponseModel responseModel) {
-        if ((NConfig.getInstance().getOnSuccessDefaultListener() == null)
-                || NConfig.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
+        if ((EasyNet.getInstance().getOnSuccessDefaultListener() == null)
+                || EasyNet.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
             onSuccess(responseModel);
     }
 

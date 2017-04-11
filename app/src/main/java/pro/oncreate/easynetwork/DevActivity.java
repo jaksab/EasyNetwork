@@ -33,9 +33,7 @@ public class DevActivity extends AppCompatActivity implements PaginationModel.Pa
     }
 
     private void start() {
-        API.get()
-                .enablePagination(this)
-                .bind(progressBar, view, view2, view3)
+        API.get().enablePagination(this).bind(progressBar, view, view2, view3)
                 .start(new NCallback() {
                 });
     }

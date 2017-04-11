@@ -715,30 +715,15 @@ public class Request {
 
 
     //
-    // Pagination
+    // New Pagination
     //
-
 
     /**
      * Configure pagination with custom API keys.
      * Please, attend! You must call this method before using other pagination methods.
-     *
-     * @param pageNumberKey page number API key
-     * @param itemsCountKey page count API key
      */
-    public Request configurePagination(String pageNumberKey, String itemsCountKey, String pageFromPrimaryKey) {
-        requestModel.setPaginationModel(new PaginationModel(pageNumberKey, itemsCountKey, pageFromPrimaryKey));
-        return this;
-    }
-
-    /**
-     * Enable pagination keys in this Request instance.
-     * You must call this method before using other pagination methods (setters).
-     */
-    public Request enablePagination() {
-        if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call configurePagination before");
-        requestModel.setEnablePagination(true);
+    public Request configurePagination(String... keys) {
+        requestModel.setPaginationModel(new PaginationModel(keys));
         return this;
     }
 
@@ -746,7 +731,7 @@ public class Request {
      * Enable pagination keys in this Request instance with NPaginationInterface instance.
      * You must call this method before using other pagination methods.
      */
-    public Request enablePagination(PaginationModel.NPaginationInterface paginationInterface) {
+    public Request enablePagination(PaginationModel.PaginationInterface paginationInterface) {
         if (requestModel.getPaginationModel() == null)
             throw new NullPointerException("You must call configurePagination before");
         requestModel.setEnablePagination(true);
@@ -755,63 +740,11 @@ public class Request {
     }
 
     /**
-     * Set items count on one page.
-     *
-     * @param count items count
-     */
-    public Request setPaginationCount(int count) {
-        if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call configurePagination before");
-        requestModel.getPaginationModel().itemsCount = count;
-        return this;
-    }
-
-    /**
-     * Set page number for current request.
-     *
-     * @param pageNumber page number
-     */
-    public Request setPaginationPage(int pageNumber) {
-        if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call configurePagination before");
-        requestModel.getPaginationModel().pageNumber = pageNumber;
-        return this;
-    }
-
-    /**
-     * Setting the next page with automatic calculation based on the current items number.
-     *
-     * @param itemsCountNow current items count
-     */
-    public Request setPaginationNextPage(int itemsCountNow) {
-        if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call configurePagination before");
-        requestModel.getPaginationModel().pageNumber = PaginationModel.calculateNextPage(itemsCountNow,
-                requestModel.getPaginationModel().itemsCount);
-        return this;
-    }
-
-    /**
-     * The maximum number of primary key from which the page count.
-     * Use this key in dynamic lists.
-     *
-     * @param pageFromPrimaryKey last primary key id
-     */
-    public Request setPaginationPrimaryKey(long pageFromPrimaryKey) {
-        if (requestModel.getPaginationModel() == null)
-            throw new NullPointerException("You must call configurePagination before");
-        requestModel.getPaginationModel().pageFromPK = pageFromPrimaryKey;
-        return this;
-    }
-
-    /**
      * Use way to calculate pagination states in your adapters, model etc.
-     * If you use this methods, you cannot use manual setters: {@link Request#setPaginationPage}, {@link Request#setPaginationPage},
-     * {@link Request#setPaginationNextPage}, {@link Request#setPaginationPrimaryKey}
      *
      * @param paginationInterface pagination interface instance
      */
-    public Request setPaginationInterface(PaginationModel.NPaginationInterface paginationInterface) {
+    Request setPaginationInterface(PaginationModel.PaginationInterface paginationInterface) {
         if (requestModel.getPaginationModel() == null)
             throw new NullPointerException("You must call configurePagination before");
         requestModel.getPaginationModel().setPaginationInterface(paginationInterface);
@@ -819,40 +752,143 @@ public class Request {
     }
 
     /**
-     * Add pagination data to request params.
+     * Add pagination data to request query params.
      */
-    private void setUpPagination() {
+    private void setupPagination() {
         if (!requestModel.isEnablePagination() || requestModel.getPaginationModel() == null)
             return;
-
-        PaginationModel paginationModel = requestModel.getPaginationModel();
-        PaginationModel.NPaginationInterface paginationInterface = requestModel
-                .getPaginationModel().getPaginationInterface();
-
-        if (paginationInterface == null) {
-            if (paginationModel.itemsCount < 0)
-                throw new NullPointerException("Items count cannot be less than zero");
-            else addParam(paginationModel.countItemsKey,
-                    String.valueOf(paginationModel.itemsCount));
-            if (paginationModel.pageNumber >= 0)
-                addParam(paginationModel.pageNumberKey,
-                        String.valueOf(paginationModel.pageNumber));
-            if (paginationModel.pageFromPK >= 0)
-                addParam(paginationModel.pageFromPrimaryKey,
-                        String.valueOf(paginationModel.pageFromPK));
-        } else {
-            if (paginationInterface.getPaginationPageCount() < 0)
-                throw new NullPointerException("Items count cannot be less than zero");
-            else addParam(paginationModel.countItemsKey,
-                    String.valueOf(paginationInterface.getPaginationPageCount()));
-            if (paginationInterface.getPaginationPageNumber() > PaginationModel.NPaginationInterface.PAGE_NUMBER_NONE)
-                addParam(paginationModel.pageNumberKey,
-                        String.valueOf(paginationInterface.getPaginationPageNumber()));
-            if (paginationInterface.getPaginationLastPrimaryKey() > PaginationModel.NPaginationInterface.LAST_PRIMARY_KEY_NONE)
-                addParam(paginationModel.pageFromPrimaryKey,
-                        String.valueOf(paginationInterface.getPaginationLastPrimaryKey()));
-        }
+        for (String key : requestModel.getPaginationModel().getData().keySet())
+            addParam(key,
+                    requestModel.getPaginationModel().getPaginationInterface().getPaginationValue(key));
     }
+
+
+    //
+    // Pagination
+    //
+
+
+//    /**
+//     * Configure pagination with custom API keys.
+//     * Please, attend! You must call this method before using other pagination methods.
+//     *
+//     * @param pageNumberKey page number API key
+//     * @param itemsCountKey page count API key
+//     */
+//    public Request configurePagination(String pageNumberKey, String itemsCountKey, String pageFromPrimaryKey) {
+//        requestModel.setPaginationModel(new NPaginationModel(pageNumberKey, itemsCountKey, pageFromPrimaryKey));
+//        return this;
+//    }
+//
+//    /**
+//     * Enable pagination keys in this Request instance.
+//     * You must call this method before using other pagination methods (setters).
+//     */
+//    public Request enablePagination() {
+//        if (requestModel.getPaginationModel() == null)
+//            throw new NullPointerException("You must call configurePagination before");
+//        requestModel.setEnablePagination(true);
+//        return this;
+//    }
+//
+//    /**
+//     * Enable pagination keys in this Request instance with NPaginationInterface instance.
+//     * You must call this method before using other pagination methods.
+//     */
+//    public Request enablePagination(NPaginationModel.NPaginationInterface paginationInterface) {
+//        if (requestModel.getPaginationModel() == null)
+//            throw new NullPointerException("You must call configurePagination before");
+//        requestModel.setEnablePagination(true);
+//        this.setPaginationInterface(paginationInterface);
+//        return this;
+//    }
+
+//    /**
+//     * Set items count on one page.
+//     *
+//     * @param count items count
+//     */
+//    public Request setPaginationCount(int count) {
+//        if (requestModel.getPaginationModel() == null)
+//            throw new NullPointerException("You must call configurePagination before");
+//        requestModel.getPaginationModel().itemsCount = count;
+//        return this;
+//    }
+//
+//    /**
+//     * Set page number for current request.
+//     *
+//     * @param pageNumber page number
+//     */
+//    public Request setPaginationPage(int pageNumber) {
+//        if (requestModel.getPaginationModel() == null)
+//            throw new NullPointerException("You must call configurePagination before");
+//        requestModel.getPaginationModel().pageNumber = pageNumber;
+//        return this;
+//    }
+//
+//    /**
+//     * Setting the next page with automatic calculation based on the current items number.
+//     *
+//     * @param itemsCountNow current items count
+//     */
+//    public Request setPaginationNextPage(int itemsCountNow) {
+//        if (requestModel.getPaginationModel() == null)
+//            throw new NullPointerException("You must call configurePagination before");
+//        requestModel.getPaginationModel().pageNumber = NPaginationModel.calculateNextPage(itemsCountNow,
+//                requestModel.getPaginationModel().itemsCount);
+//        return this;
+//    }
+
+//    /**
+//     * The maximum number of primary key from which the page count.
+//     * Use this key in dynamic lists.
+//     *
+//     * @param pageFromPrimaryKey last primary key id
+//     */
+//    public Request setPaginationPrimaryKey(long pageFromPrimaryKey) {
+//        if (requestModel.getPaginationModel() == null)
+//            throw new NullPointerException("You must call configurePagination before");
+//        requestModel.getPaginationModel().pageFromPK = pageFromPrimaryKey;
+//        return this;
+//    }
+
+
+//    /**
+//     * Add pagination data to request params.
+//     */
+//    private void setupPagination() {
+//        if (!requestModel.isEnablePagination() || requestModel.getPaginationModel() == null)
+//            return;
+//
+//        NPaginationModel paginationModel = requestModel.getPaginationModel();
+//        NPaginationModel.NPaginationInterface paginationInterface = requestModel
+//                .getPaginationModel().getPaginationInterface();
+//
+//        if (paginationInterface == null) {
+//            if (paginationModel.itemsCount < 0)
+//                throw new NullPointerException("Items count cannot be less than zero");
+//            else addParam(paginationModel.countItemsKey,
+//                    String.valueOf(paginationModel.itemsCount));
+//            if (paginationModel.pageNumber >= 0)
+//                addParam(paginationModel.pageNumberKey,
+//                        String.valueOf(paginationModel.pageNumber));
+//            if (paginationModel.pageFromPK >= 0)
+//                addParam(paginationModel.pageFromPrimaryKey,
+//                        String.valueOf(paginationModel.pageFromPK));
+//        } else {
+//            if (paginationInterface.getPaginationPageCount() < 0)
+//                throw new NullPointerException("Items count cannot be less than zero");
+//            else addParam(paginationModel.countItemsKey,
+//                    String.valueOf(paginationInterface.getPaginationPageCount()));
+//            if (paginationInterface.getPaginationPageNumber() > NPaginationModel.NPaginationInterface.PAGE_NUMBER_NONE)
+//                addParam(paginationModel.pageNumberKey,
+//                        String.valueOf(paginationInterface.getPaginationPageNumber()));
+//            if (paginationInterface.getPaginationLastPrimaryKey() > NPaginationModel.NPaginationInterface.LAST_PRIMARY_KEY_NONE)
+//                addParam(paginationModel.pageFromPrimaryKey,
+//                        String.valueOf(paginationInterface.getPaginationLastPrimaryKey()));
+//        }
+//    }
 
 
     //
@@ -950,7 +986,7 @@ public class Request {
         addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
         if (contentType == null)
             this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
-        setUpPagination();
+        setupPagination();
 
         switch (contentType) {
             case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {

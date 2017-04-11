@@ -10,6 +10,7 @@ import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynetwork.api.API;
 
 
 public class App extends Application {
@@ -21,10 +22,11 @@ public class App extends Application {
                 .setWriteLogs(true)
                 .setDefaultNBuilderListener(new EasyNet.NBuilderDefaultListener() {
                     @Override
-                    public Request defaultConfig(Request nBuilder) {
-                        return nBuilder
+                    public Request defaultConfig(Request request) {
+                        return request
                                 .setHost("http://oncreate.com.ua")
-                                .addHeader("Accept-Language", Locale.getDefault().toString().replace("_", "-"));
+                                .addHeader("Accept-Language", Locale.getDefault().toString().replace("_", "-"))
+                                .configurePagination(API.PAGINATION_LIMIT, API.PAGINATION_OFFSET);
                     }
                 })
                 .setDefaultOnSuccessListener(new EasyNet.OnSuccessDefaultListener() {

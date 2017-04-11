@@ -6,10 +6,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
-import pro.oncreate.easynet.EasyNet;
+import pro.oncreate.easynet.PaginationModel;
 import pro.oncreate.easynet.processing.NCallback;
+import pro.oncreate.easynetwork.api.API;
 
-public class DevActivity extends AppCompatActivity {
+public class DevActivity extends AppCompatActivity implements PaginationModel.PaginationInterface {
 
     private ProgressBar progressBar;
     private FrameLayout view, view2, view3;
@@ -23,7 +24,6 @@ public class DevActivity extends AppCompatActivity {
         view = (FrameLayout) findViewById(R.id.view);
         view2 = (FrameLayout) findViewById(R.id.view2);
         view3 = (FrameLayout) findViewById(R.id.view3);
-
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -33,10 +33,24 @@ public class DevActivity extends AppCompatActivity {
     }
 
     private void start() {
-        EasyNet.get()
+        API.get()
+                .enablePagination(this)
                 .bind(progressBar, view, view2, view3)
                 .start(new NCallback() {
-
                 });
+    }
+
+    @Override
+    public int getPaginationValue(String key) {
+        int value = 0;
+        switch (key) {
+            case "limit":
+                value = 10;
+                break;
+            case "offset":
+                value = (int) (System.currentTimeMillis() / 1000000000);
+                break;
+        }
+        return value;
     }
 }

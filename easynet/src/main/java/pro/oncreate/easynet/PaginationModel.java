@@ -1,5 +1,7 @@
 package pro.oncreate.easynet;
 
+import java.util.HashMap;
+
 /**
  * Created by andrej on 05.11.16.
  */
@@ -7,56 +9,29 @@ package pro.oncreate.easynet;
 @SuppressWarnings("unused,WeakerAccess")
 public class PaginationModel {
 
-    // DEFAULT VALUES
-    private static final int DEFAULT_ITEMS_COUNT = 20;
-    private static final int DEFAULT_PAGE_NUMBER = -1;
-    private static final int DEFAULT_PAGE_FROM_PRIMARY_KEY = -1;
+    private HashMap<String, Integer> data = new HashMap<>();
+    private PaginationInterface paginationInterface;
 
-    // KEYS FOR PAGINATION DATA
-    String pageNumberKey;
-    String pageFromPrimaryKey;
-    String countItemsKey;
+    PaginationModel(String... keys) {
+        if (keys == null || keys.length == 0)
+            throw new IllegalArgumentException("Pagination keys cannot be empty");
 
-    // PAGINATION MEMBERS
-    int itemsCount = DEFAULT_ITEMS_COUNT;
-    int pageNumber = DEFAULT_PAGE_NUMBER;
-    long pageFromPK = DEFAULT_PAGE_FROM_PRIMARY_KEY;
-    private NPaginationInterface paginationInterface;
-
-    // CONSTRUCTOR
-    PaginationModel(String pageNumberKEY, String countItemsKEY, String pageFromPrimaryKEY) {
-        this.pageNumberKey = pageNumberKEY;
-        this.countItemsKey = countItemsKEY;
-        this.pageFromPrimaryKey = pageFromPrimaryKEY;
+        for (String key : keys) data.put(key, 0);
     }
 
-    // UTILS
-    static int calculateNextPage(int itemsCountNow, int maxPageCount) {
-        int page = itemsCountNow / maxPageCount + 1;
-        if (itemsCountNow % maxPageCount != 0)
-            page++;
-        return page;
-    }
-
-    // GETTERS AND SETTERS
-    public NPaginationInterface getPaginationInterface() {
+    public PaginationInterface getPaginationInterface() {
         return paginationInterface;
     }
 
-    public void setPaginationInterface(NPaginationInterface paginationInterface) {
+    public void setPaginationInterface(PaginationInterface paginationInterface) {
         this.paginationInterface = paginationInterface;
     }
 
-    // USE THIS INTERFACE IN ADAPTERS OR OTHER CLASSES TO SIMPLIFY PAGINATION FUNCTIONS
-    public interface NPaginationInterface {
-        int DEFAULT_ITEMS_COUNT = PaginationModel.DEFAULT_ITEMS_COUNT;
-        int PAGE_NUMBER_NONE = PaginationModel.DEFAULT_PAGE_NUMBER;
-        int LAST_PRIMARY_KEY_NONE = PaginationModel.DEFAULT_PAGE_FROM_PRIMARY_KEY;
+    public HashMap<String, Integer> getData() {
+        return data;
+    }
 
-        int getPaginationPageCount();
-
-        int getPaginationPageNumber();
-
-        long getPaginationLastPrimaryKey();
+    public interface PaginationInterface {
+        int getPaginationValue(String key);
     }
 }

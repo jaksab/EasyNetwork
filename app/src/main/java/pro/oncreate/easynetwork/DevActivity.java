@@ -7,7 +7,7 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.tasks.NCallback;
+import pro.oncreate.easynet.processing.NCallback;
 
 public class DevActivity extends AppCompatActivity {
 

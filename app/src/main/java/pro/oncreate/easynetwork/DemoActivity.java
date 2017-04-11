@@ -23,9 +23,8 @@ import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.tasks.NBaseCallback;
-import pro.oncreate.easynet.tasks.NCallbackParse;
-import pro.oncreate.easynet.tasks.NTask;
+import pro.oncreate.easynet.processing.NBaseCallback;
+import pro.oncreate.easynet.processing.NCallbackParse;
 import pro.oncreate.easynetwork.adapters.ExpandableListAdapter;
 import pro.oncreate.easynetwork.models.CountryModel;
 
@@ -63,8 +62,6 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                 .addHeader(NConst.ACCEPT_TYPE, NConst.MIME_TYPE_JSON)
                 .bind(progressBar, recyclerview)
                 .enableDefaultListeners(true) // default
-                .setReadTimeout(NTask.DEFAULT_TIMEOUT_READ) // default
-                .setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT) // default
                 .setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED) // default
                 .waitHeader(new NBaseCallback.WaitHeaderCallback("Date") {
                     @Override

@@ -14,7 +14,7 @@ import pro.oncreate.easynet.methods.Method;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.tasks.NBaseCallback;
+import pro.oncreate.easynet.processing.NBaseCallback;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]

@@ -1,4 +1,4 @@
-package pro.oncreate.easynet.tasks;
+package pro.oncreate.easynet.processing;
 
 import android.os.AsyncTask;
 
@@ -40,6 +40,7 @@ import pro.oncreate.easynet.utils.NLog;
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
 
+@Deprecated
 @SuppressWarnings("unused,WeakerAccess")
 public class NTask extends AsyncTask<String, Integer, NResponseModel> {
 
@@ -79,7 +80,7 @@ public class NTask extends AsyncTask<String, Integer, NResponseModel> {
             listener.start(requestModel);
         requestModel.setStartTime(System.currentTimeMillis());
         setTag("task#" + requestModel.getStartTime());
-        EasyNet.getInstance().addTask(this.tag, this);
+        //EasyNet.getInstance().addTask(this.tag, this);
     }
 
     @Override

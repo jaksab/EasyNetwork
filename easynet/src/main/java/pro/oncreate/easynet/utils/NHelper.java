@@ -21,10 +21,7 @@ public class NHelper {
             ConnectivityManager cm = (ConnectivityManager) context
                     .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo nInfo = cm.getActiveNetworkInfo();
-            if (nInfo == null || !nInfo.isConnected())
-                return false;
-            else
-                return true;
+            return !(nInfo == null || !nInfo.isConnected());
         } catch (Exception e) {
             return false;
         }

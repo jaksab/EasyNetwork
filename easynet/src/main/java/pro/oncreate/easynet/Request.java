@@ -21,12 +21,15 @@ import pro.oncreate.easynet.models.subsidiary.BindParams;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.tasks.NBaseCallback;
-import pro.oncreate.easynet.tasks.NCallback;
-import pro.oncreate.easynet.tasks.NCallbackGson;
-import pro.oncreate.easynet.tasks.NCallbackParse;
-import pro.oncreate.easynet.tasks.NTask;
-import pro.oncreate.easynet.utils.NLog;
+import pro.oncreate.easynet.processing.BaseTask;
+import pro.oncreate.easynet.processing.JSONTask;
+import pro.oncreate.easynet.processing.MultipartTask;
+import pro.oncreate.easynet.processing.NBaseCallback;
+import pro.oncreate.easynet.processing.NCallback;
+import pro.oncreate.easynet.processing.NCallbackGson;
+import pro.oncreate.easynet.processing.NCallbackParse;
+import pro.oncreate.easynet.processing.RawTask;
+import pro.oncreate.easynet.processing.UrlencodedTask;
 
 import static pro.oncreate.easynet.methods.Method.DELETE;
 import static pro.oncreate.easynet.methods.Method.GET;
@@ -34,6 +37,8 @@ import static pro.oncreate.easynet.methods.Method.HEAD;
 import static pro.oncreate.easynet.methods.Method.OPTIONS;
 import static pro.oncreate.easynet.methods.Method.POST;
 import static pro.oncreate.easynet.methods.Method.PUT;
+import static pro.oncreate.easynet.processing.BaseTask.DEFAULT_TIMEOUT_CONNECT;
+import static pro.oncreate.easynet.processing.BaseTask.DEFAULT_TIMEOUT_READ;
 
 
 /**
@@ -67,7 +72,7 @@ public class Request {
 
     private NRequestModel requestModel;
     private String contentType;
-    private NTask.NTaskListener taskListener;
+    private BaseTask.NTaskListener taskListener;
 
 
     //
@@ -81,8 +86,8 @@ public class Request {
         requestModel.setNeedParse(false);
         requestModel.setEnablePagination(false);
         requestModel.setEnableDefaultListeners(true);
-        requestModel.setConnectTimeout(NTask.DEFAULT_TIMEOUT_CONNECT);
-        requestModel.setReadTimeout(NTask.DEFAULT_TIMEOUT_READ);
+        requestModel.setConnectTimeout(DEFAULT_TIMEOUT_CONNECT);
+        requestModel.setReadTimeout(DEFAULT_TIMEOUT_READ);
         setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
     }
 
@@ -915,41 +920,17 @@ public class Request {
     }
 
     private void startTask() {
-        if (validateRequest()) {
-            addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
-            if (contentType == null)
-                this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
-            setUpPagination();
-
-            switch (contentType) {
-                case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
-                    requestModel.setMethod(POST);
-                    break;
-                }
-            }
-            new NTask(taskListener, requestModel).execute();
-        }
+        if (validateRequest())
+            makeTask().execute();
     }
 
     /**
      * Execute request synchronously
      */
     public NResponseModel getSynchronously() throws ExecutionException, InterruptedException {
-        if (validateRequest()) {
-            addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
-            if (contentType == null)
-                this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
-            setUpPagination();
-
-            switch (contentType) {
-                case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
-                    requestModel.setMethod(POST);
-                    break;
-                }
-            }
-            return new NTask(taskListener, requestModel).execute().get();
-        }
-        return null;
+        if (validateRequest())
+            return makeTask().execute().get();
+        else return null;
     }
 
     /**
@@ -962,6 +943,40 @@ public class Request {
         return this;
     }
 
+    /**
+     * This method sets the primary data and selects the appropriate instance of BaseTask class heirs.
+     */
+    private BaseTask makeTask() {
+        addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
+        if (contentType == null)
+            this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+        setUpPagination();
+
+        switch (contentType) {
+            case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
+                requestModel.setMethod(POST);
+                break;
+            }
+        }
+
+        BaseTask task;
+        switch (requestModel.getRequestType()) {
+            case NConst.MIME_TYPE_X_WWW_FORM_URLENCODED:
+                task = new UrlencodedTask(taskListener, requestModel);
+                break;
+            case NConst.MIME_TYPE_MULTIPART_FORM_DATA:
+                task = new MultipartTask(taskListener, requestModel);
+                break;
+            case NConst.MIME_TYPE_JSON:
+                task = new JSONTask(taskListener, requestModel);
+                break;
+            default:
+                task = new RawTask(taskListener, requestModel);
+                break;
+        }
+        return task;
+    }
+
 
     //
     // Validate request data
@@ -969,21 +984,15 @@ public class Request {
 
 
     private boolean validateRequest() {
-        boolean valid = true;
-
-        if (requestModel == null) {
-            NLog.logE("Request model cannot be null");
-            valid = false;
-        }
+        if (requestModel == null)
+            throw new NullPointerException("Request model cannot be null");
 
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty()) {
-            NLog.logE("URL cannot be empty");
-            valid = false;
+            throw new NullPointerException("URL cannot be empty");
         } else if (!Pattern.matches(Patterns.WEB_URL.pattern(), requestModel.getUrl())) {
-            NLog.logE("Invalid URL");
-            valid = false;
+            throw new NullPointerException("Invalid URL");
         }
-        return valid;
+        return true;
     }
 
 
@@ -993,13 +1002,13 @@ public class Request {
 
     /**
      * Now we recommend using {@link NCallbackParse}, which do simplify work with http request lifecycle.
-     * {@link NTask.NTaskListener} is no longer used for the manual implementation of the client, but you can do if necessary.
+     * {@link BaseTask.NTaskListener} is no longer used for the manual implementation of the client, but you can do if necessary.
      *
      * @see Request#start(NCallback)
      * @see Request#startWithParse(NCallbackParse)
      */
     @Deprecated
-    public Request setListener(NTask.NTaskListener listener) {
+    public Request setListener(BaseTask.NTaskListener listener) {
         this.taskListener = listener;
         return this;
     }

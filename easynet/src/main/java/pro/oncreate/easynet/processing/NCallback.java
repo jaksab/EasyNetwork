@@ -1,4 +1,4 @@
-package pro.oncreate.easynet.tasks;
+package pro.oncreate.easynet.processing;
 
 import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.models.NResponseModel;

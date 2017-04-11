@@ -1,7 +1,5 @@
 package pro.oncreate.easynet.data;
 
-import pro.oncreate.easynet.tasks.NTask;
-
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
  */
@@ -9,7 +7,7 @@ import pro.oncreate.easynet.tasks.NTask;
 @SuppressWarnings("unused,WeakerAccess")
 public enum NErrors {
     /**
-     * Error during connection process in {@link NTask#doInBackground}
+     * Error during connection process in {@link pro.oncreate.easynet.processing.BaseTask#doInBackground}
      */
     CONNECTION_ERROR,
     /**

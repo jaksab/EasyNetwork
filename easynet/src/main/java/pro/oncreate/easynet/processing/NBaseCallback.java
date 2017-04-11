@@ -1,4 +1,4 @@
-package pro.oncreate.easynet.tasks;
+package pro.oncreate.easynet.processing;
 
 import android.os.Handler;
 import android.os.Message;
@@ -19,7 +19,7 @@ import pro.oncreate.easynet.utils.NLog;
  */
 
 @SuppressWarnings("unused,WeakerAccess")
-public abstract class NBaseCallback implements NTask.NTaskListener {
+public abstract class NBaseCallback implements BaseTask.NTaskListener {
 
     private static final int MESSAGE_SHOW_PROGRESS = 100;
     private static final int DEFAULT_DELAY = 399;

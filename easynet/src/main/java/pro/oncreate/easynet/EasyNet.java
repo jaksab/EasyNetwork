@@ -1,5 +1,7 @@
 package pro.oncreate.easynet;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +10,8 @@ import pro.oncreate.easynet.data.NConst;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
-import pro.oncreate.easynet.tasks.NTask;
+import pro.oncreate.easynet.processing.BaseTask;
+import pro.oncreate.easynet.utils.NHelper;
 
 import static pro.oncreate.easynet.data.NConst.DELETE;
 import static pro.oncreate.easynet.data.NConst.GET;
@@ -40,7 +43,7 @@ public class EasyNet {
     private ArrayList<OnErrorDefaultListenerWithCode> onErrorDefaultListenersCollection = new ArrayList<>();
     private OnErrorDefaultListener onErrorDefaultListener;
 
-    private Map<String, NTask> taskQueue;
+    private Map<String, BaseTask> taskQueue;
 
     private static final String[] SUPPORTED_METHODS = {
             GET, POST, PUT, DELETE, OPTIONS, HEAD
@@ -203,7 +206,7 @@ public class EasyNet {
      * @param tag  unique name
      * @param task NTask instance
      */
-    public void addTask(String tag, NTask task) {
+    public void addTask(String tag, BaseTask task) {
         if (taskQueue == null)
             taskQueue = new HashMap<>();
         taskQueue.put(tag, task);
@@ -231,14 +234,14 @@ public class EasyNet {
      * Cancel all current request execution.
      */
     public void cancelAllTasks() {
-        for (NTask task : taskQueue.values()) {
+        for (BaseTask task : taskQueue.values()) {
             task.cancel(false);
         }
     }
 
 
     //
-    // Other
+    // Getters and setters
     //
 
 
@@ -333,5 +336,16 @@ public class EasyNet {
     public static Request multipart(String path, Object... params) {
         return multipart().setPath(path, params);
     }
+
+
+    //
+    // Bonus
+    //
+
+
+    public static boolean isActiveInternet(Context context) {
+        return NHelper.isActiveInternet(context);
+    }
+
 }
 

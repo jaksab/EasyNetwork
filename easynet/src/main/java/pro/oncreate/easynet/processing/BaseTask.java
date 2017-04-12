@@ -1,6 +1,7 @@
 package pro.oncreate.easynet.processing;
 
 import android.os.AsyncTask;
+import android.os.Process;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,6 +24,9 @@ import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.utils.NDataBuilder;
 import pro.oncreate.easynet.utils.NLog;
+
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
 
 /**
@@ -65,12 +69,14 @@ public abstract class BaseTask extends AsyncTask<String, Integer, NResponseModel
         if (listener != null)
             listener.start(requestModel);
         requestModel.setStartTime(System.currentTimeMillis());
-        setTag("task#" + requestModel.getStartTime());
+        setTag(requestModel.getTag());
         EasyNet.getInstance().addTask(this.tag, this);
     }
 
     @Override
     protected NResponseModel doInBackground(String... params) {
+        Process.setThreadPriority(THREAD_PRIORITY_BACKGROUND + THREAD_PRIORITY_MORE_FAVORABLE);
+
         NResponseModel responseModel;
         HttpURLConnection connection = null;
         String body;

@@ -1,6 +1,7 @@
 package pro.oncreate.easynet;
 
 import android.app.Dialog;
+import android.os.AsyncTask;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Patterns;
 import android.view.View;
@@ -72,6 +73,7 @@ public class Request {
 
     private NRequestModel requestModel;
     private String contentType;
+    private boolean parallelExecution = false;
     private BaseTask.NTaskListener taskListener;
 
 
@@ -897,71 +899,52 @@ public class Request {
 
 
     /**
-     * Use this method, if you want to take response together with the representation model.
-     * The model must inherit {@link pro.oncreate.easynet.models.NBaseModel}, which organize parse algorithm.
-     *
-     * @param taskListener request lifecycle callback
-     */
-    @Deprecated
-    public void startWithParse(NCallbackParse taskListener) {
-        this.taskListener = taskListener;
-        this.requestModel.setNeedParse(true);
-        this.startTask();
-    }
-
-    /**
-     * Use model auto parsing functional with Gson library.
-     *
-     * @param taskListener request lifecycle callback
-     */
-    @Deprecated
-    public void startWithParse(NCallbackGson taskListener) {
-        this.taskListener = taskListener;
-        this.requestModel.setNeedParse(true);
-        this.startTask();
-    }
-
-    /**
      * Use this method, if you want to take response without representation model.
      *
      * @param taskListener instance of callback
+     * @return String - tag (task id)
      */
-    public void start(NCallback taskListener) {
+    public String start(NCallback taskListener) {
         this.taskListener = taskListener;
+        this.requestModel.setTag("task#" + requestModel.getStartTime());
         this.startTask();
+        return this.requestModel.getTag();
     }
-
 
     /**
      * Use this method, if you want to take response together with the representation model.
      * The model must inherit {@link pro.oncreate.easynet.models.NBaseModel}, which organize parse algorithm.
      *
      * @param taskListener request lifecycle callback
+     * @return String - tag (task id)
      */
-    public void start(NCallbackParse taskListener) {
-        this.taskListener = taskListener;
+    public String start(NCallbackParse taskListener) {
         this.requestModel.setNeedParse(true);
-        this.startTask();
+        return start(taskListener);
     }
 
     /**
      * Use model auto parsing functional with Gson library.
      *
      * @param taskListener request lifecycle callback
+     * @return String - tag (task id)
      */
-    public void start(NCallbackGson taskListener) {
-        this.taskListener = taskListener;
+    public String start(NCallbackGson taskListener) {
         this.requestModel.setNeedParse(true);
-        this.startTask();
+        return start(taskListener);
     }
 
     private void startTask() {
-        if (validateRequest())
-            makeTask().execute();
+        if (validateRequest()) {
+            if (parallelExecution)
+                makeTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            else
+                makeTask().execute();
+        }
     }
 
     /**
-     * Execute request synchronously
+     * Execute request synchronously (UI thread). Parallel execution always false.
      */
     public NResponseModel getSynchronously() throws ExecutionException, InterruptedException {
         if (validateRequest())
@@ -1013,6 +996,10 @@ public class Request {
         return task;
     }
 
+    public Request parallelExecution() {
+        this.parallelExecution = true;
+        return this;
+    }
 
     //
     // Validate request data
@@ -1041,7 +1028,6 @@ public class Request {
      * {@link BaseTask.NTaskListener} is no longer used for the manual implementation of the client, but you can do if necessary.
      *
      * @see Request#start(NCallback)
-     * @see Request#startWithParse(NCallbackParse)
      */
     @Deprecated
     public Request setListener(BaseTask.NTaskListener listener) {

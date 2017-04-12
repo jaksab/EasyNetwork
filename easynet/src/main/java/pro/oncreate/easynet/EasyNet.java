@@ -94,7 +94,7 @@ public class EasyNet {
         /**
          * Receives a empty Request instance that must a result return
          */
-        Request defaultConfig(Request nBuilder);
+        Request defaultConfig(Request request);
     }
 
 
@@ -225,9 +225,10 @@ public class EasyNet {
      * Cancel current request execution for tag.
      *
      * @param tag - name of task
+     * @return true - if task is present and has been removed.
      */
-    public void removeTask(String tag) {
-        taskQueue.remove(tag);
+    public boolean removeTask(String tag) {
+        return taskQueue.remove(tag) != null;
     }
 
     /**

@@ -27,6 +27,7 @@ public class NRequestModel {
     private String url;
     private Method method;
     private String requestType;
+    private String tag;
 
     // Request data
     private ArrayList<NKeyValueModel> headers;
@@ -209,10 +210,19 @@ public class NRequestModel {
         this.enableManualRedirect = enableManuadlRedirect;
     }
 
-    //
-    //
-    //
+    public String getTag() {
+        if (tag != null)
+            return tag;
+        else return "task#" + System.currentTimeMillis();
+    }
 
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    //
+    //
+    //
 
     public List<BindView> getBindViews() {
         return bindViews;
@@ -269,6 +279,5 @@ public class NRequestModel {
             this.paramsFile.clear();
         this.body = null;
     }
-
 
 }

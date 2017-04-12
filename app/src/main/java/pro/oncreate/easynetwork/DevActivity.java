@@ -7,8 +7,6 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import pro.oncreate.easynet.PaginationModel;
-import pro.oncreate.easynet.processing.NCallback;
-import pro.oncreate.easynetwork.api.API;
 
 public class DevActivity extends AppCompatActivity implements PaginationModel.PaginationInterface {
 
@@ -19,7 +17,6 @@ public class DevActivity extends AppCompatActivity implements PaginationModel.Pa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dev);
-
         progressBar = (ProgressBar) findViewById(R.id.pb);
         view = (FrameLayout) findViewById(R.id.view);
         view2 = (FrameLayout) findViewById(R.id.view2);
@@ -33,9 +30,6 @@ public class DevActivity extends AppCompatActivity implements PaginationModel.Pa
     }
 
     private void start() {
-        API.get().enablePagination(this).bind(progressBar, view, view2, view3)
-                .start(new NCallback() {
-                });
     }
 
     @Override

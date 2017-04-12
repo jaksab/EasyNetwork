@@ -2,19 +2,20 @@
 
 # EasyNetwork
 
-EasyNetwork - is powerful and easy-to-use http library for Android.
+EasyNetwork - is powerful and easy-to-use http library for Android. <br/> 
+[Wiki - Development guidelines](https://github.com/jaksab/EasyNetwork/wiki)
 
 # Download
   
 ```groovy
 dependencies {
-    compile 'pro.oncreate.easynet:easynet:1.1.7'
+    compile 'pro.oncreate.easynet:easynet:1.1.9'
 }
 ```
 
 # Usage
 
-Make simple request by means of `NBuilder` and start execution: 
+Make simple request by means of `Request` and start execution: 
 
 
 ```java
@@ -30,7 +31,7 @@ Make simple request by means of `NBuilder` and start execution:
                 
 ```
 
-Primary configuration example (with `NConfig` instance):
+Primary configuration example (with `EasyNet` instance):
 
 ```java
 public class App extends Application {
@@ -38,38 +39,38 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        NConfig netConfig = NConfig.getInstance();
-        netConfig.setWriteLogs(true); // Default
-        netConfig.setDefaultNBuilderListener(new NConfig.NBuilderDefaultListener() {
+        EasyNet.getInstance()
+        .setWriteLogs(true) // Default
+        .setDefaultNBuilderListener(new EasyNet.NBuilderDefaultListener() {
             @Override
-            public NBuilder defaultConfig(NBuilder nBuilder) {
-                return nBuilder
+            public Request defaultConfig(Request request) {
+                return request
                         .setHost("https://example.com/api")
                         .addHeader("Accept-Language", Locale.getDefault().toString());
             }
-        });
-        netConfig.addOnErrorDefaultListener(new NConfig.OnErrorDefaultListenerWithCode(404) {
+        })
+       .addOnErrorDefaultListener(new EasyNet.OnErrorDefaultListenerWithCode(404) {
             @Override
             public void onError(NResponseModel responseModel) {
-                // Intercepted error 404
+                 // For example, intercepted error 404
             }
         });
     }
 }
 ```
 
-See more: [Wiki](https://github.com/jaksab/EasyNetwork/wiki)
+See more examples: [Wiki](https://github.com/jaksab/EasyNetwork/wiki)
 
 # Features
 
 - Functional "from the box": without mandatory primary configuration, anywhere in the code, functionally and simply.
-- Integration with GSON.
-- There is a flexible functionality for hiding\showing\disabled the views, progress dialogs, swipeRefresh layout when the query is executed.
+- Integration with Gson library.
+- There is a flexible functionality for hiding\showing\disabled the views, progress dialogs, swipeRefresh layout when the query is executed. [More](https://github.com/jaksab/EasyNetwork/wiki/5.-Progress-control)
 - Visual logs.
-- Controll the tasks exucution: cancel all tasks, cancel task by tag and other. Example: `NConfig.getInstance().cancelAllTasks();`.
-- The ability to intercept the results of a query with certain parameters.
-- Separation of errors into: error (server) and failed (connection).
-- Handling the redirects
+- Controll the tasks exucution: cancel all tasks, cancel task by tag and other. [More](https://github.com/jaksab/EasyNetwork/wiki/7.-Execution-control)
+- The ability to intercept the results of a request with certain parameters.
+- Separation of errors into: error (server) and failed (connection). [More](https://github.com/jaksab/EasyNetwork/wiki/4.-Error-processing)
+- Handling the redirects.
 
 # License
 

@@ -65,11 +65,11 @@ See more examples: [Wiki](https://github.com/jaksab/EasyNetwork/wiki)
 
 - Functional "from the box": without mandatory primary configuration, anywhere in the code, functionally and simply.
 - Integration with Gson library.
-- There is a flexible functionality for hiding\showing\disabled the views, progress dialogs, swipeRefresh layout when the query is executed [More](https://github.com/jaksab/EasyNetwork/wiki/5.-Progress-control).
+- There is a flexible functionality for hiding\showing\disabled the views, progress dialogs, swipeRefresh layout when the query is executed. [More](https://github.com/jaksab/EasyNetwork/wiki/5.-Progress-control)
 - Visual logs.
-- Controll the tasks exucution: cancel all tasks, cancel task by tag and other. [More](https://github.com/jaksab/EasyNetwork/wiki/7.-Execution-control).
-- The ability to intercept the results of a query with certain parameters.
-- Separation of errors into: error (server) and failed (connection).
+- Controll the tasks exucution: cancel all tasks, cancel task by tag and other. [More](https://github.com/jaksab/EasyNetwork/wiki/7.-Execution-control)
+- The ability to intercept the results of a request with certain parameters.
+- Separation of errors into: error (server) and failed (connection). [More](https://github.com/jaksab/EasyNetwork/wiki/4.-Error-processing)
 - Handling the redirects.
 
 # License

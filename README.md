@@ -1,4 +1,5 @@
 [ ![Download](https://api.bintray.com/packages/jaksab/EasyNetwork/easynet/images/download.svg) ](https://bintray.com/jaksab/EasyNetwork/easynet/_latestVersion)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-EasyNetwork-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/5578)
 
 # EasyNetwork
 

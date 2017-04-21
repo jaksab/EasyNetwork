@@ -8,14 +8,12 @@ import java.util.HashMap;
 
 @SuppressWarnings("unused,WeakerAccess")
 public class PaginationModel {
-
     private HashMap<String, Integer> data = new HashMap<>();
     private PaginationInterface paginationInterface;
 
     PaginationModel(String... keys) {
         if (keys == null || keys.length == 0)
             throw new IllegalArgumentException("Pagination keys cannot be empty");
-
         for (String key : keys) data.put(key, 0);
     }
 
@@ -32,6 +30,6 @@ public class PaginationModel {
     }
 
     public interface PaginationInterface {
-        int getPaginationValue(String key);
+        Integer getPaginationValue(String key);
     }
 }

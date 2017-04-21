@@ -795,7 +795,10 @@ public class Request {
      */
     public String start(NCallbackParse taskListener) {
         this.requestModel.setNeedParse(true);
-        return start(taskListener);
+        this.taskListener = taskListener;
+        this.requestModel.setTag("task#" + requestModel.getStartTime());
+        this.startTask();
+        return this.requestModel.getTag();
     }
 
     /**
@@ -806,7 +809,10 @@ public class Request {
      */
     public String start(NCallbackGson taskListener) {
         this.requestModel.setNeedParse(true);
-        return start(taskListener);
+        this.taskListener = taskListener;
+        this.requestModel.setTag("task#" + requestModel.getStartTime());
+        this.startTask();
+        return this.requestModel.getTag();
     }
 
     private void startTask() {
@@ -852,7 +858,6 @@ public class Request {
                 break;
             }
         }
-
         BaseTask task;
         switch (requestModel.getRequestType()) {
             case NConst.MIME_TYPE_X_WWW_FORM_URLENCODED:

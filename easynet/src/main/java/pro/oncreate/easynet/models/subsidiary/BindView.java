@@ -53,10 +53,10 @@ public class BindView {
                 view.setVisibility(View.VISIBLE);
                 break;
             case DISABLE_AND_ENABLE_AFTER:
-                view.setEnabled(true);
+                view.setEnabled(false);
                 break;
             case ENABLE_AND_DISABLE_AFTER:
-                view.setEnabled(false);
+                view.setEnabled(true);
                 break;
         }
     }
@@ -76,10 +76,10 @@ public class BindView {
                 else view.setVisibility(View.INVISIBLE);
                 break;
             case DISABLE_AND_ENABLE_AFTER:
-                view.setEnabled(false);
+                view.setEnabled(true);
                 break;
             case ENABLE_AND_DISABLE_AFTER:
-                view.setEnabled(true);
+                view.setEnabled(false);
                 break;
         }
     }
@@ -99,10 +99,10 @@ public class BindView {
                 else view.setVisibility(View.INVISIBLE);
                 break;
             case DISABLE_AND_ENABLE_AFTER:
-                view.setEnabled(false);
+                view.setEnabled(true);
                 break;
             case ENABLE_AND_DISABLE_AFTER:
-                view.setEnabled(true);
+                view.setEnabled(false);
                 break;
         }
     }

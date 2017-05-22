@@ -22,6 +22,7 @@ import pro.oncreate.easynet.models.subsidiary.BindParams;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
+import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
 import pro.oncreate.easynet.processing.BaseTask;
 import pro.oncreate.easynet.processing.JSONTask;
 import pro.oncreate.easynet.processing.MultipartTask;
@@ -108,7 +109,7 @@ public class Request {
     @Deprecated
     public static Request create() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder();
+                .getDefaultRequestInstance();
     }
 
     /**
@@ -117,7 +118,7 @@ public class Request {
     @Deprecated
     public static Request create(String method) {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(method);
     }
 
@@ -127,7 +128,7 @@ public class Request {
     @Deprecated
     public static Request get() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(GET);
     }
 
@@ -137,7 +138,7 @@ public class Request {
     @Deprecated
     public static Request post() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(POST);
     }
 
@@ -147,7 +148,7 @@ public class Request {
     @Deprecated
     public static Request put() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(PUT);
     }
 
@@ -157,7 +158,7 @@ public class Request {
     @Deprecated
     public static Request delete() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(DELETE);
     }
 
@@ -167,7 +168,7 @@ public class Request {
     @Deprecated
     public static Request opt() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(OPTIONS);
     }
 
@@ -177,7 +178,7 @@ public class Request {
     @Deprecated
     public static Request head() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(HEAD);
     }
 
@@ -187,7 +188,7 @@ public class Request {
     @Deprecated
     public static Request multipart() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setContentType(NConst.MIME_TYPE_MULTIPART_FORM_DATA);
     }
 
@@ -769,6 +770,24 @@ public class Request {
 
 
     //
+    // Cache
+    //
+
+    /**
+     * Call this method, if you want to save response data to cache.
+     */
+    public Request cacheResponse() {
+        this.requestModel.setCacheResponse(true);
+        return this;
+    }
+
+    public Request startOptions(RequestExecutionOptions executionOptions) {
+        this.requestModel.setRequestExecutionOptions(executionOptions);
+        return this;
+    }
+
+
+    //
     // Start the request
     //
 
@@ -847,17 +866,17 @@ public class Request {
      * This method sets the primary data and selects the appropriate instance of BaseTask class heirs.
      */
     private BaseTask makeTask() {
-        addHeader(NConst.CONTENT_TYPE, contentType == null ? NConst.MIME_TYPE_X_WWW_FORM_URLENCODED : contentType);
         if (contentType == null)
-            this.requestModel.setRequestType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+            setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
+        else if (contentType.equals(NConst.MIME_TYPE_MULTIPART_FORM_DATA))
+            requestModel.setMethod(POST);
+
+        addHeader(NConst.CONTENT_TYPE, contentType);
         setupPagination();
 
-        switch (contentType) {
-            case NConst.MIME_TYPE_MULTIPART_FORM_DATA: {
-                requestModel.setMethod(POST);
-                break;
-            }
-        }
+        if (requestModel.getRequestExecutionOptions() == null)
+            requestModel.setRequestExecutionOptions(new RequestExecutionOptions(RequestExecutionOptions.NETWORK_ONLY));
+
         BaseTask task;
         switch (requestModel.getRequestType()) {
             case NConst.MIME_TYPE_X_WWW_FORM_URLENCODED:

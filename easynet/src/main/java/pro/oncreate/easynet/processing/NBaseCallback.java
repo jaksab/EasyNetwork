@@ -182,4 +182,10 @@ public abstract class NBaseCallback implements BaseTask.NTaskListener {
     }
 
     abstract public void onRedirectInterrupted(String location, NResponseModel responseModel);
+
+    public void onCacheLoaded(NResponseModel responseModel) {
+    }
+
+    public void onCacheMissing(NRequestModel requestModel) {
+    }
 }

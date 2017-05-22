@@ -19,7 +19,8 @@ public class App extends Application {
         super.onCreate();
         EasyNet.getInstance()
                 .setWriteLogs(true)
-                .setDefaultNBuilderListener(new EasyNet.NBuilderDefaultListener() {
+                .setCacheDir(getCacheDir())
+                .setDefaultRequestListener(new EasyNet.RequestDefaultListener() {
                     @Override
                     public Request defaultConfig(Request request) {
                         return request

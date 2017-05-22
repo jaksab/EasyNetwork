@@ -3,9 +3,14 @@ package pro.oncreate.easynet.processing;
 import android.os.AsyncTask;
 import android.os.Process;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -22,6 +27,7 @@ import pro.oncreate.easynet.methods.QueryMethod;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
+import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
 import pro.oncreate.easynet.utils.NDataBuilder;
 import pro.oncreate.easynet.utils.NLog;
 
@@ -34,7 +40,7 @@ import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
  */
 
 @SuppressWarnings("unused,WeakerAccess")
-public abstract class BaseTask extends AsyncTask<String, Integer, NResponseModel> {
+public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel> {
 
 
     //
@@ -81,6 +87,23 @@ public abstract class BaseTask extends AsyncTask<String, Integer, NResponseModel
         HttpURLConnection connection = null;
         String body;
         InputStream inputStream;
+
+        int executionOptions = requestModel.getRequestExecutionOptions().getRequestExecutionType();
+        if (executionOptions == RequestExecutionOptions.CACHE_AND_NETWORK
+                || executionOptions == RequestExecutionOptions.CACHE_ONLY) {
+            String lastResponse = loadResponse(requestModel.getUrl());
+            NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
+
+            if (lastResponse != null) {
+                NLog.logD("[Load from cache]: " + lastResponse);
+                publishProgress(cacheResponse);
+            } else {
+                publishProgress(requestModel);
+            }
+
+            if (executionOptions == RequestExecutionOptions.CACHE_ONLY)
+                return cacheResponse;
+        }
 
         try {
             NLog.logD("======== START REQUEST ========");
@@ -129,6 +152,9 @@ public abstract class BaseTask extends AsyncTask<String, Integer, NResponseModel
 
                     NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
 
+                    if (requestModel.isCacheResponse())
+                        saveResponse(requestModel.getUrl(), body, headers);
+
                     if (listener != null)
                         listener.finish(responseModel);
                     break;
@@ -138,34 +164,42 @@ public abstract class BaseTask extends AsyncTask<String, Integer, NResponseModel
             responseModel = null;
             NLog.logD("[Error]: " + e.toString());
         } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+            if (connection != null) connection.disconnect();
             EasyNet.getInstance().removeTask(getTag());
         }
         return responseModel;
     }
 
     @Override
-    protected void onProgressUpdate(Integer... errorCode) {
+    protected void onProgressUpdate(Object... values) {
+        if (values != null && values.length > 0) {
+            if (values.length == 1 && values[0] instanceof NResponseModel && listener instanceof NBaseCallback) {
+                ((NBaseCallback) listener).onCacheLoaded((NResponseModel) values[0]);
+            }
+            if (values.length == 1 && values[0] instanceof NRequestModel && listener instanceof NBaseCallback) {
+                ((NBaseCallback) listener).onCacheMissing((NRequestModel) values[0]);
+            }
+        }
     }
 
     @Override
     protected void onPostExecute(NResponseModel responseModel) {
         super.onPostExecute(responseModel);
-        if (listener != null) {
-            if (responseModel != null) {
-                if (!responseModel.isRedirectInterrupted())
+        if (listener != null) { // Ignore response if no callback
+            if (responseModel != null) { // Response is present
+                if (responseModel.isFromCache()) // Response from cache, ignore him
+                    return;
+                if (!responseModel.isRedirectInterrupted()) // Response OK
                     listener.finishUI(responseModel);
-                else if (listener instanceof NBaseCallback) {
+                else if (listener instanceof NBaseCallback) { // Response interrupted
                     ((NBaseCallback) listener).finishUIFailed();
                     ((NBaseCallback) listener).onRedirectInterrupted(responseModel.getRedirectLocation(), responseModel);
                 }
-            } else if (listener instanceof NBaseCallback) {
-                ((NBaseCallback) listener).finishUIFailed();
-                if (requestModel.isEnableDefaultListeners())
+            } else if (listener instanceof NBaseCallback) { // Response == null
+                ((NBaseCallback) listener).finishUIFailed(); // Finish all request progress views
+                if (requestModel.isEnableDefaultListeners()) // Failed processing with default listener
                     ((NBaseCallback) listener).preFailed(requestModel, NErrors.CONNECTION_ERROR);
-                else
+                else // // Failed processing without default listener
                     ((NBaseCallback) listener).onFailed(requestModel, NErrors.CONNECTION_ERROR);
             }
         }
@@ -260,11 +294,51 @@ public abstract class BaseTask extends AsyncTask<String, Integer, NResponseModel
         return outputStream.toString();
     }
 
+    protected void saveResponse(String key, String body, Map<String, List<String>> headers) {
+        try {
+            String filename = generateCacheFileName(key);
+            File file = EasyNet.getInstance().getCacheFile(filename);
+
+            FileOutputStream fos = new FileOutputStream(file, false);
+            fos.write(body.getBytes());
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected String loadResponse(String key) {
+        try {
+            String filename = generateCacheFileName(key);
+            File file = EasyNet.getInstance().getCacheFile(filename);
+
+            BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            String line;
+            StringBuilder buffer = new StringBuilder();
+            while ((line = input.readLine()) != null) {
+                buffer.append(line);
+            }
+            input.close();
+            return buffer.toString();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    protected NResponseModel getCacheResponse(NRequestModel requestModel, String body) {
+        NResponseModel responseModel = new NResponseModel(requestModel.getUrl(), 0, body, null);
+        responseModel.setFromCache(true);
+        return responseModel;
+    }
+
 
     //
     // Other
     //
 
+    public String generateCacheFileName(String key) {
+        return key.replace("/", "").replace(":", "").replace(".", "");
+    }
 
     public String getTag() {
         return tag;

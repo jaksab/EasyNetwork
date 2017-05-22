@@ -20,6 +20,7 @@ public class NResponseModel {
     private int responseTime;
     private boolean redirectInterrupted;
     private String redirectLocation;
+    private boolean fromCache;
 
     public NResponseModel(String url, int statusCode, String body, Map<String, List<String>> headers) {
         this.url = url;
@@ -94,5 +95,13 @@ public class NResponseModel {
 
     public void setRedirectLocation(String redirectLocation) {
         this.redirectLocation = redirectLocation;
+    }
+
+    public boolean isFromCache() {
+        return fromCache;
+    }
+
+    public void setFromCache(boolean fromCache) {
+        this.fromCache = fromCache;
     }
 }

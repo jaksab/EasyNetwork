@@ -6,7 +6,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
+import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.PaginationModel;
+import pro.oncreate.easynet.models.NResponseModel;
+import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
+import pro.oncreate.easynet.processing.NCallback;
 
 public class DevActivity extends AppCompatActivity implements PaginationModel.PaginationInterface {
 
@@ -30,10 +34,19 @@ public class DevActivity extends AppCompatActivity implements PaginationModel.Pa
     }
 
     private void start() {
+        EasyNet.get().setUrl("https://api.letshindig.com", "v1/users/privacy-policy")
+                .cacheResponse()
+                .startOptions(new RequestExecutionOptions(RequestExecutionOptions.CACHE_AND_NETWORK))
+                .start(new NCallback() {
+                    @Override
+                    public void onSuccess(NResponseModel responseModel) {
+                        super.onSuccess(responseModel);
+                    }
+                });
     }
 
     @Override
-    public int getPaginationValue(String key) {
+    public Integer getPaginationValue(String key) {
         int value = 0;
         switch (key) {
             case "limit":

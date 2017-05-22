@@ -14,6 +14,7 @@ import pro.oncreate.easynet.methods.Method;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
+import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
 import pro.oncreate.easynet.processing.NBaseCallback;
 
 /**
@@ -54,6 +55,10 @@ public class NRequestModel {
     private ProgressBar progressBar;
     private View progressView;
     private SwipeRefreshLayout refreshLayout;
+
+    // Cache
+    private boolean cacheResponse;
+    private RequestExecutionOptions requestExecutionOptions;
 
 
     public String getUrl() {
@@ -220,8 +225,24 @@ public class NRequestModel {
         this.tag = tag;
     }
 
+    public boolean isCacheResponse() {
+        return cacheResponse;
+    }
+
+    public void setCacheResponse(boolean cacheResponse) {
+        this.cacheResponse = cacheResponse;
+    }
+
+    public RequestExecutionOptions getRequestExecutionOptions() {
+        return requestExecutionOptions;
+    }
+
+    public void setRequestExecutionOptions(RequestExecutionOptions requestExecutionOptions) {
+        this.requestExecutionOptions = requestExecutionOptions;
+    }
+
     //
-    //
+    // Progress
     //
 
     public List<BindView> getBindViews() {

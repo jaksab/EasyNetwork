@@ -2,6 +2,8 @@ package pro.oncreate.easynet;
 
 import android.content.Context;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,11 +34,12 @@ public class EasyNet {
     // Fields
     //
 
+    public static final String CACHE_DIR_NAME = "easy-network-cache";
 
     volatile private static EasyNet config;
     private boolean writeLogs = true;
-    private Request nBuilder; // Default nBuilder instance
-    private NBuilderDefaultListener defaultNBuilderListener;
+    private Request request; // Default request instance
+    private RequestDefaultListener defaultRequestListener;
 
     private OnSuccessDefaultListener onSuccessDefaultListener;
     private OnFailedDefaultListener onFailedDefaultListener;
@@ -48,6 +51,9 @@ public class EasyNet {
     private static final String[] SUPPORTED_METHODS = {
             GET, POST, PUT, DELETE, OPTIONS, HEAD
     };
+
+    private File cacheDir;
+    private int maxCacheItems = 20;
 
     //
     // Init
@@ -72,25 +78,25 @@ public class EasyNet {
 
 
     //
-    // Default builders
+    // Default request
     //
 
 
     /**
      * Use this callback to set the basic properties for all queries.
      */
-    public EasyNet setDefaultNBuilderListener(NBuilderDefaultListener defaultNBuilderListener) {
-        this.defaultNBuilderListener = defaultNBuilderListener;
+    public EasyNet setDefaultRequestListener(RequestDefaultListener requestDefaultListener) {
+        this.defaultRequestListener = requestDefaultListener;
         return this;
     }
 
-    public Request getDefaultNBuilder() {
-        if (defaultNBuilderListener != null)
-            this.nBuilder = defaultNBuilderListener.defaultConfig(Request.newInstance());
-        return this.nBuilder;
+    public Request getDefaultRequestInstance() {
+        if (defaultRequestListener != null)
+            this.request = defaultRequestListener.defaultConfig(Request.newInstance());
+        return this.request;
     }
 
-    public interface NBuilderDefaultListener {
+    public interface RequestDefaultListener {
         /**
          * Receives a empty Request instance that must a result return
          */
@@ -140,7 +146,7 @@ public class EasyNet {
     }
 
     public interface OnFailedDefaultListener {
-        boolean onFailed(NRequestModel nRequestModel, NErrors error);
+        boolean onFailed(NRequestModel requestModel, NErrors error);
     }
 
     // --> Errors
@@ -264,49 +270,77 @@ public class EasyNet {
 
 
     //
+    // Cache
+    //
+
+
+    public EasyNet setCacheDir(File cacheDir) {
+        this.cacheDir = cacheDir;
+        return this;
+    }
+
+    public int getMaxCacheItems() {
+        return maxCacheItems;
+    }
+
+    public EasyNet setMaxCacheItems(int maxCacheItems) {
+        this.maxCacheItems = maxCacheItems;
+        return this;
+    }
+
+    public File getCacheDir() {
+        return this.cacheDir;
+    }
+
+    public File getCacheFile(String name) throws IOException {
+        return new File(getCacheDir(), name + ".tmp");
+    }
+
+
+    //
     // Request Maker
     //
 
 
     public static Request get() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(GET);
     }
 
     public static Request post() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(POST);
     }
 
     public static Request put() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(PUT);
     }
 
     public static Request delete() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(DELETE);
     }
 
     public static Request opt() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(OPTIONS);
     }
 
     public static Request head() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setMethod(HEAD);
     }
 
     public static Request multipart() {
         return EasyNet.getInstance()
-                .getDefaultNBuilder()
+                .getDefaultRequestInstance()
                 .setContentType(NConst.MIME_TYPE_MULTIPART_FORM_DATA);
     }
 

@@ -72,6 +72,7 @@ See more examples: [Wiki](https://github.com/jaksab/EasyNetwork/wiki)
 - The ability to intercept the results of a request with certain parameters.
 - Separation of errors into: error (server) and failed (connection). [More](https://github.com/jaksab/EasyNetwork/wiki/4.-Error-processing)
 - Handling the redirects.
+- Cache responses.
 
 # License
 

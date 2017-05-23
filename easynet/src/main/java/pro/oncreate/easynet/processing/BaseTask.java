@@ -94,11 +94,17 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             String lastResponse = loadResponse(requestModel.getUrl());
             NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
 
+            NLog.logD("======== TRY TO LOAD CACHE ========");
             if (lastResponse != null) {
                 NLog.logD("[Load from cache]: " + lastResponse);
-                publishProgress(cacheResponse);
+                if (listener != null)
+                    listener.finish(cacheResponse);
+                if (executionOptions != RequestExecutionOptions.CACHE_ONLY)
+                    publishProgress(cacheResponse);
             } else {
-                publishProgress(requestModel);
+                NLog.logD("[Cache missing]");
+                if (executionOptions != RequestExecutionOptions.CACHE_ONLY)
+                    publishProgress(requestModel);
             }
 
             if (executionOptions == RequestExecutionOptions.CACHE_ONLY)
@@ -149,11 +155,16 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                     responseModel = new NResponseModel(requestModel.getUrl(), responseCode, body, headers);
                     responseModel.setEndTime(System.currentTimeMillis());
                     responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
-
                     NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
 
                     if (requestModel.isCacheResponse())
-                        saveResponse(requestModel.getUrl(), body, headers);
+                        saveResponse(requestModel.getUrl(), body);
+
+                    try {
+                        inputStream.close();
+                        inputStream = null;
+                    } catch (Exception ignored) {
+                    }
 
                     if (listener != null)
                         listener.finish(responseModel);
@@ -164,8 +175,12 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             responseModel = null;
             NLog.logD("[Error]: " + e.toString());
         } finally {
-            if (connection != null) connection.disconnect();
-            EasyNet.getInstance().removeTask(getTag());
+            try {
+                if (connection != null) connection.disconnect();
+                EasyNet.getInstance().removeTask(getTag());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return responseModel;
     }
@@ -174,7 +189,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
     protected void onProgressUpdate(Object... values) {
         if (values != null && values.length > 0) {
             if (values.length == 1 && values[0] instanceof NResponseModel && listener instanceof NBaseCallback) {
-                ((NBaseCallback) listener).onCacheLoaded((NResponseModel) values[0]);
+                listener.finishUI((NResponseModel) values[0]);
             }
             if (values.length == 1 && values[0] instanceof NRequestModel && listener instanceof NBaseCallback) {
                 ((NBaseCallback) listener).onCacheMissing((NRequestModel) values[0]);
@@ -187,8 +202,6 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         super.onPostExecute(responseModel);
         if (listener != null) { // Ignore response if no callback
             if (responseModel != null) { // Response is present
-                if (responseModel.isFromCache()) // Response from cache, ignore him
-                    return;
                 if (!responseModel.isRedirectInterrupted()) // Response OK
                     listener.finishUI(responseModel);
                 else if (listener instanceof NBaseCallback) { // Response interrupted
@@ -294,39 +307,67 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         return outputStream.toString();
     }
 
-    protected void saveResponse(String key, String body, Map<String, List<String>> headers) {
+    protected void saveResponse(String key, String body) {
+        if (key == null || body == null)
+            return;
+
+        FileOutputStream fos = null;
         try {
             String filename = generateCacheFileName(key);
             File file = EasyNet.getInstance().getCacheFile(filename);
 
-            FileOutputStream fos = new FileOutputStream(file, false);
+            try {
+                if (EasyNet.getInstance().getCacheDir().listFiles().length >= EasyNet.getInstance().getMaxCacheItems())
+                    EasyNet.getInstance().clearCache();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            fos = new FileOutputStream(file, false);
             fos.write(body.getBytes());
             fos.close();
+            fos = null;
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (fos != null)
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
     protected String loadResponse(String key) {
+        BufferedReader input = null;
         try {
             String filename = generateCacheFileName(key);
             File file = EasyNet.getInstance().getCacheFile(filename);
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             String line;
             StringBuilder buffer = new StringBuilder();
             while ((line = input.readLine()) != null) {
                 buffer.append(line);
             }
             input.close();
+            input = null;
             return buffer.toString();
         } catch (IOException e) {
             return null;
+        } finally {
+            if (input != null)
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
     protected NResponseModel getCacheResponse(NRequestModel requestModel, String body) {
-        NResponseModel responseModel = new NResponseModel(requestModel.getUrl(), 0, body, null);
+        NResponseModel responseModel = new NResponseModel(requestModel.getUrl(), 200, body, null);
         responseModel.setFromCache(true);
         return responseModel;
     }

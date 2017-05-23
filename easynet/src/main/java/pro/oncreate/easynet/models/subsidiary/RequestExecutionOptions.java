@@ -11,17 +11,20 @@ public class RequestExecutionOptions {
     public static final int CACHE_ONLY = 2;
     public static final int CACHE_AND_NETWORK = 3;
 
+    public static final RequestExecutionOptions NETWORK_ONLY_OPTIONS
+            = new RequestExecutionOptions(NETWORK_ONLY);
+    public static final RequestExecutionOptions CACHE_ONLY_OPTIONS
+            = new RequestExecutionOptions(CACHE_ONLY);
+    public static final RequestExecutionOptions CACHE_AND_NETWORK_OPTIONS
+            = new RequestExecutionOptions(CACHE_AND_NETWORK);
+
     private int requestExecutionType;
 
-    public RequestExecutionOptions(int requestExecutionType) {
+    private RequestExecutionOptions(int requestExecutionType) {
         this.requestExecutionType = requestExecutionType;
     }
 
     public int getRequestExecutionType() {
         return requestExecutionType;
-    }
-
-    public void setRequestExecutionType(int requestExecutionType) {
-        this.requestExecutionType = requestExecutionType;
     }
 }

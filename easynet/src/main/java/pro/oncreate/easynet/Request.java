@@ -791,6 +791,16 @@ public class Request {
     // Start the request
     //
 
+    /**
+     * Start without callback (ignore response).
+     *
+     * @return String - tag (task id)
+     */
+    public String start() {
+        this.requestModel.setTag("task#" + requestModel.getStartTime());
+        this.startTask();
+        return this.requestModel.getTag();
+    }
 
     /**
      * Use this method, if you want to take response without representation model.
@@ -834,6 +844,22 @@ public class Request {
         return this.requestModel.getTag();
     }
 
+
+    public String start(RequestExecutionOptions executionOptions, NCallback taskListener) {
+        startOptions(executionOptions);
+        return start(taskListener);
+    }
+
+    public String start(RequestExecutionOptions executionOptions, NCallbackParse taskListener) {
+        startOptions(executionOptions);
+        return start(taskListener);
+    }
+
+    public String start(RequestExecutionOptions executionOptions, NCallbackGson taskListener) {
+        startOptions(executionOptions);
+        return start(taskListener);
+    }
+
     private void startTask() {
         if (validateRequest()) {
             if (parallelExecution)
@@ -875,7 +901,7 @@ public class Request {
         setupPagination();
 
         if (requestModel.getRequestExecutionOptions() == null)
-            requestModel.setRequestExecutionOptions(new RequestExecutionOptions(RequestExecutionOptions.NETWORK_ONLY));
+            requestModel.setRequestExecutionOptions(RequestExecutionOptions.NETWORK_ONLY_OPTIONS);
 
         BaseTask task;
         switch (requestModel.getRequestType()) {

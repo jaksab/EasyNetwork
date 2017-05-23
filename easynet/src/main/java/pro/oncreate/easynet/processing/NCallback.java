@@ -13,7 +13,11 @@ public class NCallback extends NBaseCallback {
     @Override
     public void finishUI(NResponseModel responseModel) {
         super.finishUI(responseModel);
-        if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
+        if (responseModel.isFromCache()) {
+            if (responseModel.getBody() == null)
+                onCacheMissing(requestModel);
+            else onCacheLoaded(responseModel);
+        } else if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
             if (requestModel.isEnableDefaultListeners())
                 preSuccess(responseModel);
             else onSuccess(responseModel);
@@ -42,5 +46,4 @@ public class NCallback extends NBaseCallback {
 
     public void onSuccess(NResponseModel responseModel) {
     }
-
 }

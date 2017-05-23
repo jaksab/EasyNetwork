@@ -23,12 +23,16 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
         this.tClass = tClass;
     }
 
-
-
     @Override
     public void finishUI(NResponseModel responseModel) {
         super.finishUI(responseModel);
-        if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
+        if (responseModel.isFromCache()) {
+            if (model != null)
+                onCacheLoaded(model, responseModel);
+            else if (models != null)
+                onCacheLoaded(models, responseModel);
+            else onCacheMissing(requestModel);
+        } else if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
             if (requestModel.isEnableDefaultListeners()) {
                 if (model != null)
                     preSuccess(model, responseModel);
@@ -47,6 +51,8 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                 preError(responseModel);
             else onError(responseModel);
         }
+        models = null;
+        tClass = null;
     }
 
     @Override
@@ -56,7 +62,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
     @Override
     public void finish(NResponseModel responseModel) {
-        if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
+        if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS || responseModel.isFromCache()) {
             if (requestModel.isNeedParse()) {
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
                     try {
@@ -95,7 +101,6 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
         }
     }
 
-
     private void preSuccess(T model, NResponseModel responseModel) {
         if ((EasyNet.getInstance().getOnSuccessDefaultListener() == null)
                 || EasyNet.getInstance().getOnSuccessDefaultListener().onSuccess(responseModel))
@@ -114,4 +119,9 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     public void onSuccess(List<T> models, NResponseModel responseModel) {
     }
 
+    public void onCacheLoaded(T model, NResponseModel responseModel) {
+    }
+
+    public void onCacheLoaded(List<T> model, NResponseModel responseModel) {
+    }
 }

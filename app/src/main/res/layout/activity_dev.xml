@@ -15,24 +15,43 @@
         android:visibility="gone" />
 
     <FrameLayout
-        android:id="@+id/view"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_gravity="center"
-        android:background="@color/black_overlay" />
-
-    <FrameLayout
         android:id="@+id/view2"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_gravity="bottom"
-        android:background="@color/black_overlay" />
+        android:background="@color/black_overlay"
+        android:tag="https://postman-echo.com/delay/3" />
 
     <FrameLayout
         android:id="@+id/view3"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_gravity="top"
-        android:background="@color/black_overlay" />
+        android:background="@color/black_overlay"
+        android:tag="https://postman-echo.com/encoding/utf8" />
+
+    <FrameLayout
+        android:id="@+id/view4"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="top|end"
+        android:background="@color/black_overlay"
+        android:tag="https://postman-echo.com/ip" />
+
+    <FrameLayout
+        android:id="@+id/view5"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|end"
+        android:background="@color/black_overlay"
+        android:tag="https://api.letshindig.com/v1/users/privacy-policy" />
+
+    <FrameLayout
+        android:id="@+id/view"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
+        android:background="@color/black_overlay"
+        android:tag="https://postman-echo.com/status/200" />
 
 </FrameLayout>

@@ -38,7 +38,7 @@ public class EasyNet {
 
     volatile private static EasyNet config;
     private boolean writeLogs = true;
-    private Request request; // Default request instance
+    private Request request;
     private RequestDefaultListener defaultRequestListener;
 
     private OnSuccessDefaultListener onSuccessDefaultListener;
@@ -52,8 +52,9 @@ public class EasyNet {
             GET, POST, PUT, DELETE, OPTIONS, HEAD
     };
 
+    private boolean cacheEnabled = false;
     private File cacheDir;
-    private int maxCacheItems = 20;
+    private int maxCacheItems = 50;
 
     //
     // Init
@@ -273,9 +274,31 @@ public class EasyNet {
     // Cache
     //
 
+    /**
+     * @param cacheDir      recommend Context#getCacheDir()
+     * @param maxCacheItems 50 by default
+     */
+    public EasyNet enableCache(File cacheDir, int maxCacheItems) {
+        setCacheDir(cacheDir);
+        setMaxCacheItems(maxCacheItems);
+        return this;
+    }
 
-    public EasyNet setCacheDir(File cacheDir) {
+    /**
+     * @param cacheDir recommend Context$getCacheDir()
+     */
+    public EasyNet enableCache(File cacheDir) {
+        setCacheDir(cacheDir);
+        return this;
+    }
+
+    EasyNet setCacheDir(File cacheDir) {
         this.cacheDir = cacheDir;
+        return this;
+    }
+
+    EasyNet setMaxCacheItems(int maxCacheItems) {
+        this.maxCacheItems = maxCacheItems;
         return this;
     }
 
@@ -283,17 +306,41 @@ public class EasyNet {
         return maxCacheItems;
     }
 
-    public EasyNet setMaxCacheItems(int maxCacheItems) {
-        this.maxCacheItems = maxCacheItems;
-        return this;
-    }
-
     public File getCacheDir() {
         return this.cacheDir;
     }
 
     public File getCacheFile(String name) throws IOException {
+        try {
+            if (!getCacheDir().exists())
+                //noinspection ResultOfMethodCallIgnored
+                getCacheDir().mkdirs();
+        } catch (Exception ignored) {
+        }
         return new File(getCacheDir(), name + ".tmp");
+    }
+
+    public void clearCache() {
+        try {
+            if (cacheDir != null && cacheDir.isDirectory()) deleteDir(cacheDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            boolean result = true;
+            String[] children = dir.list();
+            for (String aChildren : children) {
+                File child = new File(dir, aChildren);
+                if (child.isDirectory())
+                    deleteDir(child);
+                else result = result && child.delete();
+            }
+            return result;
+        }
+        return false;
     }
 
 

@@ -14,7 +14,7 @@ import pro.oncreate.easynet.methods.Method;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
+import pro.oncreate.easynet.processing.BaseTask;
 import pro.oncreate.easynet.processing.NBaseCallback;
 
 /**
@@ -58,7 +58,7 @@ public class NRequestModel {
 
     // Cache
     private boolean cacheResponse;
-    private RequestExecutionOptions requestExecutionOptions;
+    private BaseTask.CacheOptions cacheOptions;
 
 
     public String getUrl() {
@@ -233,12 +233,12 @@ public class NRequestModel {
         this.cacheResponse = cacheResponse;
     }
 
-    public RequestExecutionOptions getRequestExecutionOptions() {
-        return requestExecutionOptions;
+    public BaseTask.CacheOptions getCacheOptions() {
+        return cacheOptions;
     }
 
-    public void setRequestExecutionOptions(RequestExecutionOptions requestExecutionOptions) {
-        this.requestExecutionOptions = requestExecutionOptions;
+    public void setCacheOptions(BaseTask.CacheOptions cacheOptions) {
+        this.cacheOptions = cacheOptions;
     }
 
     //

@@ -35,7 +35,8 @@ public class NCallback extends NBaseCallback {
     }
 
     @Override
-    public void finish(NResponseModel responseModel) {
+    public boolean finish(NResponseModel responseModel) {
+        return true;
     }
 
     private void preSuccess(NResponseModel responseModel) {
@@ -45,5 +46,8 @@ public class NCallback extends NBaseCallback {
     }
 
     public void onSuccess(NResponseModel responseModel) {
+    }
+
+    public void onCacheLoaded(NResponseModel responseModel) {
     }
 }

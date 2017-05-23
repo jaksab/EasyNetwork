@@ -6,15 +6,14 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.PaginationModel;
 import pro.oncreate.easynet.data.NErrors;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
-import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
+import pro.oncreate.easynet.processing.BaseTask;
 import pro.oncreate.easynet.processing.NCallbackParse;
 import pro.oncreate.easynetwork.models.TestModel;
 
-public class DevActivity extends AppCompatActivity implements PaginationModel.PaginationInterface, View.OnClickListener {
+public class DevActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ProgressBar progressBar;
 
@@ -31,25 +30,11 @@ public class DevActivity extends AppCompatActivity implements PaginationModel.Pa
     }
 
     @Override
-    public Integer getPaginationValue(String key) {
-        int value = 0;
-        switch (key) {
-            case "limit":
-                value = 10;
-                break;
-            case "offset":
-                value = 0;
-                break;
-        }
-        return value;
-    }
-
-    @Override
     public void onClick(View v) {
         EasyNet.get().setUrl((String) v.getTag())
                 .bind(progressBar, v)
                 .cacheResponse()
-                .start(RequestExecutionOptions.CACHE_AND_NETWORK_OPTIONS, new NCallbackParse<TestModel>(TestModel.class) {
+                .start(BaseTask.CacheOptions.CACHE_AND_NETWORK, new NCallbackParse<TestModel>(TestModel.class) {
                     @Override
                     public void onSuccess(TestModel model, NResponseModel responseModel) {
                         super.onSuccess(model, responseModel);

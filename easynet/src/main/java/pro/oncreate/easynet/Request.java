@@ -22,7 +22,6 @@ import pro.oncreate.easynet.models.subsidiary.BindParams;
 import pro.oncreate.easynet.models.subsidiary.BindView;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
 import pro.oncreate.easynet.processing.BaseTask;
 import pro.oncreate.easynet.processing.JSONTask;
 import pro.oncreate.easynet.processing.MultipartTask;
@@ -781,8 +780,8 @@ public class Request {
         return this;
     }
 
-    public Request startOptions(RequestExecutionOptions executionOptions) {
-        this.requestModel.setRequestExecutionOptions(executionOptions);
+    public Request setCacheOptions(BaseTask.CacheOptions cacheOptions) {
+        this.requestModel.setCacheOptions(cacheOptions);
         return this;
     }
 
@@ -845,18 +844,30 @@ public class Request {
     }
 
 
-    public String start(RequestExecutionOptions executionOptions, NCallback taskListener) {
-        startOptions(executionOptions);
+    /**
+     * @param cacheOptions select data source: network, cache, etc
+     * @see Request#start(NCallback)
+     */
+    public String start(BaseTask.CacheOptions cacheOptions, NCallback taskListener) {
+        setCacheOptions(cacheOptions);
         return start(taskListener);
     }
 
-    public String start(RequestExecutionOptions executionOptions, NCallbackParse taskListener) {
-        startOptions(executionOptions);
+    /**
+     * @param cacheOptions select data source: network, cache, etc
+     * @see Request#start(NCallbackParse)
+     */
+    public String start(BaseTask.CacheOptions cacheOptions, NCallbackParse taskListener) {
+        setCacheOptions(cacheOptions);
         return start(taskListener);
     }
 
-    public String start(RequestExecutionOptions executionOptions, NCallbackGson taskListener) {
-        startOptions(executionOptions);
+    /**
+     * @param cacheOptions select data source: network, cache, etc
+     * @see Request#start(NCallbackGson)
+     */
+    public String start(BaseTask.CacheOptions cacheOptions, NCallbackGson taskListener) {
+        setCacheOptions(cacheOptions);
         return start(taskListener);
     }
 
@@ -900,8 +911,8 @@ public class Request {
         addHeader(NConst.CONTENT_TYPE, contentType);
         setupPagination();
 
-        if (requestModel.getRequestExecutionOptions() == null)
-            requestModel.setRequestExecutionOptions(RequestExecutionOptions.NETWORK_ONLY_OPTIONS);
+        if (requestModel.getCacheOptions() == null)
+            requestModel.setCacheOptions(BaseTask.CacheOptions.NETWORK_ONLY);
 
         BaseTask task;
         switch (requestModel.getRequestType()) {

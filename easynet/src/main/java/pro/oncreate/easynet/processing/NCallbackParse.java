@@ -67,27 +67,34 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
     }
 
     @Override
-    public void finish(NResponseModel responseModel) {
+    public boolean finish(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS || responseModel.isFromCache()) {
             if (requestModel.isNeedParse()) {
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
                     try {
-                        model = tClass.cast(tClass.newInstance().parse(responseModel, new JSONObject(responseModel.getBody())));
+                        model = tClass.cast(tClass.newInstance()
+                                .parse(responseModel, new JSONObject(responseModel.getBody())));
+                        return true;
                     } catch (Exception e) {
                         Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
+                        return false;
                     }
                 else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
                     try {
                         JSONArray jsonArray = new JSONArray(responseModel.getBody());
                         models = new ArrayList<>();
                         for (int i = 0; i < jsonArray.length(); i++)
-                            models.add(tClass.cast(tClass.newInstance().parse(responseModel, jsonArray.getJSONObject(i))));
+                            models.add(tClass.cast(tClass.newInstance()
+                                    .parse(responseModel, jsonArray.getJSONObject(i))));
+                        return true;
                     } catch (Exception e) {
                         Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
+                        return false;
                     }
                 }
             }
         }
+        return false;
     }
 
     private void preSuccess(T model, NResponseModel responseModel) {

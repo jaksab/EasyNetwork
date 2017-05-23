@@ -61,7 +61,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     }
 
     @Override
-    public void finish(NResponseModel responseModel) {
+    public boolean finish(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS || responseModel.isFromCache()) {
             if (requestModel.isNeedParse()) {
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
@@ -75,8 +75,10 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                         Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
 
                         model = (T) method.invoke(gson, responseModel.getBody(), tClass);
+                        return true;
                     } catch (Exception e) {
                         e.printStackTrace();
+                        return false;
                     }
                 else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
                     try {
@@ -92,13 +94,15 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
                         T[] array = (T[]) method.invoke(gson, responseModel.getBody(), t);
                         models = Arrays.asList(array);
-
+                        return true;
                     } catch (Exception e) {
                         e.printStackTrace();
+                        return false;
                     }
                 }
             }
         }
+        return false;
     }
 
     private void preSuccess(T model, NResponseModel responseModel) {

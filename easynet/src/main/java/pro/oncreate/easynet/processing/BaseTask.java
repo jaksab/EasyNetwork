@@ -27,7 +27,6 @@ import pro.oncreate.easynet.methods.QueryMethod;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
-import pro.oncreate.easynet.models.subsidiary.RequestExecutionOptions;
 import pro.oncreate.easynet.utils.NDataBuilder;
 import pro.oncreate.easynet.utils.NLog;
 
@@ -88,9 +87,10 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         String body;
         InputStream inputStream;
 
-        int executionOptions = requestModel.getRequestExecutionOptions().getRequestExecutionType();
-        if (executionOptions == RequestExecutionOptions.CACHE_AND_NETWORK
-                || executionOptions == RequestExecutionOptions.CACHE_ONLY) {
+        CacheOptions cacheOptions = requestModel.getCacheOptions();
+        if (cacheOptions == CacheOptions.CACHE_AND_NETWORK
+                || cacheOptions == CacheOptions.CACHE_ONLY
+                || cacheOptions == CacheOptions.NETWORK_ONCE_CACHE_LATER) {
             String lastResponse = loadResponse(requestModel.getUrl());
             NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
 
@@ -99,15 +99,16 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                 NLog.logD("[Load from cache]: " + lastResponse);
                 if (listener != null)
                     listener.finish(cacheResponse);
-                if (executionOptions != RequestExecutionOptions.CACHE_ONLY)
+                if (cacheOptions == CacheOptions.CACHE_AND_NETWORK)
                     publishProgress(cacheResponse);
             } else {
                 NLog.logD("[Cache missing]");
-                if (executionOptions != RequestExecutionOptions.CACHE_ONLY)
+                if (cacheOptions != CacheOptions.CACHE_ONLY)
                     publishProgress(requestModel);
             }
 
-            if (executionOptions == RequestExecutionOptions.CACHE_ONLY)
+            if (cacheOptions == CacheOptions.CACHE_ONLY
+                    || (cacheOptions == CacheOptions.NETWORK_ONCE_CACHE_LATER && lastResponse != null))
                 return cacheResponse;
         }
 
@@ -157,17 +158,14 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                     responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
                     NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
 
-                    if (requestModel.isCacheResponse())
-                        saveResponse(requestModel.getUrl(), body);
-
                     try {
                         inputStream.close();
                         inputStream = null;
                     } catch (Exception ignored) {
                     }
 
-                    if (listener != null)
-                        listener.finish(responseModel);
+                    if (listener != null && listener.finish(responseModel))
+                        saveToCache(responseModel, body);
                     break;
                 }
             }
@@ -372,6 +370,14 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         return responseModel;
     }
 
+    protected void saveToCache(NResponseModel responseModel, String body) {
+        try {
+            if (requestModel.isCacheResponse() && responseModel != null
+                    && responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS)
+                saveResponse(requestModel.getUrl(), body);
+        } catch (Exception ignored) {
+        }
+    }
 
     //
     // Other
@@ -402,16 +408,38 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
 
 
     public interface NTaskListener {
+        /**
+         * Called when request task is started
+         *
+         * @param requestModel request model data
+         */
         void start(NRequestModel requestModel);
 
+        /**
+         * Called when request task is finishing and response data ready to use in UI thread
+         *
+         * @param responseModel response model data
+         */
         void finishUI(NResponseModel responseModel);
 
-        void finish(NResponseModel responseModel);
+        /**
+         * Called when http request is finishing and response data сan be processed in background thread
+         *
+         * @param responseModel response model data
+         */
+        boolean finish(NResponseModel responseModel);
 
         /**
          * @param location new URL
          * @return true - if you want to continue redirect
          */
         boolean redirect(String location);
+    }
+
+    public enum CacheOptions {
+        NETWORK_ONLY,
+        CACHE_ONLY,
+        CACHE_AND_NETWORK,
+        NETWORK_ONCE_CACHE_LATER
     }
 }

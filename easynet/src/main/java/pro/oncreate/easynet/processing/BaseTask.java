@@ -88,6 +88,9 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         String body;
         InputStream inputStream;
 
+        NLog.logD("======== START REQUEST ========");
+        NLog.logD(String.format(Locale.getDefault(), "[%s] %s", requestModel.getMethod(), requestModel.getUrl()));
+
         CacheOptions cacheOptions = requestModel.getCacheOptions();
         if (cacheOptions == CacheOptions.CACHE_AND_NETWORK
                 || cacheOptions == CacheOptions.CACHE_ONLY
@@ -95,8 +98,6 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             String lastResponse = loadResponse(requestModel.getUrl());
             NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
 
-            NLog.logD("======== TRY TO LOAD CACHE ========");
-            NLog.logD("[Url]: " + requestModel.getUrl());
             if (lastResponse != null) {
                 NLog.logD("[Load from cache]: " + lastResponse);
                 if (listener != null)
@@ -115,9 +116,6 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         }
 
         try {
-            NLog.logD("======== START REQUEST ========");
-            NLog.logD(String.format(Locale.getDefault(), "[%s] %s", requestModel.getMethod(), requestModel.getUrl()));
-
             while (true) {
                 this.url = buildUrlWithQueryParams();
                 connection = setupConnection();
@@ -349,7 +347,10 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             fos.write(body.getBytes());
             fos.close();
             fos = null;
+
+            NLog.logD("[Saving response to cache success]");
         } catch (IOException e) {
+            NLog.logD("[Saving response to cache failed]");
             e.printStackTrace();
         } finally {
             if (fos != null)

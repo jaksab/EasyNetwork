@@ -57,8 +57,6 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
                 preError(responseModel);
             else onError(responseModel);
         }
-        models = null;
-        tClass = null;
     }
 
     @Override

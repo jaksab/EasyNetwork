@@ -51,8 +51,6 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                 preError(responseModel);
             else onError(responseModel);
         }
-        models = null;
-        tClass = null;
     }
 
     @Override

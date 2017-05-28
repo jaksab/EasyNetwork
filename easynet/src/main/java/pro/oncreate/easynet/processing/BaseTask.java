@@ -420,7 +420,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
     //
 
     public String generateCacheFileName(String key) {
-        return key.replace("/", "").replace(":", "").replace(".", "");
+        return key.replaceAll("[/:.&+?%]", "");
     }
 
     public String getTag() {

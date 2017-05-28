@@ -683,14 +683,37 @@ public class Request {
         return this;
     }
 
+    /**
+     * Select suitable cache options from BaseTask#CacheOptions enum.
+     * setCacheResponse enabled by default.
+     */
     public Request setCacheOptions(BaseTask.CacheOptions cacheOptions) {
         this.requestModel.setCacheOptions(cacheOptions);
+        this.requestModel.setCacheResponse(true);
         return this;
     }
 
+    /**
+     * @see Request#setCacheOptions(BaseTask.CacheOptions)
+     * cacheWithParams affects on cache file name, if for the same query it is important to consider different caches for different parameters, you must set true value.
+     * setCacheResponse enabled by default.
+     */
     public Request setCacheOptions(BaseTask.CacheOptions cacheOptions, boolean cacheWithParams) {
         this.requestModel.setCacheOptions(cacheOptions);
         this.requestModel.setCacheWithParams(cacheWithParams);
+        this.requestModel.setCacheResponse(true);
+        return this;
+    }
+
+    /**
+     * @see Request#setCacheOptions(BaseTask.CacheOptions, boolean)
+     * Use cacheResponse param, to influence the need to save a query response.
+     */
+    public Request setCacheOptions(BaseTask.CacheOptions cacheOptions, boolean cacheWithParams,
+                                   boolean cacheResponse) {
+        this.requestModel.setCacheOptions(cacheOptions);
+        this.requestModel.setCacheWithParams(cacheWithParams);
+        this.requestModel.setCacheResponse(cacheResponse);
         return this;
     }
 

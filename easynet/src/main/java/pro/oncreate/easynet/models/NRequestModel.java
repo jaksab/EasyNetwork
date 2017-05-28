@@ -58,8 +58,8 @@ public class NRequestModel {
 
     // Cache
     private boolean cacheResponse;
+    private boolean cacheWithParams;
     private BaseTask.CacheOptions cacheOptions;
-
 
     public String getUrl() {
         return url;
@@ -239,6 +239,14 @@ public class NRequestModel {
 
     public void setCacheOptions(BaseTask.CacheOptions cacheOptions) {
         this.cacheOptions = cacheOptions;
+    }
+
+    public boolean isCacheWithParams() {
+        return cacheWithParams;
+    }
+
+    public void setCacheWithParams(boolean cacheWithParams) {
+        this.cacheWithParams = cacheWithParams;
     }
 
     //

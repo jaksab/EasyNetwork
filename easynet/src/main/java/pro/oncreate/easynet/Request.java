@@ -688,6 +688,11 @@ public class Request {
         return this;
     }
 
+    public Request setCacheOptions(BaseTask.CacheOptions cacheOptions, boolean cacheWithParams) {
+        this.requestModel.setCacheOptions(cacheOptions);
+        this.requestModel.setCacheWithParams(cacheWithParams);
+        return this;
+    }
 
     //
     // Start the request

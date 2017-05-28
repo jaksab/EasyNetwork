@@ -95,29 +95,36 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         if (cacheOptions == CacheOptions.CACHE_AND_NETWORK
                 || cacheOptions == CacheOptions.CACHE_ONLY
                 || cacheOptions == CacheOptions.NETWORK_ONCE_CACHE_LATER) {
-            String lastResponse = loadResponse(requestModel.getUrl());
-            NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
 
-            if (lastResponse != null) {
-                NLog.logD("[Load from cache]: " + lastResponse);
-                if (listener != null)
-                    listener.finish(cacheResponse);
-                if (cacheOptions == CacheOptions.CACHE_AND_NETWORK)
-                    publishProgress(cacheResponse);
-            } else {
-                NLog.logD("[Cache missing]");
-                if (cacheOptions != CacheOptions.CACHE_ONLY)
-                    publishProgress(requestModel);
+            try {
+                String key = !requestModel.isCacheWithParams() ? requestModel.getUrl() : buildUrlWithQueryParams(false);
+                String lastResponse = loadResponse(key);
+                NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
+
+                if (lastResponse != null) {
+                    NLog.logD("[Load from cache]: " + lastResponse);
+                    if (listener != null)
+                        listener.finish(cacheResponse);
+                    if (cacheOptions == CacheOptions.CACHE_AND_NETWORK)
+                        publishProgress(cacheResponse);
+                } else {
+                    NLog.logD("[Cache missing]");
+                    if (cacheOptions != CacheOptions.CACHE_ONLY)
+                        publishProgress(requestModel);
+                }
+
+                if (cacheOptions == CacheOptions.CACHE_ONLY
+                        || (cacheOptions == CacheOptions.NETWORK_ONCE_CACHE_LATER && lastResponse != null))
+                    return cacheResponse;
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
-
-            if (cacheOptions == CacheOptions.CACHE_ONLY
-                    || (cacheOptions == CacheOptions.NETWORK_ONCE_CACHE_LATER && lastResponse != null))
-                return cacheResponse;
         }
 
         try {
             while (true) {
-                this.url = buildUrlWithQueryParams();
+                this.url = buildUrlWithQueryParams(true);
                 connection = setupConnection();
                 addHeaders(connection);
                 makeRequestBody(connection);
@@ -258,7 +265,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         }
     }
 
-    protected String buildUrlWithQueryParams() throws UnsupportedEncodingException {
+    protected String buildUrlWithQueryParams(boolean logs) throws UnsupportedEncodingException {
         String urlParams;
         String result = requestModel.getUrl();
 
@@ -267,13 +274,15 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             urlParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
             if (!urlParams.isEmpty()) {
                 result = requestModel.getUrl() + "?" + urlParams;
-                NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
+                if (logs)
+                    NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         } else if (!requestModel.getQueryParams().isEmpty()) {
             urlParams = NDataBuilder.getQuery(requestModel.getQueryParams(), charset);
             if (!urlParams.isEmpty()) {
                 result = requestModel.getUrl() + "?" + urlParams;
-                NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
+                if (logs)
+                    NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         }
         return result;
@@ -398,8 +407,10 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
     protected void saveToCache(NResponseModel responseModel, String body) {
         try {
             if (requestModel.isCacheResponse() && responseModel != null
-                    && responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS)
-                saveResponse(requestModel.getUrl(), body);
+                    && responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS) {
+                String key = !requestModel.isCacheWithParams() ? requestModel.getUrl() : buildUrlWithQueryParams(true);
+                saveResponse(key, body);
+            }
         } catch (Exception ignored) {
         }
     }

@@ -37,7 +37,7 @@ public class EasyNet {
     public static final String CACHE_DIR_NAME = "easy-network-cache";
 
     volatile private static EasyNet config;
-    private boolean writeLogs = true;
+    private boolean writeLogs = BuildConfig.DEBUG;
     private Request request;
     private RequestDefaultListener defaultRequestListener;
 

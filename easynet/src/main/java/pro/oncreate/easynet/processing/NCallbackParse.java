@@ -118,7 +118,7 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
     public void onCacheLoaded(T model, NResponseModel responseModel) {
     }
 
-    public void onCacheLoaded(List<T> model, NResponseModel responseModel) {
+    public void onCacheLoaded(List<T> models, NResponseModel responseModel) {
     }
 
 }

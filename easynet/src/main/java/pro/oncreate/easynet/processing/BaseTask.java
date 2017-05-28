@@ -53,6 +53,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
     protected static final String charset = "UTF-8";
 
     protected String tag;
+    protected String url;
     protected OutputStream outputStream;
     protected PrintWriter writer;
     protected BaseTask.NTaskListener listener;
@@ -95,6 +96,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             NResponseModel cacheResponse = getCacheResponse(requestModel, lastResponse);
 
             NLog.logD("======== TRY TO LOAD CACHE ========");
+            NLog.logD("[Url]: " + requestModel.getUrl());
             if (lastResponse != null) {
                 NLog.logD("[Load from cache]: " + lastResponse);
                 if (listener != null)
@@ -117,7 +119,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             NLog.logD(String.format(Locale.getDefault(), "[%s] %s", requestModel.getMethod(), requestModel.getUrl()));
 
             while (true) {
-                addUrlParams();
+                this.url = buildUrlWithQueryParams();
                 connection = setupConnection();
                 addHeaders(connection);
                 makeRequestBody(connection);
@@ -134,7 +136,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
 
                     if (!next) {
                         NLog.logE("[The redirect is forbidden]: " + newUrl);
-                        responseModel = new NResponseModel(requestModel.getUrl(), responseCode,
+                        responseModel = new NResponseModel(this.url, responseCode,
                                 null, null);
                         responseModel.setRedirectInterrupted(true);
                         responseModel.setRedirectLocation(newUrl);
@@ -153,7 +155,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                     body = readResponseBody(inputStream);
                     Map<String, List<String>> headers = getResponseHeaders(connection, body);
 
-                    responseModel = new NResponseModel(requestModel.getUrl(), responseCode, body, headers);
+                    responseModel = new NResponseModel(this.url, responseCode, body, headers);
                     responseModel.setEndTime(System.currentTimeMillis());
                     responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
                     NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");
@@ -223,7 +225,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
 
 
     protected HttpURLConnection openConnection() throws Exception {
-        URL url = new URL(requestModel.getUrl());
+        URL url = new URL(this.url);
         return (HttpURLConnection) url.openConnection();
     }
 
@@ -238,6 +240,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
         NLog.logD("[Headers]: " + logHeaders.toString());
     }
 
+    @Deprecated
     protected void addUrlParams() throws UnsupportedEncodingException {
         String urlParams;
 
@@ -255,6 +258,27 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                 NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         }
+    }
+
+    protected String buildUrlWithQueryParams() throws UnsupportedEncodingException {
+        String urlParams;
+        String result = requestModel.getUrl();
+
+        if ((requestModel.getMethod() instanceof QueryMethod)
+                && requestModel.getQueryParams().isEmpty() && !requestModel.getParams().isEmpty()) {
+            urlParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
+            if (!urlParams.isEmpty()) {
+                result = requestModel.getUrl() + "?" + urlParams;
+                NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
+            }
+        } else if (!requestModel.getQueryParams().isEmpty()) {
+            urlParams = NDataBuilder.getQuery(requestModel.getQueryParams(), charset);
+            if (!urlParams.isEmpty()) {
+                result = requestModel.getUrl() + "?" + urlParams;
+                NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
+            }
+        }
+        return result;
     }
 
     abstract protected void makeRequestBody(HttpURLConnection connection) throws IOException;

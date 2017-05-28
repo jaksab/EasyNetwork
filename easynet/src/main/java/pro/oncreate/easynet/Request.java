@@ -32,12 +32,8 @@ import pro.oncreate.easynet.processing.NCallbackParse;
 import pro.oncreate.easynet.processing.RawTask;
 import pro.oncreate.easynet.processing.UrlencodedTask;
 
-import static pro.oncreate.easynet.methods.Method.DELETE;
 import static pro.oncreate.easynet.methods.Method.GET;
-import static pro.oncreate.easynet.methods.Method.HEAD;
-import static pro.oncreate.easynet.methods.Method.OPTIONS;
 import static pro.oncreate.easynet.methods.Method.POST;
-import static pro.oncreate.easynet.methods.Method.PUT;
 import static pro.oncreate.easynet.processing.BaseTask.DEFAULT_TIMEOUT_CONNECT;
 import static pro.oncreate.easynet.processing.BaseTask.DEFAULT_TIMEOUT_READ;
 
@@ -93,103 +89,10 @@ public class Request {
         setContentType(NConst.MIME_TYPE_X_WWW_FORM_URLENCODED);
     }
 
-    static Request newInstance() {
+    public static Request newInstance() {
         return new Request();
     }
 
-
-    //
-    // Build the request type and method
-    //
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request create() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance();
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request create(String method) {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(method);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request get() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(GET);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request post() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(POST);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request put() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(PUT);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request delete() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(DELETE);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request opt() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(OPTIONS);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request head() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setMethod(HEAD);
-    }
-
-    /**
-     * Use EasyNet get(), post() and other methods
-     */
-    @Deprecated
-    public static Request multipart() {
-        return EasyNet.getInstance()
-                .getDefaultRequestInstance()
-                .setContentType(NConst.MIME_TYPE_MULTIPART_FORM_DATA);
-    }
 
     /**
      * For multipart request default method - POST

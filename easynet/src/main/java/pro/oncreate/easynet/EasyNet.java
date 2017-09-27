@@ -240,13 +240,23 @@ public class EasyNet {
 
     /**
      * Cancel all current request execution.
+     *
+     * @return count of removed items
      */
-    public void cancelAllTasks() {
-        for (BaseTask task : taskQueue.values()) {
-            task.cancel(false);
+    public int cancelAllTasks() {
+        try {
+            int countRemoved = 0;
+            if (taskQueue != null) {
+                for (BaseTask task : taskQueue.values()) {
+                    task.cancel(false);
+                    countRemoved++;
+                }
+            }
+            return countRemoved;
+        } catch (Exception e) {
+            return 0;
         }
     }
-
 
     //
     // Getters and setters

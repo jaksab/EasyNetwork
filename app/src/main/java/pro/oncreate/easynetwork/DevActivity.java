@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NErrors;
@@ -21,23 +22,22 @@ public class DevActivity extends AppCompatActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dev);
-        progressBar = (ProgressBar) findViewById(R.id.pb);
+        progressBar = findViewById(R.id.pb);
         findViewById(R.id.view).setOnClickListener(this);
-        findViewById(R.id.view5).setOnClickListener(this);
-        findViewById(R.id.view2).setOnClickListener(this);
-        findViewById(R.id.view3).setOnClickListener(this);
-        findViewById(R.id.view4).setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        EasyNet.get().setUrl((String) v.getTag())
+        EasyNet.get().setUrl("https://api.infitting.com/v1.1/countries/231/cities")
+                .addParam("name", "д")
+                .addParam("q", (String) null)
                 .bind(progressBar, v)
                 .cacheResponse()
                 .start(BaseTask.CacheOptions.CACHE_AND_NETWORK, new NCallbackParse<TestModel>(TestModel.class) {
                     @Override
                     public void onSuccess(TestModel model, NResponseModel responseModel) {
                         super.onSuccess(model, responseModel);
+                        Toast.makeText(DevActivity.this, responseModel.getBody(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override

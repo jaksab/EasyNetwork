@@ -25,7 +25,8 @@ public class NDataBuilder {
 
             result.append(URLEncoder.encode(pair.getKey(), charset));
             result.append("=");
-            result.append(URLEncoder.encode(pair.getValue(), charset));
+            if (pair.getValue() != null)
+                result.append(URLEncoder.encode(pair.getValue(), charset));
         }
 
         return result.toString();
@@ -43,7 +44,8 @@ public class NDataBuilder {
 
             result.append(pair.getKey());
             result.append("=");
-            result.append(pair.getValue());
+            if (pair.getValue() != null)
+                result.append(pair.getValue());
         }
 
         return result.toString();

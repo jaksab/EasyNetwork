@@ -271,14 +271,14 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
 
         if ((requestModel.getMethod() instanceof QueryMethod)
                 && requestModel.getQueryParams().isEmpty() && !requestModel.getParams().isEmpty()) {
-            urlParams = NDataBuilder.getQuery(requestModel.getParams());
+            urlParams = NDataBuilder.getQuery(requestModel.getParams(), charset);
             if (!urlParams.isEmpty()) {
                 result = requestModel.getUrl() + "?" + urlParams;
                 if (logs)
                     NLog.logD("[Query params]: " + urlParams.replace("&", "; "));
             }
         } else if (!requestModel.getQueryParams().isEmpty()) {
-            urlParams = NDataBuilder.getQuery(requestModel.getQueryParams());
+            urlParams = NDataBuilder.getQuery(requestModel.getQueryParams(), charset);
             if (!urlParams.isEmpty()) {
                 result = requestModel.getUrl() + "?" + urlParams;
                 if (logs)

@@ -420,6 +420,12 @@ public class Request {
         return this;
     }
 
+    public Request addQueryParam(String key, String value, boolean saveIfNull) {
+        if (saveIfNull || value != null)
+            requestModel.getQueryParams().add(new NKeyValueModel(key, value));
+        return this;
+    }
+
     /**
      * Use this method with all content types. The method add the query param to the request URL.
      *
@@ -429,6 +435,12 @@ public class Request {
      */
     public Request addQueryParam(String key, Object value) {
         requestModel.getQueryParams().add(new NKeyValueModel(key, String.valueOf(value)));
+        return this;
+    }
+
+    public Request addQueryParam(String key, Object value, boolean saveIfNull) {
+        if (saveIfNull || value != null)
+            requestModel.getQueryParams().add(new NKeyValueModel(key, String.valueOf(value)));
         return this;
     }
 

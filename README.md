@@ -10,7 +10,7 @@ EasyNetwork - is powerful and easy-to-use http library for Android. <br/>
   
 ```groovy
 dependencies {
-    compile 'pro.oncreate.easynet:easynet:1.2.5'
+    compile 'pro.oncreate.easynet:easynet:1.3.0'
 }
 ```
 

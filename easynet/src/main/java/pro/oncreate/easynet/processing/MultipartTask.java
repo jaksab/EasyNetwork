@@ -24,7 +24,7 @@ public class MultipartTask extends BaseTask {
 
     protected static final int FILE_BUFFER_SIZE = 4096;
     protected static final String LINE_END = "\r\n";
-    protected final String boundary = "===" + System.currentTimeMillis() + "===";
+    protected final String boundary = "---" + System.currentTimeMillis() + "---";
 
     public MultipartTask(NTaskListener listener, NRequestModel requestModel) {
         super(listener, requestModel);

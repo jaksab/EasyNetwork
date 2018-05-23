@@ -73,8 +73,8 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                 fromJsonParams[1] = Class.class;
 
                 final Class[] registerTypeAdapterParams = new Class[2];
-                fromJsonParams[0] = String.class;
-                fromJsonParams[1] = Object.class;
+                registerTypeAdapterParams[0] = String.class;
+                registerTypeAdapterParams[1] = Object.class;
 
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
                     try {

@@ -56,6 +56,7 @@ public class EasyNet {
     private File cacheDir;
     private int maxCacheItems = 50;
 
+
     //
     // Init
     //

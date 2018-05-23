@@ -18,6 +18,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     private T model;
     protected List<T> models;
     private Class<T> tClass;
+    private Object typeAdapter;
 
     public NCallbackGson(Class<T> tClass) {
         this.tClass = tClass;
@@ -58,21 +59,42 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
     }
 
+    public NCallbackGson registerTypeAdapter(Object typeAdapter) {
+        this.typeAdapter = typeAdapter;
+        return this;
+    }
+
     @Override
     public boolean finish(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS || responseModel.isFromCache()) {
             if (requestModel.isNeedParse()) {
+                final Class[] fromJsonParams = new Class[2];
+                fromJsonParams[0] = String.class;
+                fromJsonParams[1] = Class.class;
+
+                final Class[] registerTypeAdapterParams = new Class[2];
+                fromJsonParams[0] = String.class;
+                fromJsonParams[1] = Object.class;
+
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
                     try {
-                        Class[] fromJsonParams = new Class[2];
-                        fromJsonParams[0] = String.class;
-                        fromJsonParams[1] = Class.class;
-
                         Class<? extends Object> aClass = Class.forName("com.google.gson.Gson");
-                        Object gson = aClass.newInstance();
-                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
+                        Object gson;
+                        if (typeAdapter == null) {
+                            gson = aClass.newInstance();
+                        } else {
+                            Class<? extends Object> bClass = Class.forName("com.google.gson.GsonBuilder");
+                            Object gsonBuilder = bClass.newInstance();
 
+                            Method registerTypeAdapter = bClass.getDeclaredMethod("registerTypeAdapter", registerTypeAdapterParams);
+                            registerTypeAdapter.invoke(gsonBuilder, typeAdapter);
+
+                            Method create = bClass.getDeclaredMethod("create");
+                            gson = create.invoke(gsonBuilder);
+                        }
+                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
                         model = (T) method.invoke(gson, responseModel.getBody(), tClass);
+
                         return true;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -80,14 +102,21 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                     }
                 else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
                     try {
-                        Class[] fromJsonParams = new Class[2];
-                        fromJsonParams[0] = String.class;
-                        fromJsonParams[1] = Class.class;
-
                         Class<? extends Object> aClass = Class.forName("com.google.gson.Gson");
-                        Object gson = aClass.newInstance();
-                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
+                        Object gson;
+                        if (typeAdapter == null) {
+                            gson = aClass.newInstance();
+                        } else {
+                            Class<? extends Object> bClass = Class.forName("com.google.gson.GsonBuilder");
+                            Object gsonBuilder = bClass.newInstance();
 
+                            Method registerTypeAdapter = bClass.getDeclaredMethod("registerTypeAdapter", registerTypeAdapterParams);
+                            registerTypeAdapter.invoke(gsonBuilder, typeAdapter);
+
+                            Method create = bClass.getDeclaredMethod("create");
+                            gson = create.invoke(gsonBuilder);
+                        }
+                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
                         Class t = java.lang.reflect.Array.newInstance(tClass, 0).getClass();
 
                         T[] array = (T[]) method.invoke(gson, responseModel.getBody(), t);

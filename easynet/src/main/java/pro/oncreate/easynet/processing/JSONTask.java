@@ -40,12 +40,15 @@ public class JSONTask extends BaseTask {
     @Override
     protected void makeRequestBody(HttpURLConnection connection) throws IOException {
         try {
+            if (requestModel.getBody() != null && !requestModel.getBody().isEmpty()) {
+                setRawBody(connection, requestModel.getBody());
+                return;
+            }
             JSONObject jsonObject = new JSONObject();
             for (int i = 0; i < requestModel.getParams().size(); i++) {
                 jsonObject.put(requestModel.getParams().get(i).getKey(),
                         requestModel.getParams().get(i).getValue());
             }
-
             setRawBody(connection, jsonObject.toString().replaceAll("\"\\[", "[").replaceAll("]\"", "]"));
         } catch (JSONException e) {
             e.printStackTrace();

@@ -24,10 +24,25 @@ public class DevActivity extends AppCompatActivity implements View.OnClickListen
         setContentView(R.layout.activity_dev);
         progressBar = findViewById(R.id.pb);
         findViewById(R.id.view).setOnClickListener(this);
+
     }
 
     @Override
     public void onClick(View v) {
+//        EasyNet.test(R.raw.test, getResources(), 3000)
+//                .bind(progressBar, v)
+//                .start(new NCallback() {
+//                    @Override
+//                    public void onSuccess(NResponseModel responseModel) {
+//                        Toast.makeText(DevActivity.this, responseModel.getBody(), Toast.LENGTH_LONG).show();
+//                    }
+//
+//                    @Override
+//                    public void onFailed(NRequestModel nRequestModel, NErrors error) {
+//                        Toast.makeText(DevActivity.this, "onFailed", Toast.LENGTH_LONG).show();
+//                    }
+//                });
+
         EasyNet.get().setUrl("https://api.infitting.com/v1.1/countries/231/cities")
                 .addParam("name", "д")
                 .addParam("q", (String) null)

@@ -1,6 +1,8 @@
 package pro.oncreate.easynet;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.support.annotation.RawRes;
 
 import java.io.File;
 import java.io.IOException;
@@ -435,6 +437,11 @@ public class EasyNet {
     // Bonus
     //
 
+    public static Request test(@RawRes int rawResId, Resources resources, long delayMills) {
+        return EasyNet.getInstance()
+                .getDefaultRequestInstance()
+                .test(rawResId, resources, delayMills);
+    }
 
     public static boolean isActiveInternet(Context context) {
         return NHelper.isActiveInternet(context);

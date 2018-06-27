@@ -51,6 +51,7 @@ public class NConst {
     public static final String MIME_TYPE_TEXT_HTML = "text/html";
     public static final String MIME_TYPE_TEXT_PLAIN = "text/plain";
     public static final String MIME_TYPE_TEXT_XML = " text/xml";
+    public static final String MIME_TYPE_TEST = " test";
 
     // ACCEPT ENCODING
     public static final String ACCEPT_ENCODING_COMPRESS = "compress";

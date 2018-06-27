@@ -1,6 +1,8 @@
 package pro.oncreate.easynet.models;
 
 import android.app.Dialog;
+import android.content.res.Resources;
+import android.support.annotation.RawRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -29,6 +31,7 @@ public class NRequestModel {
     private Method method;
     private String requestType;
     private String tag;
+    private Resources resources;
 
     // Request data
     private ArrayList<NKeyValueModel> headers;
@@ -37,12 +40,15 @@ public class NRequestModel {
     private ArrayList<NKeyValueFileModel> paramsFile;
     private String body;
     private File chunk;
+    private @RawRes
+    int testRaw;
     private PaginationModel paginationModel;
 
     // Etc
     private long connectTimeout;
     private long readTimeout;
     private long startTime;
+    private long testDelayMills;
     private boolean needParse;
     private boolean enablePagination;
     private boolean enableManualRedirect;
@@ -247,6 +253,30 @@ public class NRequestModel {
 
     public void setCacheWithParams(boolean cacheWithParams) {
         this.cacheWithParams = cacheWithParams;
+    }
+
+    public long getTestDelayMills() {
+        return testDelayMills;
+    }
+
+    public void setTestDelayMills(long testDelayMills) {
+        this.testDelayMills = testDelayMills;
+    }
+
+    public int getTestRaw() {
+        return testRaw;
+    }
+
+    public void setTestRaw(int testRaw) {
+        this.testRaw = testRaw;
+    }
+
+    public Resources getResources() {
+        return resources;
+    }
+
+    public void setResources(Resources resources) {
+        this.resources = resources;
     }
 
     //

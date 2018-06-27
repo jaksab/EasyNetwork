@@ -1,6 +1,7 @@
 package pro.oncreate.easynet.processing;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     private T model;
     protected List<T> models;
     private Class<T> tClass;
-    private Object typeAdapter;
+    private Class typeAdapter;
 
     public NCallbackGson(Class<T> tClass) {
         this.tClass = tClass;
@@ -59,7 +60,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
     }
 
-    public NCallbackGson registerTypeAdapter(Object typeAdapter) {
+    public NCallbackGson registerTypeAdapter(Class typeAdapter) {
         this.typeAdapter = typeAdapter;
         return this;
     }
@@ -73,7 +74,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                 fromJsonParams[1] = Class.class;
 
                 final Class[] registerTypeAdapterParams = new Class[2];
-                registerTypeAdapterParams[0] = String.class;
+                registerTypeAdapterParams[0] = Type.class;
                 registerTypeAdapterParams[1] = Object.class;
 
                 if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
@@ -87,7 +88,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                             Object gsonBuilder = bClass.newInstance();
 
                             Method registerTypeAdapter = bClass.getDeclaredMethod("registerTypeAdapter", registerTypeAdapterParams);
-                            registerTypeAdapter.invoke(gsonBuilder, typeAdapter);
+                            registerTypeAdapter.invoke(gsonBuilder, tClass, typeAdapter.newInstance());
 
                             Method create = bClass.getDeclaredMethod("create");
                             gson = create.invoke(gsonBuilder);
@@ -111,7 +112,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                             Object gsonBuilder = bClass.newInstance();
 
                             Method registerTypeAdapter = bClass.getDeclaredMethod("registerTypeAdapter", registerTypeAdapterParams);
-                            registerTypeAdapter.invoke(gsonBuilder, typeAdapter);
+                            registerTypeAdapter.invoke(gsonBuilder, tClass, typeAdapter.newInstance());
 
                             Method create = bClass.getDeclaredMethod("create");
                             gson = create.invoke(gsonBuilder);

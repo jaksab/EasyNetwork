@@ -1,7 +1,9 @@
 package pro.oncreate.easynet;
 
 import android.app.Dialog;
+import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.support.annotation.RawRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Patterns;
 import android.view.View;
@@ -30,6 +32,7 @@ import pro.oncreate.easynet.processing.NCallback;
 import pro.oncreate.easynet.processing.NCallbackGson;
 import pro.oncreate.easynet.processing.NCallbackParse;
 import pro.oncreate.easynet.processing.RawTask;
+import pro.oncreate.easynet.processing.TestTask;
 import pro.oncreate.easynet.processing.UrlencodedTask;
 
 import static pro.oncreate.easynet.methods.Method.GET;
@@ -495,6 +498,17 @@ public class Request {
         return this;
     }
 
+    /**
+     * Use test requests with some data from raw resource file. Use delay for emulate server response.
+     */
+    public Request test(@RawRes int rawResId, Resources resources, long delayMills) {
+        setContentType(NConst.MIME_TYPE_TEST);
+        requestModel.setTestRaw(rawResId);
+        requestModel.setResources(resources);
+        requestModel.setTestDelayMills(delayMills);
+        return this;
+    }
+
 
     //
     // Setting the default request listeners
@@ -867,6 +881,9 @@ public class Request {
                 break;
             case NConst.MIME_TYPE_JSON:
                 task = new JSONTask(taskListener, requestModel);
+                break;
+            case NConst.MIME_TYPE_TEST:
+                task = new TestTask(taskListener, requestModel);
                 break;
             default:
                 task = new RawTask(taskListener, requestModel);

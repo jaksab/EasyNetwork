@@ -41,7 +41,7 @@ public class TestTask extends BaseTask {
             while ((line = reader.readLine()) != null) {
                 data.append(line).append("\n");
             }
-            body = data.toString();
+            body = data.toString().trim();
 
             NLog.logD("Read body success");
             NLog.logD("[Body]: " + body);

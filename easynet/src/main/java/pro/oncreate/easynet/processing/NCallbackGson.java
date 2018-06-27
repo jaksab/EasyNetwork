@@ -94,7 +94,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                             gson = create.invoke(gsonBuilder);
                         }
                         Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
-                        model = (T) method.invoke(gson, responseModel.getBody(), tClass);
+                        model = (T) method.invoke(gson, responseModel.getBody().trim(), tClass);
 
                         return true;
                     } catch (Exception e) {
@@ -120,7 +120,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                         Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
                         Class t = java.lang.reflect.Array.newInstance(tClass, 0).getClass();
 
-                        T[] array = (T[]) method.invoke(gson, responseModel.getBody(), t);
+                        T[] array = (T[]) method.invoke(gson, responseModel.getBody().trim(), t);
                         models = Arrays.asList(array);
                         return true;
                     } catch (Exception e) {

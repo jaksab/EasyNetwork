@@ -18,6 +18,7 @@ import pro.oncreate.easynet.models.subsidiary.NKeyValueFileModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
 import pro.oncreate.easynet.processing.BaseTask;
 import pro.oncreate.easynet.processing.NBaseCallback;
+import pro.oncreate.easynet.processing.TestTask;
 
 /**
  * Copyright (c) $today.year. Konovalenko Andrii [jaksab2@mail.ru]
@@ -32,6 +33,7 @@ public class NRequestModel {
     private String requestType;
     private String tag;
     private Resources resources;
+    private TestTask.PreprocessorCallback preprocessorCallback;
 
     // Request data
     private ArrayList<NKeyValueModel> headers;
@@ -277,6 +279,14 @@ public class NRequestModel {
 
     public void setResources(Resources resources) {
         this.resources = resources;
+    }
+
+    public TestTask.PreprocessorCallback getPreprocessorCallback() {
+        return preprocessorCallback;
+    }
+
+    public void setPreprocessorCallback(TestTask.PreprocessorCallback preprocessorCallback) {
+        this.preprocessorCallback = preprocessorCallback;
     }
 
     //

@@ -46,7 +46,13 @@ public class TestTask extends BaseTask {
             NLog.logD("Read body success");
             NLog.logD("[Body]: " + body);
 
-            Thread.sleep(requestModel.getTestDelayMills());
+            if (requestModel.getPreprocessorCallback() != null) {
+                body = requestModel.getPreprocessorCallback().onDataReady(body, requestModel);
+                NLog.logD("[Processing body]: " + body);
+            }
+
+            if (requestModel.getTestDelayMills() > 0)
+                Thread.sleep(requestModel.getTestDelayMills());
 
             responseModel = new NResponseModel(this.url, 200, body, new HashMap<String, List<String>>());
             responseModel.setEndTime(System.currentTimeMillis());
@@ -81,5 +87,15 @@ public class TestTask extends BaseTask {
 
     @Override
     protected void makeRequestBody(HttpURLConnection connection) throws IOException {
+    }
+
+    public interface PreprocessorCallback {
+        /**
+         * Implement this instance for organizing custom logic
+         *
+         * @param body original body from raw file
+         * @return body after post processing
+         */
+        String onDataReady(String body, NRequestModel requestModel);
     }
 }

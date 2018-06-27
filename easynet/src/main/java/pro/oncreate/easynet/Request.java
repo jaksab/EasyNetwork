@@ -509,6 +509,23 @@ public class Request {
         return this;
     }
 
+    /**
+     * Use test requests with some data from raw resource file.
+     */
+    public Request test(@RawRes int rawResId, Resources resources) {
+        test(rawResId, resources, 0L);
+        return this;
+    }
+
+    /**
+     * Use this method if you need to organizing custom logic in test requests.
+     * Use $addParam and check this data in preprocessor logic.
+     */
+    public Request setTestPreprocessor(TestTask.PreprocessorCallback testPreprocessor) {
+        requestModel.setPreprocessorCallback(testPreprocessor);
+        return this;
+    }
+
 
     //
     // Setting the default request listeners
@@ -905,6 +922,9 @@ public class Request {
     private boolean validateRequest() {
         if (requestModel == null)
             throw new NullPointerException("Request model cannot be null");
+
+        if (requestModel.getRequestType().equals(NConst.MIME_TYPE_TEST))
+            return true;
 
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty()) {
             throw new NullPointerException("URL cannot be empty");

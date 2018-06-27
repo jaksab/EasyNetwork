@@ -443,6 +443,12 @@ public class EasyNet {
                 .test(rawResId, resources, delayMills);
     }
 
+    public static Request test(@RawRes int rawResId, Resources resources) {
+        return EasyNet.getInstance()
+                .getDefaultRequestInstance()
+                .test(rawResId, resources);
+    }
+
     public static boolean isActiveInternet(Context context) {
         return NHelper.isActiveInternet(context);
     }

@@ -10,7 +10,7 @@ EasyNetwork - is powerful and easy-to-use http library for Android. <br/>
   
 ```groovy
 dependencies {
-    compile 'pro.oncreate.easynet:easynet:1.3.3'
+    compile 'pro.oncreate.easynet:easynet:1.3.5'
 }
 ```
 
@@ -73,6 +73,7 @@ See more examples: [Wiki](https://github.com/jaksab/EasyNetwork/wiki)
 - Separation of errors into: error (server) and failed (connection). [More](https://github.com/jaksab/EasyNetwork/wiki/4.-Error-processing)
 - Handling the redirects.
 - Cache responses.
+– Make test requests without backend for first stages of development **New**
 
 # License
 

@@ -858,9 +858,12 @@ public class Request {
      * Execute request synchronously (UI thread). Parallel execution always false.
      */
     public NResponseModel getSynchronously() throws ExecutionException, InterruptedException {
-        if (validateRequest())
-            return makeTask().execute().get();
-        else return null;
+        if (validateRequest()) {
+            if (parallelExecution)
+                return makeTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+            else
+                return makeTask().execute().get();
+        } else return null;
     }
 
     /**

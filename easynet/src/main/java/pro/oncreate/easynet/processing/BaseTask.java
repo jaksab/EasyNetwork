@@ -157,7 +157,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                     NLog.logD("[Status code]: " + responseCode);
 
                     inputStream = getInputStreamFromConnection(connection);
-                    body = readResponseBody(inputStream);
+                    body = readResponseBody(inputStream).trim();
                     Map<String, List<String>> headers = getResponseHeaders(connection, body);
 
                     responseModel = new NResponseModel(this.url, responseCode, body, headers);

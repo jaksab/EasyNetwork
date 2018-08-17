@@ -57,7 +57,8 @@ public class TestTask extends BaseTask {
             responseModel = new NResponseModel(this.url, 200, body, new HashMap<String, List<String>>());
             responseModel.setEndTime(System.currentTimeMillis());
             responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
-            listener.finish(responseModel);
+            if (listener != null)
+                listener.finish(responseModel);
         } catch (Exception e) {
             responseModel = null;
             NLog.logD("[Error]: " + e.toString());

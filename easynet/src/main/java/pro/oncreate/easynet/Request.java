@@ -4,8 +4,8 @@ import android.app.Dialog;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.annotation.RawRes;
+import android.support.v4.util.PatternsCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -931,7 +931,7 @@ public class Request {
 
         if (requestModel.getUrl() == null || requestModel.getUrl().isEmpty()) {
             throw new NullPointerException("URL cannot be empty");
-        } else if (!Pattern.matches(Patterns.WEB_URL.pattern(), requestModel.getUrl())) {
+        } else if (!Pattern.matches(PatternsCompat.WEB_URL.pattern(), requestModel.getUrl())) {
             throw new NullPointerException("Invalid URL");
         }
         return true;

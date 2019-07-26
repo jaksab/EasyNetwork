@@ -17,6 +17,7 @@ public class NConst {
     public static final String DELETE = "DELETE";
     public static final String OPTIONS = "OPTIONS";
     public static final String HEAD = "HEAD";
+    public static final String PATCH = "PATCH";
 
 
     //

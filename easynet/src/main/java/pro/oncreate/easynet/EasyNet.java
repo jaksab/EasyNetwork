@@ -21,6 +21,7 @@ import static pro.oncreate.easynet.data.NConst.DELETE;
 import static pro.oncreate.easynet.data.NConst.GET;
 import static pro.oncreate.easynet.data.NConst.HEAD;
 import static pro.oncreate.easynet.data.NConst.OPTIONS;
+import static pro.oncreate.easynet.data.NConst.PATCH;
 import static pro.oncreate.easynet.data.NConst.POST;
 import static pro.oncreate.easynet.data.NConst.PUT;
 
@@ -51,13 +52,12 @@ public class EasyNet {
     private Map<String, BaseTask> taskQueue;
 
     private static final String[] SUPPORTED_METHODS = {
-            GET, POST, PUT, DELETE, OPTIONS, HEAD
+            GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH
     };
 
     private boolean cacheEnabled = false;
     private File cacheDir;
     private int maxCacheItems = 50;
-
 
     //
     // Init
@@ -380,6 +380,12 @@ public class EasyNet {
                 .setMethod(PUT);
     }
 
+    public static Request patch() {
+        return EasyNet.getInstance()
+                .getDefaultRequestInstance()
+                .setMethod(PATCH);
+    }
+
     public static Request delete() {
         return EasyNet.getInstance()
                 .getDefaultRequestInstance()
@@ -414,6 +420,10 @@ public class EasyNet {
 
     public static Request put(String path, Object... params) {
         return put().setPath(path, params);
+    }
+
+    public static Request patch(String path, Object... params) {
+        return patch().setPath(path, params);
     }
 
     public static Request delete(String path, Object... params) {

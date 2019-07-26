@@ -1,5 +1,7 @@
 package pro.oncreate.easynet.methods;
 
+import android.support.annotation.NonNull;
+
 import pro.oncreate.easynet.data.NConst;
 
 /**
@@ -34,6 +36,9 @@ public abstract class Method {
                 break;
             case NConst.OPTIONS:
                 method = OPTIONS;
+                break;
+            case NConst.PATCH:
+                method = PATCH;
                 break;
         }
         return method;
@@ -81,6 +86,15 @@ public abstract class Method {
         }
     };
 
+    public static final EntityMethod PATCH = new EntityMethod() {
+        @Override
+        public String name() {
+            return "PATCH";
+        }
+    };
+
+
+    @NonNull
     @Override
     public String toString() {
         return name();

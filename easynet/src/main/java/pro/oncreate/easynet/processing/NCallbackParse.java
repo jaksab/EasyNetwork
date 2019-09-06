@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.models.NBaseModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.utils.NLog;
@@ -24,6 +24,7 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
     private T model;
     protected ArrayList<T> models;
     private Class<T> tClass;
+    private Exception parseException;
 
     public NCallbackParse(Class<T> tClass) {
         this.tClass = tClass;
@@ -44,13 +45,13 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
                     preSuccess(model, responseModel);
                 else if (models != null)
                     preSuccess(models, responseModel);
-                else preFailed(requestModel, NErrors.PARSE_ERROR);
+                else preFailed(requestModel, new NError(NError.TYPE_PARSE_ERROR, parseException));
             } else {
                 if (model != null)
                     onSuccess(model, responseModel);
                 else if (models != null)
                     onSuccess(models, responseModel);
-                else onFailed(requestModel, NErrors.PARSE_ERROR);
+                else onFailed(requestModel, new NError(NError.TYPE_PARSE_ERROR, parseException));
             }
         } else if (responseModel.statusType() == NResponseModel.STATUS_TYPE_ERROR) {
             if (requestModel.isEnableDefaultListeners())
@@ -74,6 +75,7 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
                                 .parse(responseModel, new JSONObject(responseModel.getBody())));
                         return true;
                     } catch (Exception e) {
+                        parseException = e;
                         Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
                         return false;
                     }
@@ -86,6 +88,7 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
                                     .parse(responseModel, jsonArray.getJSONObject(i))));
                         return true;
                     } catch (Exception e) {
+                        parseException = e;
                         Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
                         return false;
                     }

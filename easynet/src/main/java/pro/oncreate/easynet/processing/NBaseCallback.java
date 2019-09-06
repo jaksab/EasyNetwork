@@ -8,7 +8,7 @@ import android.view.View;
 import java.util.List;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.models.subsidiary.BindView;
@@ -110,15 +110,14 @@ public abstract class NBaseCallback implements BaseTask.NTaskListener {
     protected void preError(NResponseModel responseModel) {
         if (EasyNet.getInstance().getOnErrorDefaultListener() != null) {
             EasyNet.getInstance().getOnErrorDefaultListener().onError(responseModel);
-        } else {
-            for (int i = 0; i < EasyNet.getInstance().getOnErrorDefaultListenersCollection().size(); i++) {
-                if (EasyNet.getInstance().getOnErrorDefaultListenersCollection().get(i).getCode() == responseModel.getStatusCode()) {
-                    EasyNet.getInstance().getOnErrorDefaultListenersCollection().get(i).onError(responseModel);
-                    break;
-                }
-            }
-            onError(responseModel);
         }
+        for (int i = 0; i < EasyNet.getInstance().getOnErrorDefaultListenersCollection().size(); i++) {
+            if (EasyNet.getInstance().getOnErrorDefaultListenersCollection().get(i).getCode() == responseModel.getStatusCode()) {
+                EasyNet.getInstance().getOnErrorDefaultListenersCollection().get(i).onError(responseModel);
+                break;
+            }
+        }
+        onError(responseModel);
     }
 
     private void callWaitHeadersCallbacks(NResponseModel responseModel) {
@@ -135,14 +134,14 @@ public abstract class NBaseCallback implements BaseTask.NTaskListener {
     public void onError(NResponseModel responseModel) {
     }
 
-    void preFailed(NRequestModel nRequestModel, NErrors error) {
+    void preFailed(NRequestModel nRequestModel, NError error) {
         if ((EasyNet.getInstance().getOnFailedDefaultListener() != null
                 && EasyNet.getInstance().getOnFailedDefaultListener().onFailed(nRequestModel, error))
                 || (EasyNet.getInstance().getOnFailedDefaultListener() == null))
             onFailed(nRequestModel, error);
     }
 
-    public void onFailed(NRequestModel nRequestModel, NErrors error) {
+    public void onFailed(NRequestModel nRequestModel, NError error) {
     }
 
     void preTaskCancelled(NRequestModel requestModel, String tag) {

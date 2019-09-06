@@ -19,7 +19,7 @@ import java.util.Map;
 
 import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NConst;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.models.subsidiary.NKeyValueModel;
@@ -115,9 +115,9 @@ public class DemoActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                     @Override
-                    public void onFailed(NRequestModel nRequestModel, NErrors error) {
+                    public void onFailed(NRequestModel nRequestModel, NError error) {
                         progressBar.setVisibility(View.GONE);
-                        Snackbar.make(getCurrentFocus(), String.format(Locale.getDefault(), "Failed %s ", error.name()), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(getCurrentFocus(), String.format(Locale.getDefault(), "Failed %s ", error.exception.toString()), Snackbar.LENGTH_LONG).show();
                     }
 
                     @Override

@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.models.NResponseModel;
 
 /**
@@ -20,6 +20,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     protected List<T> models;
     private Class<T> tClass;
     private Class typeAdapter;
+    private Exception parseException;
 
     public NCallbackGson(Class<T> tClass) {
         this.tClass = tClass;
@@ -40,13 +41,13 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                     preSuccess(model, responseModel);
                 else if (models != null)
                     preSuccess(models, responseModel);
-                else preFailed(requestModel, NErrors.PARSE_ERROR);
+                else preFailed(requestModel, new NError(NError.TYPE_PARSE_ERROR, parseException));
             } else {
                 if (model != null)
                     onSuccess(model, responseModel);
                 else if (models != null)
                     onSuccess(models, responseModel);
-                else onFailed(requestModel, NErrors.PARSE_ERROR);
+                else onFailed(requestModel, new NError(NError.TYPE_PARSE_ERROR, parseException));
             }
         } else if (responseModel.statusType() == NResponseModel.STATUS_TYPE_ERROR) {
             if (requestModel.isEnableDefaultListeners())
@@ -98,6 +99,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
                         return true;
                     } catch (Exception e) {
+                        parseException = e;
                         e.printStackTrace();
                         return false;
                     }
@@ -124,6 +126,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                         models = Arrays.asList(array);
                         return true;
                     } catch (Exception e) {
+                        parseException = e;
                         e.printStackTrace();
                         return false;
                     }

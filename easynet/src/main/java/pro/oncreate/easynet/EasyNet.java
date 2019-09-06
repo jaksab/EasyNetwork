@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pro.oncreate.easynet.data.NConst;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
 import pro.oncreate.easynet.processing.BaseTask;
@@ -150,7 +150,7 @@ public class EasyNet {
     }
 
     public interface OnFailedDefaultListener {
-        boolean onFailed(NRequestModel requestModel, NErrors error);
+        boolean onFailed(NRequestModel requestModel, NError error);
     }
 
     // --> Errors
@@ -214,7 +214,7 @@ public class EasyNet {
      * Resister a new task in queue.
      *
      * @param tag  unique name
-     * @param task NTask instance
+     * @param task BaseTask instance
      */
     public void addTask(String tag, BaseTask task) {
         if (taskQueue == null)

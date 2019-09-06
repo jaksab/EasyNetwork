@@ -2,16 +2,16 @@ package pro.oncreate.easynetwork;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import pro.oncreate.easynet.EasyNet;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
-import pro.oncreate.easynet.processing.BaseTask;
-import pro.oncreate.easynet.processing.NCallbackParse;
+import pro.oncreate.easynet.processing.NCallbackGson;
 import pro.oncreate.easynetwork.models.TestModel;
 
 public class DevActivity extends AppCompatActivity implements View.OnClickListener {
@@ -43,26 +43,29 @@ public class DevActivity extends AppCompatActivity implements View.OnClickListen
 //                    }
 //                });
 
-        EasyNet.get().setUrl("https://api.infitting.com/v1.1/countries/231/cities")
+        EasyNet.get()
+                //.setUrl("https://oncreate.pro/1241") 404
+                .setUrl("https://httpstat.us/502")
                 .addParam("name", "д")
                 .addParam("q", (String) null)
                 .bind(progressBar, v)
-                .cacheResponse()
-                .start(BaseTask.CacheOptions.CACHE_AND_NETWORK, new NCallbackParse<TestModel>(TestModel.class) {
+                .start(new NCallbackGson<TestModel>(TestModel.class) {
                     @Override
                     public void onSuccess(TestModel model, NResponseModel responseModel) {
-                        super.onSuccess(model, responseModel);
                         Toast.makeText(DevActivity.this, responseModel.getBody(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onError(NResponseModel responseModel) {
-                        super.onError(responseModel);
+                        Toast.makeText(DevActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                        Log.d("EasyNetLog", "Error" + responseModel.getStatusCode() + responseModel.getBody());
                     }
 
                     @Override
-                    public void onFailed(NRequestModel nRequestModel, NErrors error) {
-                        super.onFailed(nRequestModel, error);
+                    public void onFailed(NRequestModel nRequestModel, NError error) {
+                        Toast.makeText(DevActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                        Log.d("EasyNetLog", "Failed " + error.toString());
+                        error.exception.printStackTrace();
                     }
 
                     @Override

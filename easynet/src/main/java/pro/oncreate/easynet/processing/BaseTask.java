@@ -22,7 +22,7 @@ import java.util.Map;
 
 import pro.oncreate.easynet.EasyNet;
 import pro.oncreate.easynet.data.NConst;
-import pro.oncreate.easynet.data.NErrors;
+import pro.oncreate.easynet.data.NError;
 import pro.oncreate.easynet.methods.QueryMethod;
 import pro.oncreate.easynet.models.NRequestModel;
 import pro.oncreate.easynet.models.NResponseModel;
@@ -58,6 +58,8 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
     protected PrintWriter writer;
     protected BaseTask.NTaskListener listener;
     protected NRequestModel requestModel;
+
+    protected Exception runException;
 
 
     //
@@ -177,6 +179,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                 }
             }
         } catch (Exception e) {
+            runException = e;
             responseModel = null;
             NLog.logD("[Error]: " + e.toString());
         } finally {
@@ -216,9 +219,9 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
             } else if (listener instanceof NBaseCallback) { // Response == null
                 ((NBaseCallback) listener).finishUIFailed(); // Finish all request progress views
                 if (requestModel.isEnableDefaultListeners()) // Failed processing with default listener
-                    ((NBaseCallback) listener).preFailed(requestModel, NErrors.CONNECTION_ERROR);
+                    ((NBaseCallback) listener).preFailed(requestModel, new NError(NError.TYPE_CONNECTION_ERROR, runException));
                 else // // Failed processing without default listener
-                    ((NBaseCallback) listener).onFailed(requestModel, NErrors.CONNECTION_ERROR);
+                    ((NBaseCallback) listener).onFailed(requestModel, new NError(NError.TYPE_CONNECTION_ERROR, runException));
             }
         }
     }

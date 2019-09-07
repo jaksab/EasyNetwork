@@ -21,6 +21,7 @@ public class NResponseModel {
     private boolean redirectInterrupted;
     private String redirectLocation;
     private boolean fromCache;
+    private NRequestModel requestModel;
 
     public NResponseModel(String url, int statusCode, String body, Map<String, List<String>> headers) {
         this.url = url;
@@ -103,5 +104,13 @@ public class NResponseModel {
 
     public void setFromCache(boolean fromCache) {
         this.fromCache = fromCache;
+    }
+
+    public NRequestModel getRequestModel() {
+        return requestModel;
+    }
+
+    public void setRequestModel(NRequestModel requestModel) {
+        this.requestModel = requestModel;
     }
 }

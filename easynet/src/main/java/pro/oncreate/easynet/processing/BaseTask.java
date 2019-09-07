@@ -163,6 +163,7 @@ public abstract class BaseTask extends AsyncTask<String, Object, NResponseModel>
                     Map<String, List<String>> headers = getResponseHeaders(connection, body);
 
                     responseModel = new NResponseModel(this.url, responseCode, body, headers);
+                    responseModel.setRequestModel(requestModel);
                     responseModel.setEndTime(System.currentTimeMillis());
                     responseModel.setResponseTime((int) (responseModel.getEndTime() - requestModel.getStartTime()));
                     NLog.logD("[Response time]: " + responseModel.getResponseTime() + " ms");

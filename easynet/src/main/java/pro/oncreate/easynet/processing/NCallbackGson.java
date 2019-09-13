@@ -19,11 +19,16 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
     private T model;
     protected List<T> models;
     private Class<T> tClass;
+    private Type type;
     private Class typeAdapter;
     private Exception parseException;
 
     public NCallbackGson(Class<T> tClass) {
         this.tClass = tClass;
+    }
+
+    public NCallbackGson(Type type) {
+        this.type = type;
     }
 
     @Override
@@ -74,6 +79,10 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                 fromJsonParams[0] = String.class;
                 fromJsonParams[1] = Class.class;
 
+                final Class[] fromJsonTypeParams = new Class[2];
+                fromJsonTypeParams[0] = String.class;
+                fromJsonTypeParams[1] = Type.class;
+
                 final Class[] registerTypeAdapterParams = new Class[2];
                 registerTypeAdapterParams[0] = Type.class;
                 registerTypeAdapterParams[1] = Object.class;
@@ -94,8 +103,14 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                             Method create = bClass.getDeclaredMethod("create");
                             gson = create.invoke(gsonBuilder);
                         }
-                        Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
-                        model = (T) method.invoke(gson, responseModel.getBody().trim(), tClass);
+
+                        if (tClass != null) {
+                            Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
+                            model = (T) method.invoke(gson, responseModel.getBody().trim(), tClass);
+                        } else if (type != null) {
+                            Method method = aClass.getDeclaredMethod("fromJson", fromJsonTypeParams);
+                            model = (T) method.invoke(gson, responseModel.getBody().trim(), type);
+                        }
 
                         return true;
                     } catch (Exception e) {

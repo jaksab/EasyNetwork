@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 28
-        versionCode 38
-        versionName "1.5.1"
+        versionCode 39
+        versionName "1.5.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -47,7 +47,7 @@ ext {
     siteUrl = 'https://github.com/jaksab/EasyNetwork'
     gitUrl = 'https://github.com/jaksab/EasyNetwork.git'
 
-    libraryVersion = '1.5.1'
+    libraryVersion = '1.5.2'
 
     developerId = 'jaksab'
     developerName = 'Andrii Konovalenko'

@@ -87,7 +87,8 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                 registerTypeAdapterParams[0] = Type.class;
                 registerTypeAdapterParams[1] = Object.class;
 
-                if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
+                String body = responseModel.getBody().trim().replaceAll("[\uFEFF-\uFFFF]", "");
+                if (body.startsWith("{") && body.endsWith("}"))
                     try {
                         Class<? extends Object> aClass = Class.forName("com.google.gson.Gson");
                         Object gson;
@@ -106,10 +107,10 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
 
                         if (tClass != null) {
                             Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
-                            model = (T) method.invoke(gson, responseModel.getBody().trim(), tClass);
+                            model = (T) method.invoke(gson, body, tClass);
                         } else if (type != null) {
                             Method method = aClass.getDeclaredMethod("fromJson", fromJsonTypeParams);
-                            model = (T) method.invoke(gson, responseModel.getBody().trim(), type);
+                            model = (T) method.invoke(gson, body, type);
                         }
 
                         return true;
@@ -137,7 +138,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                         Method method = aClass.getDeclaredMethod("fromJson", fromJsonParams);
                         Class t = java.lang.reflect.Array.newInstance(tClass, 0).getClass();
 
-                        T[] array = (T[]) method.invoke(gson, responseModel.getBody().trim(), t);
+                        T[] array = (T[]) method.invoke(gson, body, t);
                         models = Arrays.asList(array);
                         return true;
                     } catch (Exception e) {

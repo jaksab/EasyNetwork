@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/EasyNetwork.iml" filepath="$PROJECT_DIR$/EasyNetwork.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/easynet/easynet.iml" filepath="$PROJECT_DIR$/easynet/easynet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/EasyNetwork.iml" filepath="$PROJECT_DIR$/EasyNetwork.iml" group="EasyNetwork" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="EasyNetwork/app" />
+      <module fileurl="file://$PROJECT_DIR$/easynet/easynet.iml" filepath="$PROJECT_DIR$/easynet/easynet.iml" group="EasyNetwork/easynet" />
     </modules>
   </component>
 </project>

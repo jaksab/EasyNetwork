@@ -69,19 +69,20 @@ public class NCallbackParse<T extends NBaseModel> extends NBaseCallback {
     public boolean finish(NResponseModel responseModel) {
         if (responseModel.statusType() == NResponseModel.STATUS_TYPE_SUCCESS || responseModel.isFromCache()) {
             if (requestModel.isNeedParse()) {
-                if (responseModel.getBody().startsWith("{") && responseModel.getBody().endsWith("}"))
+                String body = responseModel.getBody().trim().replaceAll("[\uFEFF-\uFFFF]", "");
+                if (body.startsWith("{") && body.endsWith("}"))
                     try {
                         model = tClass.cast(tClass.newInstance()
-                                .parse(responseModel, new JSONObject(responseModel.getBody())));
+                                .parse(responseModel, new JSONObject(body)));
                         return true;
                     } catch (Exception e) {
                         parseException = e;
                         Log.d(NLog.LOG_NAME_DEFAULT, e.toString());
                         return false;
                     }
-                else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
+                else if (body.startsWith("[") && body.endsWith("]")) {
                     try {
-                        JSONArray jsonArray = new JSONArray(responseModel.getBody());
+                        JSONArray jsonArray = new JSONArray(body);
                         models = new ArrayList<>();
                         for (int i = 0; i < jsonArray.length(); i++)
                             models.add(tClass.cast(tClass.newInstance()

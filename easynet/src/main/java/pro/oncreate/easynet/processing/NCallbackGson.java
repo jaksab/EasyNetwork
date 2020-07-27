@@ -119,7 +119,7 @@ public class NCallbackGson<T extends Object> extends NBaseCallback {
                         e.printStackTrace();
                         return false;
                     }
-                else if (responseModel.getBody().startsWith("[") && responseModel.getBody().endsWith("]")) {
+                else if (body.startsWith("[") && body.endsWith("]")) {
                     try {
                         Class<? extends Object> aClass = Class.forName("com.google.gson.Gson");
                         Object gson;
